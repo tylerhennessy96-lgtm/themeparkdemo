@@ -394,6 +394,161 @@
     }
     .filter-clear:hover { background: rgba(232,0,125,0.08); }
 
+    /* Multi-select trigger pill (button variant of .filter-pill) */
+    .filter-pill.ms-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 28px 0 12px;
+    }
+    .filter-pill.ms-pill .ms-trigger-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .filter-pill.ms-pill .ms-trigger-count {
+      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .filter-pill.ms-pill.active .ms-trigger-count { color: var(--accent); }
+
+    /* ── Multi-select popover ── */
+    .ms-popover {
+      position: fixed;
+      z-index: 200;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      min-width: 280px;
+      max-width: 360px;
+      max-height: 380px;
+      overflow: hidden;
+    }
+    .ms-search-wrap {
+      position: relative;
+      padding: 10px 10px 6px;
+      flex-shrink: 0;
+    }
+    .ms-search {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      padding: 0 10px 0 30px;
+      height: 30px;
+      box-sizing: border-box;
+    }
+    .ms-search::placeholder { color: var(--text-muted); font-weight: 400; }
+    .ms-search:focus {
+      outline: 1.5px solid var(--accent);
+      outline-offset: -1px;
+      border-color: var(--accent);
+    }
+    .ms-search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(calc(-50% + 2px));
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .ms-quick-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 14px 8px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ms-link {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--accent);
+      background: transparent;
+      border: none;
+      padding: 2px 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .ms-link:hover { color: var(--accent-dim); text-decoration: underline; }
+    .ms-options {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+      min-height: 60px;
+    }
+    .ms-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 7px 14px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: left;
+    }
+    .ms-option:hover,
+    .ms-option:focus { background: var(--row-hover); outline: none; }
+    .ms-option .ms-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .ms-check {
+      width: 16px; height: 16px;
+      border: 1.5px solid var(--border-mid);
+      border-radius: 4px;
+      flex-shrink: 0;
+      position: relative;
+      transition: background .12s, border-color .12s;
+      background: var(--surface);
+    }
+    .ms-option[aria-checked="true"] .ms-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .ms-option[aria-checked="true"] .ms-check::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 4px; height: 8px;
+      border: solid #fff;
+      border-width: 0 1.5px 1.5px 0;
+      transform: rotate(45deg);
+    }
+    .ms-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+    .ms-empty {
+      padding: 24px 14px;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
     /* Date-range trigger pill (button variant of .filter-pill) */
     .filter-pill.date-pill {
       display: inline-flex;
@@ -564,6 +719,377 @@
       cursor: not-allowed;
     }
 
+    /* ── Calendar cell click affordance + decision indicators ── */
+    table.cal-table tbody td[data-row] { cursor: pointer; }
+    table.cal-table tbody td.decided-confirm,
+    table.cal-table tbody td.decided-reject { position: relative; }
+    table.cal-table tbody td.decided-confirm::after,
+    table.cal-table tbody td.decided-reject::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      z-index: 1;
+      box-shadow: 0 0 0 1.5px var(--surface);
+    }
+    table.cal-table tbody td.decided-confirm::after { background: #16a34a; }
+    table.cal-table tbody td.decided-reject::after  { background: #dc2626; }
+
+    /* ── Detail modal ── */
+    .dm-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,0.55);
+      z-index: 1000;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity .15s ease;
+      overflow-y: auto;
+    }
+    .dm-backdrop.is-open { opacity: 1; }
+    .dm-modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: min(1200px, calc(100vw - 48px));
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(8px);
+      transition: transform .15s ease;
+      margin: auto;
+      font-family: 'Inter', sans-serif;
+    }
+    .dm-backdrop.is-open .dm-modal { transform: translateY(0); }
+    .dm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 16px;
+    }
+    .dm-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .dm-header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .dm-go-live {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .dm-close {
+      width: 28px; height: 28px;
+      border: none;
+      background: transparent;
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background .12s, color .12s;
+      line-height: 1;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dm-close:hover { background: var(--row-hover); color: var(--text-primary); }
+    .dm-body {
+      padding: 20px 24px 24px;
+      overflow-y: auto;
+    }
+    .dm-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .dm-col-left, .dm-col-right { display: flex; flex-direction: column; gap: 16px; }
+    .dm-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .dm-panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 8px 0;
+    }
+    .dm-date-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 20px;
+      padding: 4px 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .dm-date-pill .chev { color: var(--text-muted); margin-left: 2px; }
+    .dm-legend {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+    .dm-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+    .dm-legend-item .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dm-chart-area { width: 100%; }
+    .dm-chart-area svg {
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Comparison table */
+    table.dm-compare {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+    }
+    table.dm-compare thead th {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 6px 12px 10px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    table.dm-compare thead th:first-child {
+      text-align: left;
+      width: 28%;
+    }
+    table.dm-compare tbody td {
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+    table.dm-compare tbody td:first-child {
+      text-align: left;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    table.dm-compare tbody tr:last-child td { border-bottom: none; }
+    .dm-cmp-pct { font-size: 11.5px; margin-left: 4px; font-weight: 500; }
+    .dm-cmp-pct.pos  { color: #166534; }
+    .dm-cmp-pct.neg  { color: #991b1b; }
+    .dm-cmp-pct.zero { color: var(--text-muted); }
+
+    /* Recommendation panel */
+    .dm-rec-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .dm-rec-row:first-of-type { padding-top: 4px; }
+    .dm-rec-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dm-rec-value {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .dm-info-icon {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: help;
+    }
+    .dm-rec-row.dm-rec-confirmed {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .dm-rec-row.dm-rec-confirmed .dm-rec-label { color: var(--accent); font-weight: 600; }
+    .dm-rec-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dm-mode-toggle {
+      display: inline-flex;
+      background: #f1f3f8;
+      border-radius: 6px;
+      padding: 2px;
+    }
+    .dm-mode-toggle button {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border: none;
+      background: transparent;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      min-width: 28px;
+    }
+    .dm-mode-toggle button.active {
+      background: var(--surface);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .dm-override-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dm-override-input input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border-mid);
+      border-radius: 6px;
+      padding: 5px 10px;
+      color: var(--text-primary);
+      min-width: 0;
+    }
+    .dm-override-input input:focus {
+      outline: 1.5px solid var(--accent);
+      outline-offset: -1px;
+    }
+    .dm-override-result {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .dm-checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .dm-checkbox input { cursor: pointer; }
+    .dm-reason {
+      margin-top: 8px;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      border: 1px solid var(--border-mid);
+      border-radius: 6px;
+      padding: 7px 10px;
+      background: var(--surface);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .dm-reason:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; }
+    .dm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .dm-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    .dm-btn-reject {
+      background: var(--surface);
+      color: var(--text-primary);
+      border-color: var(--border-mid);
+    }
+    .dm-btn-reject:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+    .dm-btn-confirm {
+      background: #16a34a;
+      color: #fff;
+      border-color: #16a34a;
+    }
+    .dm-btn-confirm:hover {
+      background: #15803d;
+      border-color: #15803d;
+    }
+
+    /* Toast */
+    .dm-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1100;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .2s ease, transform .2s ease;
+      max-width: 380px;
+      pointer-events: none;
+    }
+    .dm-toast.is-open { opacity: 1; transform: translateY(0); }
+    .dm-toast.dm-toast-confirm { background: #16a34a; }
+    .dm-toast.dm-toast-reject  { background: #dc2626; }
+
     /* Empty-state row inside the calendar grid when no routes match */
     .cal-empty-th {
       position: sticky;
@@ -600,9 +1126,18 @@
     <div class="pricing-header-row">
       <h1 class="pricing-heading">Pricing</h1>
       <div class="filter-group" id="filterGroup">
-        <select class="filter-pill" data-filter="origin"      aria-label="Origin"></select>
-        <select class="filter-pill" data-filter="destination" aria-label="Destination"></select>
-        <select class="filter-pill" data-filter="lane"        aria-label="Lane"></select>
+        <button class="filter-pill ms-pill" data-filter="origin" id="msOriginTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Origin">
+          <span class="ms-trigger-text">All Origins</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="destination" id="msDestinationTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Destination">
+          <span class="ms-trigger-text">All Destinations</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="lane" id="msLaneTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Lane">
+          <span class="ms-trigger-text">All Lanes</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
         <button class="filter-pill date-pill" id="dateRangeTrigger" type="button" aria-haspopup="dialog" aria-label="Date range">
           <svg class="cal-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
             <rect x="1.5" y="2.5" width="11" height="10" rx="1.5"/>
@@ -1030,7 +1565,9 @@
       const cells = visibleColIdx.map(ci => {
         const [rev, units, price] = data[i][ci];
         const cls = tier(rev);
-        return `<td class="${cls}">
+        const decision = decisions[`${route}|${labels[ci]}`];
+        const decisionCls = decision ? ` decided-${decision === 'confirmed' ? 'confirm' : 'reject'}` : '';
+        return `<td class="${cls}${decisionCls}" data-row="${i}" data-col="${ci}">
           <div class="cell-rev">${fmtPct(rev)}</div>
           <div class="cell-meta">
             <span>U ${fmtPct(units)}</span>
@@ -1048,36 +1585,28 @@
      ════════════════════════════════════════════════════════════ */
 
   const filters = {
-    origin: 'all',
-    destination: 'all',
-    lane: 'all',
+    origin: [],
+    destination: [],
+    lane: [],
     dateRange: { start: null, end: null },
   };
+  const filterItems = { origin: [], destination: [], lane: [] };
+  const FILTER_LABELS = { origin: 'Origins', destination: 'Destinations', lane: 'Lanes' };
 
   function uniqueSorted(arr) {
     return [...new Set(arr)].sort((a, b) => a.localeCompare(b));
   }
 
   function buildFilterOptions() {
-    const origins      = uniqueSorted(ROWS.map(r => r.origin));
-    const destinations = uniqueSorted(ROWS.map(r => r.dest));
-    const lanes        = uniqueSorted(ROWS.map(r => `${r.origin} → ${r.dest}`));
-
-    const fill = (key, allLabel, items) => {
-      const sel = document.querySelector(`[data-filter="${key}"]`);
-      sel.innerHTML =
-        `<option value="all">${esc(allLabel)}</option>` +
-        items.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
-    };
-    fill('origin',      'All Origins',      origins);
-    fill('destination', 'All Destinations', destinations);
-    fill('lane',        'All Lanes',        lanes);
+    filterItems.origin      = uniqueSorted(ROWS.map(r => r.origin));
+    filterItems.destination = uniqueSorted(ROWS.map(r => r.dest));
+    filterItems.lane        = uniqueSorted(ROWS.map(r => `${r.origin} → ${r.dest}`));
   }
 
   function rowMatches(row) {
-    if (filters.origin      !== 'all' && row.origin !== filters.origin) return false;
-    if (filters.destination !== 'all' && row.dest   !== filters.destination) return false;
-    if (filters.lane        !== 'all' && `${row.origin} → ${row.dest}` !== filters.lane) return false;
+    if (filters.origin.length      && !filters.origin.includes(row.origin)) return false;
+    if (filters.destination.length && !filters.destination.includes(row.dest)) return false;
+    if (filters.lane.length        && !filters.lane.includes(`${row.origin} → ${row.dest}`)) return false;
     const { start, end } = filters.dateRange;
     if (start || end) {
       const rd = parseListDate(row.date);
@@ -1092,22 +1621,20 @@
     const m = routeStr.match(/^(.+?)\s*→\s*(.+)$/);
     if (!m) return true;
     const origin = m[1], dest = m[2];
-    if (filters.origin      !== 'all' && origin !== filters.origin) return false;
-    if (filters.destination !== 'all' && dest   !== filters.destination) return false;
-    if (filters.lane        !== 'all' && routeStr !== filters.lane) return false;
+    if (filters.origin.length      && !filters.origin.includes(origin)) return false;
+    if (filters.destination.length && !filters.destination.includes(dest)) return false;
+    if (filters.lane.length        && !filters.lane.includes(routeStr)) return false;
     return true;
   }
 
   function applyFilters() {
-    document.querySelectorAll('.filter-pill[data-filter]').forEach(sel => {
-      sel.classList.toggle('active', sel.value !== 'all');
-    });
+    ['origin', 'destination', 'lane'].forEach(updateMsTrigger);
     updateDateTrigger();
 
     const anyActive =
-      filters.origin      !== 'all' ||
-      filters.destination !== 'all' ||
-      filters.lane        !== 'all' ||
+      filters.origin.length      > 0 ||
+      filters.destination.length > 0 ||
+      filters.lane.length        > 0 ||
       !!(filters.dateRange.start || filters.dateRange.end);
     document.getElementById('filterClear').hidden = !anyActive;
 
@@ -1142,18 +1669,11 @@
     renderCalendar(mode);
   });
 
-  document.getElementById('filterGroup').addEventListener('change', e => {
-    const sel = e.target.closest('.filter-pill');
-    if (!sel) return;
-    filters[sel.dataset.filter] = sel.value;
-    applyFilters();
-  });
   document.getElementById('filterClear').addEventListener('click', () => {
-    filters.origin = 'all';
-    filters.destination = 'all';
-    filters.lane = 'all';
+    filters.origin = [];
+    filters.destination = [];
+    filters.lane = [];
     filters.dateRange = { start: null, end: null };
-    document.querySelectorAll('.filter-pill[data-filter]').forEach(sel => { sel.value = 'all'; });
     applyFilters();
   });
 
@@ -1431,6 +1951,624 @@
   document.getElementById('dateRangeTrigger').addEventListener('click', e => {
     e.stopPropagation();
     if (popoverOpen) closePopover(); else openPopover();
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     Detail modal — opens on calendar cell click
+     ════════════════════════════════════════════════════════════ */
+
+  const decisions = {};   // key: `${route}|${label}` → 'confirmed' | 'rejected'
+
+  function hashStr(s) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(seed) {
+    return function () {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function mockData(route, label, rev, units, price) {
+    const rand = mulberry32(hashStr(route + '|' + label));
+    const noise = (mag) => (rand() - 0.5) * 2 * mag;
+    const dirSign = rev >= 0 ? 1 : -1;
+
+    // Booking curves: 24 monthly points, logistic 0% → ~55%
+    const N = 24;
+    function series(shift) {
+      const pts = [];
+      for (let i = 0; i < N; i++) {
+        const tt = i / (N - 1);
+        const adj = Math.min(1, Math.max(0, tt + shift));
+        const v = 55 / (1 + Math.exp(-7 * (adj - 0.5)));
+        pts.push(Math.max(0, Math.min(60, v + noise(1.4))));
+      }
+      return pts;
+    }
+    const booking = {
+      target:   series(0.08),
+      forecast: series(0.04),
+      historic: series(-0.02),
+      current:  series(dirSign * 0.06 - 0.01),
+    };
+
+    // Price curve: 10 stepped segments over 350→0 days
+    const STEPS = 10;
+    const baseline = 175 + (price / 100) * 22;
+    const stepped = [];
+    let cur = baseline * (1 + 0.10 + noise(0.02));
+    for (let i = 0; i < STEPS; i++) {
+      const tt = i / (STEPS - 1);
+      const target = baseline * (1 - 0.07 * tt + 0.025 * Math.sin(tt * 6));
+      cur = cur * 0.85 + target * 0.15 + noise(2);
+      cur = Math.max(150, Math.min(200, cur));
+      stepped.push({ day: 350 - tt * 350, price: Math.round(cur * 10) / 10 });
+    }
+
+    // Comparison numbers — % deltas track cell YoY direction
+    const baseBookings = 380 + Math.round(noise(40));
+    const baseRevK     = 75  + Math.round(noise(8));
+    const basePerCap   = 199 + Math.round(noise(12));
+    const fcMult       = 1.4 + (rand() - 0.5) * 0.3;
+    const comparison = {
+      current: {
+        bookings: { value: baseBookings,                   pct: Math.round(units * 0.3) },
+        revenue:  { value: baseRevK,                       pct: Math.round(rev * 0.4) },
+        perCap:   { value: basePerCap,                     pct: Math.round(price * 0.7) },
+      },
+      forecast: {
+        bookings: { value: Math.round(baseBookings * fcMult), pct: Math.round(units) },
+        revenue:  { value: Math.round(baseRevK * fcMult),     pct: Math.round(rev) },
+        perCap:   { value: Math.round(basePerCap * 0.92 + noise(10)), pct: Math.round(price) },
+      },
+    };
+
+    const currentPrice = Math.round(baseline + noise(8));
+    const recommended  = Math.round(currentPrice * (1 + Math.max(-0.08, Math.min(0.08, rev / 200)) + noise(0.02)));
+    const lyPrice      = Math.round(currentPrice * (1 - rev / 100 / 2));
+    const defaultOverridePct = rev >= 0 ? Math.min(5, Math.round(rev / 4)) : Math.max(-5, Math.round(rev / 4));
+
+    return { booking, price: stepped, comparison,
+      recommendation: { current: currentPrice, ly: lyPrice, recommended, defaultOverridePct } };
+  }
+
+  function bookingCurveSvg(b) {
+    const W = 520, H = 280;
+    const padL = 36, padR = 14, padT = 12, padB = 28;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const yScale = (p) => padT + innerH * (1 - p / 60);
+    const xScale = (i, n) => padL + innerW * (i / (n - 1));
+    const pathD = (pts) => pts.map((v, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i, pts.length).toFixed(1)} ${yScale(v).toFixed(1)}`).join(' ');
+
+    let grid = '';
+    for (let v = 0; v <= 60; v += 10) {
+      const y = yScale(v);
+      grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#e5e7eb" stroke-width="1"/>`;
+      grid += `<text x="${padL - 6}" y="${y + 3.5}" text-anchor="end" font-size="10" fill="#9ca3af">${v}%</text>`;
+    }
+    const yRef = yScale(50);
+    grid += `<line x1="${padL}" y1="${yRef}" x2="${W - padR}" y2="${yRef}" stroke="#e8007d" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>`;
+
+    const cN = b.current.length;
+    const currentPath = pathD(b.current);
+    const currentArea = currentPath +
+      ` L ${xScale(cN - 1, cN).toFixed(1)} ${yScale(0).toFixed(1)}` +
+      ` L ${xScale(0, cN).toFixed(1)} ${yScale(0).toFixed(1)} Z`;
+
+    const lines = [
+      { d: pathD(b.historic), color: '#374151' },
+      { d: pathD(b.target),   color: '#e8007d' },
+      { d: pathD(b.forecast), color: '#0d9488' },
+    ];
+
+    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      ${grid}
+      <path d="${currentArea}" fill="rgba(96,165,250,0.18)" stroke="none"/>
+      ${lines.map(l => `<path d="${l.d}" fill="none" stroke="${l.color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`).join('')}
+      <path d="${currentPath}" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+      <text x="${padL}" y="${H - 8}" font-size="10" fill="#9ca3af">26-04-2025</text>
+      <text x="${W - padR}" y="${H - 8}" text-anchor="end" font-size="10" fill="#9ca3af">11-04-2026</text>
+    </svg>`;
+  }
+
+  function priceCurveSvg(steps) {
+    const W = 520, H = 220;
+    const padL = 44, padR = 44, padT = 12, padB = 28;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const xScale = (day) => padL + innerW * (1 - day / 350);
+    const yScale = (price) => padT + innerH * (1 - (price - 150) / 50);
+
+    let grid = '';
+    [{ p: 200, l: '+17%', r: '$200' }, { p: 175, l: '0%', r: '$175' }, { p: 150, l: '-17%', r: '$150' }].forEach(yp => {
+      const y = yScale(yp.p);
+      grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#e5e7eb" stroke-width="1"/>`;
+      grid += `<text x="${padL - 6}" y="${y + 3.5}" text-anchor="end" font-size="10" fill="#9ca3af">${yp.l}</text>`;
+      grid += `<text x="${W - padR + 6}" y="${y + 3.5}" font-size="10" fill="#9ca3af">${yp.r}</text>`;
+    });
+
+    let d = '';
+    steps.forEach((pt, i) => {
+      const x = xScale(pt.day).toFixed(1);
+      const y = yScale(pt.price).toFixed(1);
+      d += i === 0 ? `M ${x} ${y}` : ` H ${x} V ${y}`;
+    });
+
+    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      ${grid}
+      <path d="${d}" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+      <text x="${padL}" y="${H - 8}" font-size="10" fill="#9ca3af">350 days</text>
+      <text x="${W - padR}" y="${H - 8}" text-anchor="end" font-size="10" fill="#9ca3af">0 days</text>
+    </svg>`;
+  }
+
+  function pctClass(n) { return n > 0 ? 'pos' : n < 0 ? 'neg' : 'zero'; }
+  function pctTxt(n)   { return (n > 0 ? '+' : '') + n + '%'; }
+
+  let modalRoot = null;
+  let modalOpen = false;
+  let modalCtx = null; // { row, col, mode, route, label, rev, units, price, data }
+  let overrideMode = 'pct';
+  let overrideValue = 0;
+
+  function buildModal() {
+    if (modalRoot) return;
+    modalRoot = document.createElement('div');
+    modalRoot.className = 'dm-backdrop';
+    modalRoot.id = 'detailModal';
+    modalRoot.hidden = true;
+    document.body.appendChild(modalRoot);
+    modalRoot.addEventListener('click', e => {
+      if (e.target === modalRoot) closeModal();
+    });
+  }
+
+  function openModalForCell(row, col, mode) {
+    const route  = CAL_ROUTES[row];
+    const labels = mode === 'daily' ? DAY_LABELS : MONTH_LABELS;
+    const data   = mode === 'daily' ? DAILY_DATA : MONTHLY_DATA;
+    const label  = labels[col];
+    const [rev, units, price] = data[row][col];
+    const m = mockData(route, label, rev, units, price);
+
+    modalCtx = { row, col, mode, route, label, rev, units, price, data: m };
+    overrideMode = 'pct';
+    overrideValue = m.recommendation.defaultOverridePct;
+
+    buildModal();
+    modalRoot.innerHTML = renderModal(modalCtx);
+    modalRoot.hidden = false;
+    requestAnimationFrame(() => modalRoot.classList.add('is-open'));
+    modalOpen = true;
+    wireModalControls();
+    document.addEventListener('keydown', onModalKey);
+  }
+
+  function closeModal() {
+    if (!modalOpen) return;
+    modalRoot.classList.remove('is-open');
+    document.removeEventListener('keydown', onModalKey);
+    modalOpen = false;
+    setTimeout(() => { if (!modalOpen) modalRoot.hidden = true; }, 160);
+  }
+  function onModalKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); closeModal(); }
+  }
+
+  function renderModal(ctx) {
+    const { route, data: m } = ctx;
+    const arrow = ' → ';
+    const arrowIdx = route.indexOf(arrow);
+    const origin = arrowIdx >= 0 ? route.slice(0, arrowIdx) : route;
+    const dest   = arrowIdx >= 0 ? route.slice(arrowIdx + arrow.length) : '';
+    const c = m.comparison;
+    const r = m.recommendation;
+    const computedDollar = computeOverrideResult(r.recommended, overrideMode, overrideValue);
+    const inputDisplay = overrideMode === 'pct' ? overrideValue + '%' : '$' + Math.round(computedDollar);
+
+    return `
+      <div class="dm-modal" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
+        <div class="dm-header">
+          <h2 class="dm-title" id="dmTitle">${esc(origin)} → ${esc(dest)}</h2>
+          <div class="dm-header-right">
+            <span class="dm-go-live">Go live: 20/04/2026</span>
+            <button class="dm-close" type="button" aria-label="Close" id="dmCloseBtn">×</button>
+          </div>
+        </div>
+        <div class="dm-body">
+          <div class="dm-grid">
+            <div class="dm-col-left">
+              <div class="dm-panel">
+                <h3 class="dm-panel-title">Booking Curve</h3>
+                <button class="dm-date-pill" type="button">17/11/2025 <span class="chev">›</span></button>
+                <div class="dm-legend">
+                  <span class="dm-legend-item"><span class="dot" style="background:#e8007d"></span>Target</span>
+                  <span class="dm-legend-item"><span class="dot" style="background:#0d9488"></span>Forecast</span>
+                  <span class="dm-legend-item"><span class="dot" style="background:#374151"></span>Historic</span>
+                  <span class="dm-legend-item"><span class="dot" style="background:#60a5fa"></span>Current</span>
+                </div>
+                <div class="dm-chart-area">${bookingCurveSvg(m.booking)}</div>
+              </div>
+              <div class="dm-panel">
+                <h3 class="dm-panel-title">Price Curve</h3>
+                <div class="dm-chart-area">${priceCurveSvg(m.price)}</div>
+              </div>
+            </div>
+            <div class="dm-col-right">
+              <div class="dm-panel">
+                <table class="dm-compare">
+                  <thead><tr><th></th><th>Current</th><th>Forecast</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td>Bookings</td>
+                      <td>${c.current.bookings.value} <span class="dm-cmp-pct ${pctClass(c.current.bookings.pct)}">(${pctTxt(c.current.bookings.pct)})</span></td>
+                      <td>${c.forecast.bookings.value} <span class="dm-cmp-pct ${pctClass(c.forecast.bookings.pct)}">(${pctTxt(c.forecast.bookings.pct)})</span></td>
+                    </tr>
+                    <tr>
+                      <td>Revenue</td>
+                      <td>$${c.current.revenue.value}k <span class="dm-cmp-pct ${pctClass(c.current.revenue.pct)}">(${pctTxt(c.current.revenue.pct)})</span></td>
+                      <td>$${c.forecast.revenue.value}k <span class="dm-cmp-pct ${pctClass(c.forecast.revenue.pct)}">(${pctTxt(c.forecast.revenue.pct)})</span></td>
+                    </tr>
+                    <tr>
+                      <td>Per Cap</td>
+                      <td>$${c.current.perCap.value} <span class="dm-cmp-pct ${pctClass(c.current.perCap.pct)}">(${pctTxt(c.current.perCap.pct)})</span></td>
+                      <td>$${c.forecast.perCap.value} <span class="dm-cmp-pct ${pctClass(c.forecast.perCap.pct)}">(${pctTxt(c.forecast.perCap.pct)})</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="dm-panel">
+                <h3 class="dm-panel-title">Recommendation</h3>
+                <div class="dm-rec-row">
+                  <span class="dm-rec-label">Current</span>
+                  <span class="dm-rec-value">$${r.current}</span>
+                </div>
+                <div class="dm-rec-row">
+                  <span class="dm-rec-label">Recommended <span class="dm-info-icon" title="Algorithmic recommendation">i</span></span>
+                  <span class="dm-rec-value">$${r.recommended}</span>
+                </div>
+                <div class="dm-rec-row dm-rec-confirmed">
+                  <span class="dm-rec-label">Confirmed</span>
+                  <div class="dm-rec-controls">
+                    <div class="dm-mode-toggle" id="dmModeToggle">
+                      <button class="${overrideMode === 'pct' ? 'active' : ''}" data-mode="pct" type="button">%</button>
+                      <button class="${overrideMode === 'dollar' ? 'active' : ''}" data-mode="dollar" type="button">$</button>
+                    </div>
+                    <div class="dm-override-input">
+                      <input type="text" id="dmOverrideInput" value="${esc(inputDisplay)}">
+                      <span class="dm-override-result" id="dmOverrideResult">$${Math.round(computedDollar)}</span>
+                    </div>
+                  </div>
+                </div>
+                <label class="dm-checkbox">
+                  <input type="checkbox"> Unconstrained override
+                </label>
+                <select class="dm-reason">
+                  <option value="">Select reason for override</option>
+                  <option>Competitive pressure</option>
+                  <option>Inventory adjustment</option>
+                  <option>Promotion</option>
+                  <option>Demand signal</option>
+                  <option>Manual review</option>
+                  <option>Other</option>
+                </select>
+                <div class="dm-actions">
+                  <button class="dm-btn dm-btn-reject"  id="dmRejectBtn"  type="button">Reject</button>
+                  <button class="dm-btn dm-btn-confirm" id="dmConfirmBtn" type="button">Confirm</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function computeOverrideResult(recommended, mode, value) {
+    if (mode === 'pct') return recommended * (1 + (parseFloat(value) || 0) / 100);
+    return parseFloat(value) || recommended;
+  }
+
+  function wireModalControls() {
+    document.getElementById('dmCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('dmRejectBtn').addEventListener('click', () => recordDecision('rejected'));
+    document.getElementById('dmConfirmBtn').addEventListener('click', () => recordDecision('confirmed'));
+
+    const modeToggle = document.getElementById('dmModeToggle');
+    modeToggle.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-mode]');
+      if (!btn || btn.classList.contains('active')) return;
+      const newMode = btn.dataset.mode;
+      const recommended = modalCtx.data.recommendation.recommended;
+      // Convert current value into the new mode
+      const cur = computeOverrideResult(recommended, overrideMode, overrideValue);
+      overrideMode = newMode;
+      if (newMode === 'pct') {
+        overrideValue = Math.round(((cur / recommended) - 1) * 1000) / 10;
+      } else {
+        overrideValue = Math.round(cur);
+      }
+      modeToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+      const input  = document.getElementById('dmOverrideInput');
+      const result = document.getElementById('dmOverrideResult');
+      input.value = newMode === 'pct' ? overrideValue + '%' : '$' + overrideValue;
+      result.textContent = '$' + Math.round(computeOverrideResult(recommended, newMode, overrideValue));
+    });
+
+    const input = document.getElementById('dmOverrideInput');
+    input.addEventListener('input', () => {
+      const raw = input.value.replace(/[^\-0-9.]/g, '');
+      overrideValue = parseFloat(raw) || 0;
+      const r = modalCtx.data.recommendation.recommended;
+      document.getElementById('dmOverrideResult').textContent =
+        '$' + Math.round(computeOverrideResult(r, overrideMode, overrideValue));
+    });
+  }
+
+  function recordDecision(status) {
+    const { row, col, route, label, mode } = modalCtx;
+    decisions[`${route}|${label}`] = status;
+
+    // Apply class to the cell directly so it updates without a full re-render
+    const td = document.querySelector(`#calBody td[data-row="${row}"][data-col="${col}"]`);
+    if (td) {
+      td.classList.remove('decided-confirm', 'decided-reject');
+      td.classList.add(status === 'confirmed' ? 'decided-confirm' : 'decided-reject');
+    }
+
+    closeModal();
+    showToast(status, route, label);
+  }
+
+  /* ── Toast ── */
+
+  let toastEl = null;
+  let toastTimers = [];
+  function showToast(kind, route, label) {
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.className = 'dm-toast';
+      document.body.appendChild(toastEl);
+    }
+    toastTimers.forEach(clearTimeout);
+    toastTimers = [];
+    toastEl.classList.remove('dm-toast-confirm', 'dm-toast-reject');
+    toastEl.classList.add(kind === 'confirmed' ? 'dm-toast-confirm' : 'dm-toast-reject');
+    toastEl.textContent = (kind === 'confirmed' ? 'Confirmed: ' : 'Rejected: ') + route + ' for ' + label;
+    requestAnimationFrame(() => toastEl.classList.add('is-open'));
+    toastTimers.push(setTimeout(() => toastEl.classList.remove('is-open'), 2700));
+  }
+
+  /* ── Cell click delegation (attached once) ── */
+
+  document.getElementById('calBody').addEventListener('click', e => {
+    const td = e.target.closest('td[data-row]');
+    if (!td) return;
+    const row = parseInt(td.dataset.row, 10);
+    const col = parseInt(td.dataset.col, 10);
+    const activeMode = document.querySelector('#modeToggle button.active');
+    const mode = activeMode ? activeMode.dataset.mode : 'monthly';
+    openModalForCell(row, col, mode);
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     Multi-select popover (origin / destination / lane)
+     ════════════════════════════════════════════════════════════ */
+
+  let msPopover = null;
+  let msActiveFilter = null;
+  let msSearchTerm = '';
+
+  function buildMsPopover() {
+    if (msPopover) return;
+    msPopover = document.createElement('div');
+    msPopover.className = 'ms-popover';
+    msPopover.id = 'msPopover';
+    msPopover.hidden = true;
+    msPopover.innerHTML = `
+      <div class="ms-search-wrap">
+        <svg class="ms-search-icon" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="6" cy="6" r="4"/>
+          <line x1="9" y1="9" x2="12.5" y2="12.5" stroke-linecap="round"/>
+        </svg>
+        <input type="text" class="ms-search" id="msSearch" placeholder="Search…">
+      </div>
+      <div class="ms-quick-actions">
+        <button class="ms-link" id="msSelectAll" type="button">Select all</button>
+        <button class="ms-link" id="msClearLink"  type="button">Clear</button>
+      </div>
+      <div class="ms-options" id="msOptions" role="listbox" aria-multiselectable="true"></div>
+    `;
+    document.body.appendChild(msPopover);
+
+    msPopover.querySelector('#msSearch').addEventListener('input', e => {
+      msSearchTerm = e.target.value.toLowerCase();
+      renderMsOptions();
+    });
+    msPopover.querySelector('#msSearch').addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const first = msPopover.querySelector('.ms-option');
+        if (first) first.focus();
+      }
+    });
+    msPopover.querySelector('#msSelectAll').addEventListener('click', onMsSelectAll);
+    msPopover.querySelector('#msClearLink').addEventListener('click', onMsClearOne);
+
+    const optionsEl = msPopover.querySelector('#msOptions');
+    optionsEl.addEventListener('click', e => {
+      const opt = e.target.closest('.ms-option');
+      if (!opt) return;
+      onMsToggle(opt.dataset.value);
+    });
+    optionsEl.addEventListener('keydown', e => {
+      const opt = e.target.closest('.ms-option');
+      if (!opt) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        let n = opt.nextElementSibling;
+        while (n && !n.classList.contains('ms-option')) n = n.nextElementSibling;
+        if (n) n.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        let p = opt.previousElementSibling;
+        while (p && !p.classList.contains('ms-option')) p = p.previousElementSibling;
+        if (p) p.focus();
+        else msPopover.querySelector('#msSearch').focus();
+      }
+    });
+  }
+
+  function getVisibleItems() {
+    if (!msActiveFilter) return [];
+    const all = filterItems[msActiveFilter];
+    if (!msSearchTerm) return all;
+    return all.filter(v => v.toLowerCase().includes(msSearchTerm));
+  }
+
+  function renderMsOptions() {
+    const container = msPopover.querySelector('#msOptions');
+    const visible = getVisibleItems();
+    if (!visible.length) {
+      container.innerHTML = `<div class="ms-empty">No matches</div>`;
+      return;
+    }
+    const selected = new Set(filters[msActiveFilter]);
+    const sel   = visible.filter(v =>  selected.has(v));
+    const unsel = visible.filter(v => !selected.has(v));
+
+    const renderRow = (v, checked) =>
+      `<button class="ms-option" data-value="${esc(v)}" role="option" aria-checked="${checked}" type="button" title="${esc(v)}">
+        <span class="ms-check"></span>
+        <span class="ms-label">${esc(v)}</span>
+      </button>`;
+
+    let html = sel.map(v => renderRow(v, true)).join('');
+    if (sel.length && unsel.length) html += `<div class="ms-divider"></div>`;
+    html += unsel.map(v => renderRow(v, false)).join('');
+    container.innerHTML = html;
+  }
+
+  function onMsToggle(value) {
+    if (!msActiveFilter) return;
+    const arr = filters[msActiveFilter];
+    const idx = arr.indexOf(value);
+    if (idx >= 0) arr.splice(idx, 1);
+    else arr.push(value);
+    renderMsOptions();
+    applyFilters();
+  }
+
+  function onMsSelectAll() {
+    if (!msActiveFilter) return;
+    const visible = getVisibleItems();
+    const cur = new Set(filters[msActiveFilter]);
+    visible.forEach(v => cur.add(v));
+    filters[msActiveFilter] = [...cur];
+    renderMsOptions();
+    applyFilters();
+  }
+
+  function onMsClearOne() {
+    if (!msActiveFilter) return;
+    filters[msActiveFilter] = [];
+    renderMsOptions();
+    applyFilters();
+  }
+
+  function positionMsPopover(filter) {
+    const trigger = document.querySelector(`[data-filter="${filter}"]`);
+    const tr = trigger.getBoundingClientRect();
+    const minW = Math.max(tr.width, 280);
+    msPopover.style.minWidth = minW + 'px';
+    const pw = Math.max(msPopover.offsetWidth, minW);
+    let left = tr.left;
+    const margin = 8;
+    if (left + pw + margin > window.innerWidth) left = window.innerWidth - pw - margin;
+    if (left < margin) left = margin;
+    msPopover.style.top  = (tr.bottom + 4) + 'px';
+    msPopover.style.left = left + 'px';
+  }
+
+  function openMsPopover(filter) {
+    buildMsPopover();
+    if (msActiveFilter === filter) { closeMsPopover(); return; }
+    if (msActiveFilter) closeMsPopover();
+    msActiveFilter = filter;
+    msSearchTerm = '';
+    const search = msPopover.querySelector('#msSearch');
+    search.value = '';
+    search.placeholder = `Search ${FILTER_LABELS[filter].toLowerCase()}…`;
+    renderMsOptions();
+    msPopover.hidden = false;
+    positionMsPopover(filter);
+    document.querySelector(`[data-filter="${filter}"]`).setAttribute('aria-expanded', 'true');
+    requestAnimationFrame(() => search.focus());
+    document.addEventListener('keydown', onMsKey);
+    document.addEventListener('mousedown', onMsOutside, true);
+    window.addEventListener('resize', closeMsPopover);
+  }
+
+  function closeMsPopover() {
+    if (!msActiveFilter) return;
+    const filter = msActiveFilter;
+    msActiveFilter = null;
+    msPopover.hidden = true;
+    const trigger = document.querySelector(`[data-filter="${filter}"]`);
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('keydown', onMsKey);
+    document.removeEventListener('mousedown', onMsOutside, true);
+    window.removeEventListener('resize', closeMsPopover);
+  }
+
+  function onMsKey(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      const trigger = msActiveFilter ? document.querySelector(`[data-filter="${msActiveFilter}"]`) : null;
+      closeMsPopover();
+      if (trigger) trigger.focus();
+    }
+  }
+  function onMsOutside(e) {
+    if (msPopover.contains(e.target)) return;
+    if (e.target.closest('.ms-pill')) return;
+    closeMsPopover();
+  }
+
+  function updateMsTrigger(filter) {
+    const trigger = document.querySelector(`[data-filter="${filter}"]`);
+    if (!trigger) return;
+    const sel = filters[filter] || [];
+    const textEl  = trigger.querySelector('.ms-trigger-text');
+    const countEl = trigger.querySelector('.ms-trigger-count');
+    if (sel.length === 0) {
+      textEl.textContent = 'All ' + FILTER_LABELS[filter];
+      countEl.hidden = true;
+      countEl.textContent = '';
+    } else if (sel.length === 1) {
+      textEl.textContent = sel[0];
+      countEl.hidden = true;
+      countEl.textContent = '';
+    } else {
+      textEl.textContent = sel[0];
+      countEl.hidden = false;
+      countEl.textContent = '+' + (sel.length - 1);
+    }
+    trigger.classList.toggle('active', sel.length > 0);
+  }
+
+  // Wire the three triggers
+  document.querySelectorAll('.ms-pill').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openMsPopover(btn.dataset.filter);
+    });
   });
 
   // Initial render
