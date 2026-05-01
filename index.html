@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing — Dynamica SmartRents</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* SmartRates pricing table — scoped to .srt so styles.css stays untouched */
+
+    .pricing-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--body-bg);
+    }
+    .pricing-header-row {
+      flex-shrink: 0;
+      padding: 14px 24px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-heading {
+      font-family: 'Inter', sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+
+    .srt-wrap {
+      flex: 1;
+      overflow: auto;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    table.srt {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      background: var(--surface);
+    }
+    table.srt th, table.srt td { box-sizing: border-box; }
+
+    /* ── Group band header row ── */
+    table.srt thead tr.bands th {
+      position: sticky;
+      top: 0;
+      z-index: 12;
+      height: 28px;
+      padding: 0 14px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-align: left;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--accent);
+    }
+    table.srt thead tr.bands th.band-product  { background: #fde6e0; color: #9c4221; }
+    table.srt thead tr.bands th.band-bookings { background: #fef0d9; color: #9a3412; }
+    table.srt thead tr.bands th.band-forecast { background: #d1f5e8; color: #0f766e; }
+    table.srt thead tr.bands th.band-price    { background: #e0eaff; color: #1e3a8a; }
+
+    /* ── Column label row ── */
+    table.srt thead tr.cols th {
+      position: sticky;
+      top: 30px;
+      z-index: 11;
+      padding: 8px 14px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: #fafbfc;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    table.srt thead tr.cols th.num { text-align: right; }
+    table.srt thead tr.cols th .sub {
+      display: block;
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 10px;
+      margin-top: 2px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    /* Group separator: left border on first cell of each band */
+    table.srt thead tr.cols th.sep,
+    table.srt tbody td.sep { border-left: 1px solid var(--border); }
+
+    /* ── Body ── */
+    table.srt tbody tr { transition: background .1s; }
+    table.srt tbody td {
+      padding: 7px 14px;
+      vertical-align: middle;
+      white-space: nowrap;
+      color: var(--text-primary);
+      font-size: 11.5px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    table.srt tbody td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    table.srt tbody td.muted { color: var(--text-muted); }
+
+    /* Hover */
+    table.srt tbody tr:hover td { background-color: #f5f7fb; }
+    table.srt tbody tr:hover td.cell-pos { background-color: #c9f0d4; }
+    table.srt tbody tr:hover td.cell-neg { background-color: #fbcfcf; }
+
+    /* Conditional formatting */
+    table.srt tbody td.cell-pos { background: #dcfce7; color: #166534; }
+    table.srt tbody td.cell-neg { background: #fee2e2; color: #991b1b; }
+
+    /* Closed rows */
+    table.srt tbody tr.closed td { color: var(--text-muted); }
+
+    /* Rec. Action select */
+    table.srt select.rec-action {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 22px 4px 8px;
+      border: 1px solid var(--border-mid);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text-primary);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      min-width: 96px;
+    }
+    table.srt select.rec-action:hover { border-color: var(--accent); }
+    table.srt select.rec-action:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; }
+
+    /* ── Segmented toggle (List/Calendar + Monthly/Daily) ── */
+    .seg-toggle {
+      display: inline-flex;
+      background: #ececf2;
+      border-radius: 999px;
+      padding: 3px;
+      flex-shrink: 0;
+    }
+    .seg-toggle button {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border: none;
+      background: transparent;
+      padding: 6px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background .15s, color .15s, box-shadow .15s;
+      letter-spacing: 0.01em;
+    }
+    .seg-toggle button:hover:not(.active) { color: var(--text-primary); }
+    .seg-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 1px 2px rgba(232,0,125,0.25);
+    }
+    .seg-toggle.secondary {
+      background: #f1f3f8;
+      padding: 2px;
+    }
+    .seg-toggle.secondary button {
+      padding: 4px 12px;
+      font-size: 11.5px;
+    }
+
+    /* ── Calendar view ── */
+    .cal-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .cal-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    .cal-toolbar-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .cal-scroll {
+      flex: 1;
+      overflow: auto;
+      background: var(--surface);
+    }
+
+    table.cal-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      background: var(--surface);
+    }
+    table.cal-table th, table.cal-table td {
+      box-sizing: border-box;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    /* Column header row */
+    table.cal-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      height: 36px;
+      padding: 0 10px;
+      background: #fafbfc;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    /* Top-left corner (sticky in both axes) */
+    table.cal-table thead th.cal-corner {
+      left: 0;
+      z-index: 4;
+      text-align: left;
+      padding: 0 14px;
+      border-right: 1px solid var(--border);
+      background: #fafbfc;
+      min-width: 270px;
+      width: 270px;
+    }
+    /* Body row label (sticky left) */
+    table.cal-table tbody th.cal-route {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: left;
+      min-width: 270px;
+      width: 270px;
+      white-space: normal;
+      line-height: 1.35;
+    }
+    /* Data cells */
+    table.cal-table tbody td {
+      padding: 6px 10px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-variant-numeric: tabular-nums;
+      min-width: 120px;
+      background: var(--surface);
+    }
+    table.cal-table tbody td .cell-rev {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.005em;
+      line-height: 1.15;
+    }
+    table.cal-table tbody td .cell-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 500;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    table.cal-table tbody td .cell-meta .pipe {
+      color: var(--text-muted);
+      opacity: 0.5;
+      font-weight: 400;
+    }
+    /* Heatmap tiers (Revenue YoY %) */
+    table.cal-table tbody td.tier-pos2 { background: #bbf7d0; }
+    table.cal-table tbody td.tier-pos2 .cell-rev  { color: #14532d; }
+    table.cal-table tbody td.tier-pos2 .cell-meta { color: #166534; }
+    table.cal-table tbody td.tier-pos1 { background: #dcfce7; }
+    table.cal-table tbody td.tier-pos1 .cell-rev  { color: #166534; }
+    table.cal-table tbody td.tier-pos1 .cell-meta { color: #15803d; }
+    table.cal-table tbody td.tier-zero { background: var(--surface); }
+    table.cal-table tbody td.tier-neg1 { background: #fee2e2; }
+    table.cal-table tbody td.tier-neg1 .cell-rev  { color: #991b1b; }
+    table.cal-table tbody td.tier-neg1 .cell-meta { color: #b91c1c; }
+    table.cal-table tbody td.tier-neg2 { background: #fecaca; }
+    table.cal-table tbody td.tier-neg2 .cell-rev  { color: #7f1d1d; }
+    table.cal-table tbody td.tier-neg2 .cell-meta { color: #991b1b; }
+    /* Cell hover */
+    table.cal-table tbody td:hover {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+      position: relative;
+      z-index: 3;
+    }
+
+    /* ── View visibility (overrides any explicit display) ── */
+    [hidden] { display: none !important; }
+
+    /* ── Filter row ── */
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .filter-pill {
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 20px;
+      padding: 5px 28px 5px 12px;
+      height: 30px;
+      max-width: 240px;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color .15s, color .15s, background-image .15s;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .filter-pill:hover { border-color: var(--accent); }
+    .filter-pill:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; }
+    .filter-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%23e8007d' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    }
+
+    .filter-clear {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--accent);
+      background: none;
+      border: none;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background .12s;
+    }
+    .filter-clear:hover { background: rgba(232,0,125,0.08); }
+
+    /* Date-range trigger pill (button variant of .filter-pill) */
+    .filter-pill.date-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 28px 0 10px;
+    }
+    .filter-pill.date-pill .cal-icon { color: var(--text-secondary); flex-shrink: 0; }
+    .filter-pill.date-pill.active .cal-icon { color: var(--accent); }
+    .filter-pill.date-pill > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Date-range popover ── */
+    .dp-popover {
+      position: fixed;
+      z-index: 200;
+      background: var(--nav-bg);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid var(--nav-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+    }
+    .dp-months {
+      display: flex;
+      gap: 24px;
+    }
+    .dp-month { width: 252px; }
+    .dp-month-header {
+      display: grid;
+      grid-template-columns: 24px 1fr 24px;
+      align-items: center;
+      margin-bottom: 6px;
+      height: 28px;
+    }
+    .dp-month-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+    .dp-nav-btn {
+      width: 24px; height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 0;
+      transition: background .12s, color .12s;
+    }
+    .dp-nav-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .dp-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 36px);
+    }
+    .dp-dow {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      padding: 6px 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .dp-day {
+      width: 36px; height: 36px;
+      position: relative;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.85);
+      font-variant-numeric: tabular-nums;
+      padding: 0;
+    }
+    .dp-day-num {
+      position: relative;
+      z-index: 2;
+      width: 30px; height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: outline-color .1s, background-color .1s, color .1s;
+    }
+    .dp-day:hover .dp-day-num {
+      outline: 1.5px solid var(--accent);
+      outline-offset: -1.5px;
+    }
+    .dp-day.in-range { background: rgba(232,0,125,0.18); }
+    .dp-day.is-start { background: linear-gradient(to right, transparent 50%, rgba(232,0,125,0.18) 50%); }
+    .dp-day.is-end   { background: linear-gradient(to right, rgba(232,0,125,0.18) 50%, transparent 50%); }
+    .dp-day.is-start.is-end { background: transparent; }
+    .dp-day.is-start .dp-day-num,
+    .dp-day.is-end   .dp-day-num {
+      background: var(--accent);
+      color: #fff;
+    }
+    .dp-day.is-start:hover .dp-day-num,
+    .dp-day.is-end:hover .dp-day-num {
+      background: var(--accent-dim);
+      outline: none;
+    }
+    .dp-day.out-of-month { color: rgba(255,255,255,0.25); }
+    .dp-day.out-of-month:hover .dp-day-num { outline-color: rgba(232,0,125,0.45); }
+
+    .dp-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--nav-border);
+      gap: 12px;
+    }
+    .dp-status {
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.65);
+      font-weight: 500;
+    }
+    .dp-actions { display: flex; gap: 8px; }
+    .dp-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    .dp-btn-ghost {
+      background: transparent;
+      border-color: rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85);
+    }
+    .dp-btn-ghost:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.4);
+    }
+    .dp-btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .dp-btn-primary:hover:not(:disabled) {
+      background: var(--accent-dim);
+      border-color: var(--accent-dim);
+    }
+    .dp-btn-primary:disabled {
+      background: rgba(232,0,125,0.4);
+      border-color: rgba(232,0,125,0.4);
+      cursor: not-allowed;
+    }
+
+    /* Empty-state row inside the calendar grid when no routes match */
+    .cal-empty-th {
+      position: sticky;
+      left: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 18px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: left;
+      min-width: 270px;
+      width: 270px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top Nav ── -->
+  <nav class="topnav">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;margin-right:32px;text-decoration:none;flex-shrink:0;">
+      <img src="engine_logo (2).png" style="height:28px;width:auto;display:block;" alt="Dynamica SmartRents">
+      <div style="display:flex;flex-direction:column;line-height:1;gap:2px;">
+        <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;color:#ffffff;text-transform:uppercase;">DYNAMICA</span>
+        <span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:400;letter-spacing:0.02em;color:rgba(255,255,255,0.55);">SmartRents</span>
+      </div>
+    </a>
+  </nav>
+
+  <main class="pricing-page">
+    <div class="pricing-header-row">
+      <h1 class="pricing-heading">Pricing</h1>
+      <div class="filter-group" id="filterGroup">
+        <select class="filter-pill" data-filter="origin"      aria-label="Origin"></select>
+        <select class="filter-pill" data-filter="destination" aria-label="Destination"></select>
+        <select class="filter-pill" data-filter="lane"        aria-label="Lane"></select>
+        <button class="filter-pill date-pill" id="dateRangeTrigger" type="button" aria-haspopup="dialog" aria-label="Date range">
+          <svg class="cal-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="1.5" y="2.5" width="11" height="10" rx="1.5"/>
+            <line x1="1.5" y1="5.5" x2="12.5" y2="5.5"/>
+            <line x1="4.5" y1="1" x2="4.5" y2="3.5"/>
+            <line x1="9.5" y1="1" x2="9.5" y2="3.5"/>
+          </svg>
+          <span id="dateRangeLabel">All Dates</span>
+        </button>
+        <button class="filter-clear" id="filterClear" type="button" hidden>Clear filters</button>
+      </div>
+      <div class="seg-toggle" id="viewToggle" role="tablist" aria-label="View">
+        <button type="button" class="active" data-view="list" role="tab" aria-selected="true">List</button>
+        <button type="button" data-view="calendar" role="tab" aria-selected="false">Calendar</button>
+      </div>
+    </div>
+    <div class="srt-wrap" id="listView">
+      <table class="srt">
+        <thead>
+          <tr class="bands">
+            <th colspan="7" class="band-product">Product details</th>
+            <th colspan="7" class="band-bookings">Bookings to date</th>
+            <th colspan="7" class="band-forecast">Forecast</th>
+            <th colspan="4" class="band-price">Price recommendations</th>
+          </tr>
+          <tr class="cols">
+            <th>Date</th>
+            <th>Day</th>
+            <th>Lane</th>
+            <th>LDM <span class="sub">Pricing unit</span></th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th class="num">Capacity <span class="sub">LDM</span></th>
+
+            <th class="num sep">Units booked <span class="sub">LDM</span></th>
+            <th class="num">Utilisation <span class="sub">%</span></th>
+            <th class="num">Utilisation <span class="sub">%, vs LY</span></th>
+            <th class="num">Price per LDM <span class="sub">$</span></th>
+            <th class="num">Price per LDM <span class="sub">%, vs LY</span></th>
+            <th class="num">Revenue <span class="sub">$</span></th>
+            <th class="num">Revenue <span class="sub">%, vs LY</span></th>
+
+            <th class="num sep">Units forecasted <span class="sub">LDM</span></th>
+            <th class="num">Utilisation <span class="sub">%</span></th>
+            <th class="num">Utilisation <span class="sub">%, vs LY</span></th>
+            <th class="num">Price per LDM <span class="sub">$</span></th>
+            <th class="num">Price per LDM <span class="sub">%, vs LY</span></th>
+            <th class="num">Revenue <span class="sub">$</span></th>
+            <th class="num">Revenue <span class="sub">%, vs LY</span></th>
+
+            <th class="num sep">Current price <span class="sub">per LDM ($)</span></th>
+            <th class="num">LY price <span class="sub">per LDM ($)</span></th>
+            <th class="num">Rec. price <span class="sub">per LDM ($)</span></th>
+            <th>Rec. Action</th>
+          </tr>
+        </thead>
+        <tbody id="srt-body"></tbody>
+      </table>
+    </div>
+
+    <div class="cal-wrap" id="calView" hidden>
+      <div class="cal-toolbar">
+        <span class="cal-toolbar-label">Granularity</span>
+        <div class="seg-toggle secondary" id="modeToggle" role="tablist" aria-label="Granularity">
+          <button type="button" class="active" data-mode="monthly" role="tab" aria-selected="true">Monthly</button>
+          <button type="button" data-mode="daily" role="tab" aria-selected="false">Daily</button>
+        </div>
+      </div>
+      <div class="cal-scroll">
+        <table class="cal-table" id="calTable">
+          <thead><tr id="calHead"></tr></thead>
+          <tbody id="calBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  const ROWS = [
+    { date:'10/24', day:'Fri', lane:'Chicago, IL (606) - Dallas-Fort Worth, TX (752)',         origin:'Chicago, IL (606)',           dest:'Dallas-Fort Worth, TX (752)',   cap:'95',
+      bk:{u:'77.9', ut:'82%',  utLY:'6%',   p:'$210',    pLY:'3%',   r:'$16,359', rLY:'4.80%'},
+      fc:{u:'99',   ut:'104%', utLY:'7%',   p:'$213.19', pLY:'9%',   r:'$21,127', rLY:'17%'},
+      pr:{c:'$210', ly:'$204', rec:'$216', a:'Increase'} },
+
+    { date:'10/24', day:'Fri', lane:'Dallas-Fort Worth, TX (752) - Chicago, IL (606)',         origin:'Dallas-Fort Worth, TX (752)', dest:'Chicago, IL (606)',             cap:'90',
+      bk:{u:'55.8', ut:'62%',  utLY:'-10%', p:'$175',    pLY:'-4%',  r:'$9,765',  rLY:'5.60%'},
+      fc:{u:'61',   ut:'68%',  utLY:'-32%', p:'$182.94', pLY:'0%',   r:'$11,163', rLY:'-32%'},
+      pr:{c:'$175', ly:'$182', rec:'$170', a:'Decrease'} },
+
+    { date:'10/24', day:'Fri', lane:'Chicago, IL (606) - Atlanta, GA (303)',                   origin:'Chicago, IL (606)',           dest:'Atlanta, GA (303)',             cap:'Closed', closed:true,
+      bk:{ut:'100%'} },
+
+    { date:'10/24', day:'Fri', lane:'Atlanta, GA (303) - Chicago, IL (606)',                   origin:'Atlanta, GA (303)',           dest:'Chicago, IL (606)',             cap:'Closed', closed:true,
+      bk:{ut:'100%'} },
+
+    { date:'10/24', day:'Fri', lane:'North NJ (070) - Chicago, IL (606)',                      origin:'North NJ (070)',              dest:'Chicago, IL (606)',             cap:'Closed', closed:true,
+      bk:{ut:'100%'} },
+
+    { date:'10/24', day:'Fri', lane:'Chicago, IL (606) - North NJ (070)',                      origin:'Chicago, IL (606)',           dest:'North NJ (070)',                cap:'Closed', closed:true,
+      bk:{ut:'100%'} },
+
+    { date:'10/24', day:'Fri', lane:'Los Angeles, CA (900) - Dallas-Fort Worth, TX (752)',     origin:'Los Angeles, CA (900)',       dest:'Dallas-Fort Worth, TX (752)',   cap:'92',
+      bk:{u:'81',   ut:'88%',  utLY:'5%',   p:'$280',    pLY:'4%',   r:'$22,680', rLY:'-2.80%'},
+      fc:{u:'88',   ut:'95%',  utLY:'3%',   p:'$267.72', pLY:'-1%',  r:'$23,428', rLY:'2%'},
+      pr:{c:'$280', ly:'$269', rec:'$294', a:'Increase'} },
+
+    { date:'10/24', day:'Fri', lane:'Dallas-Fort Worth, TX (752) - Los Angeles, CA (900)',     origin:'Dallas-Fort Worth, TX (752)', dest:'Los Angeles, CA (900)',         cap:'88',
+      bk:{u:'56.3', ut:'64%',  utLY:'-12%', p:'$220',    pLY:'-5%',  r:'$12,386', rLY:'2.00%'},
+      fc:{u:'59',   ut:'67%',  utLY:'-33%', p:'$217.83', pLY:'-6%',  r:'$12,935', rLY:'-37%'},
+      pr:{c:'$220', ly:'$232', rec:'$213', a:'Decrease'} },
+
+    { date:'10/24', day:'Fri', lane:'Atlanta, GA (303) - Orlando, FL (328)',                   origin:'Atlanta, GA (303)',           dest:'Orlando, FL (328)',             cap:'55',
+      bk:{u:'42.9', ut:'78%',  utLY:'-2%',  p:'$140',    pLY:'-1%',  r:'$6,006',  rLY:'-2.00%'},
+      fc:{u:'47',   ut:'85%',  utLY:'-15%', p:'$144.06', pLY:'2%',   r:'$6,717',  rLY:'-14%'},
+      pr:{c:'$140', ly:'$141', rec:'$140', a:'Keep'} },
+
+    { date:'10/24', day:'Fri', lane:'Orlando, FL (328) - Atlanta, GA (303)',                   origin:'Orlando, FL (328)',           dest:'Atlanta, GA (303)',             cap:'50',
+      bk:{u:'36',   ut:'72%',  utLY:'1%',   p:'$135',    pLY:'0%',   r:'$4,860',  rLY:'5.00%'},
+      fc:{u:'46',   ut:'92%',  utLY:'-2%',  p:'$162.93', pLY:'21%',  r:'$7,511',  rLY:'18%'},
+      pr:{c:'$135', ly:'$135', rec:'$135', a:'Keep'} },
+
+    { date:'10/24', day:'Fri', lane:'Dallas-Fort Worth, TX (752) - Houston, TX (770)',         origin:'Dallas-Fort Worth, TX (752)', dest:'Houston, TX (770)',             cap:'68',
+      bk:{u:'54.4', ut:'80%',  utLY:'2%',   p:'$165',    pLY:'-1%',  r:'$8,976',  rLY:'4.00%'},
+      fc:{u:'59',   ut:'87%',  utLY:'-6%',  p:'$171.50', pLY:'3%',   r:'$10,135', rLY:'-3%'},
+      pr:{c:'$165', ly:'$167', rec:'$170', a:'Increase'} },
+
+    { date:'10/24', day:'Fri', lane:'Houston, TX (770) - Dallas-Fort Worth, TX (752)',         origin:'Houston, TX (770)',           dest:'Dallas-Fort Worth, TX (752)',   cap:'65',
+      bk:{u:'44.2', ut:'68%',  utLY:'-7%',  p:'$150',    pLY:'-3%',  r:'$6,630',  rLY:'-3.80%'},
+      fc:{u:'49',   ut:'76%',  utLY:'-24%', p:'$149.01', pLY:'-4%',  r:'$7,349',  rLY:'-27%'},
+      pr:{c:'$150', ly:'$155', rec:'$149', a:'Decrease'} },
+
+    { date:'10/24', day:'Fri', lane:'Philadelphia, PA (191) - New York, NY (212)',             origin:'Philadelphia, PA (191)',      dest:'New York, NY (212)',            cap:'42',
+      bk:{u:'34.4', ut:'82%',  utLY:'2%',   p:'$125',    pLY:'-2%',  r:'$4,300',  rLY:'-1.80%'},
+      fc:{u:'43',   ut:'103%', utLY:'11%',  p:'$114.23', pLY:'-10%', r:'$4,943',  rLY:'-1%'},
+      pr:{c:'$125', ly:'$128', rec:'$129', a:'Increase'} },
+
+    { date:'10/24', day:'Fri', lane:'New York, NY (212) - Philadelphia, PA (191)',             origin:'New York, NY (212)',          dest:'Philadelphia, PA (191)',        cap:'45',
+      bk:{u:'33.8', ut:'75%',  utLY:'-5%',  p:'$120',    pLY:'-3%',  r:'$4,056',  rLY:'0.40%'},
+      fc:{u:'38',   ut:'84%',  utLY:'-16%', p:'$112.09', pLY:'-9%',  r:'$4,215',  rLY:'-24%'},
+      pr:{c:'$120', ly:'$124', rec:'$120', a:'Keep'} },
+
+    { date:'10/24', day:'Fri', lane:'Seattle, WA (981) - Portland, OR (972)',                  origin:'Seattle, WA (981)',           dest:'Portland, OR (972)',            cap:'44',
+      bk:{u:'33.9', ut:'77%',  utLY:'-1%',  p:'$115',    pLY:'-1%',  r:'$3,899',  rLY:'-3.20%'},
+      fc:{u:'39',   ut:'89%',  utLY:'-11%', p:'$122.60', pLY:'6%',   r:'$4,787',  rLY:'-6%'},
+      pr:{c:'$115', ly:'$116', rec:'$115', a:'Keep'} },
+
+    { date:'10/24', day:'Fri', lane:'Portland, OR (972) - Seattle, WA (981)',                  origin:'Portland, OR (972)',          dest:'Seattle, WA (981)',             cap:'44',
+      bk:{u:'32.1', ut:'73%',  utLY:'-4%',  p:'$110',    pLY:'-2%',  r:'$3,531',  rLY:'3.80%'},
+      fc:{u:'40',   ut:'92%',  utLY:'-8%',  p:'$138.35', pLY:'23%',  r:'$5,597',  rLY:'13%'},
+      pr:{c:'$110', ly:'$112', rec:'$110', a:'Keep'} },
+
+    { date:'10/24', day:'Fri', lane:'Phoenix, AZ (850) - Las Vegas, NV (891)',                 origin:'Phoenix, AZ (850)',           dest:'Las Vegas, NV (891)',           cap:'46',
+      bk:{u:'35',   ut:'76%',  utLY:'-3%',  p:'$125',    pLY:'-2%',  r:'$4,375',  rLY:'7.00%'},
+      fc:{u:'38',   ut:'84%',  utLY:'-16%', p:'$183.96', pLY:'44%',  r:'$7,081',  rLY:'21%'},
+      pr:{c:'$125', ly:'$128', rec:'$125', a:'Keep'} },
+
+    { date:'10/24', day:'Fri', lane:'Las Vegas, NV (891) - Phoenix, AZ (850)',                 origin:'Las Vegas, NV (891)',         dest:'Phoenix, AZ (850)',             cap:'44',
+      bk:{u:'29.5', ut:'67%',  utLY:'-9%',  p:'$118',    pLY:'-4%',  r:'$3,481',  rLY:'-1.00%'},
+      fc:{u:'31',   ut:'71%',  utLY:'-29%', p:'$113.26', pLY:'-8%',  r:'$3,527',  rLY:'-35%'},
+      pr:{c:'$118', ly:'$123', rec:'$114', a:'Decrease'} },
+
+    { date:'10/24', day:'Fri', lane:'Chicago, IL (606) - Minneapolis, MN (554)',               origin:'Chicago, IL (606)',           dest:'Minneapolis, MN (554)',         cap:'60',
+      bk:{u:'44.4', ut:'74%',  utLY:'1%',   p:'$160',    pLY:'1%',   r:'$7,104',  rLY:'2.20%'},
+      fc:{u:'49',   ut:'81%',  utLY:'-13%', p:'$159.30', pLY:'1%',   r:'$7,733',  rLY:'-13%'},
+      pr:{c:'$160', ly:'$158', rec:'$160', a:'Keep'} },
+
+    { date:'10/24', day:'Fri', lane:'Minneapolis, MN (554) - Chicago, IL (606)',               origin:'Minneapolis, MN (554)',       dest:'Chicago, IL (606)',             cap:'58',
+      bk:{u:'38.3', ut:'66%',  utLY:'-6%',  p:'$150',    pLY:'-3%',  r:'$5,745',  rLY:'0.40%'},
+      fc:{u:'42',   ut:'72%',  utLY:'-28%', p:'$142.83', pLY:'-8%',  r:'$5,954',  rLY:'-34%'},
+      pr:{c:'$150', ly:'$155', rec:'$149', a:'Decrease'} },
+  ];
+
+  const DASH = '—';
+  const ACTIONS = ['Increase','Decrease','Keep','Hold','Override'];
+
+  function pctSign(s) {
+    if (!s || s === '-') return null;
+    if (s.startsWith('-')) return -1;
+    if (parseFloat(s) === 0) return 0;
+    return 1;
+  }
+  function pctLY(s) {
+    if (!s || s === '-') return DASH;
+    const v = parseFloat(s);
+    if (isNaN(v)) return s;
+    if (v > 0) return '+' + s;
+    return s;
+  }
+  function classFor(sign) {
+    if (sign === 1) return ' cell-pos';
+    if (sign === -1) return ' cell-neg';
+    return '';
+  }
+  function recClass(rec, current) {
+    if (!rec || !current) return '';
+    const r = parseFloat(rec.replace(/[^-0-9.]/g, ''));
+    const c = parseFloat(current.replace(/[^-0-9.]/g, ''));
+    if (isNaN(r) || isNaN(c)) return '';
+    if (r > c) return ' cell-pos';
+    if (r < c) return ' cell-neg';
+    return '';
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  function renderClosed(row) {
+    const util = (row.bk && row.bk.ut) || DASH;
+    const cells = [
+      `<td>${esc(row.date)}</td>`,
+      `<td>${esc(row.day)}</td>`,
+      `<td>${esc(row.lane)}</td>`,
+      `<td class="muted">LDM</td>`,
+      `<td>${esc(row.origin)}</td>`,
+      `<td>${esc(row.dest)}</td>`,
+      `<td class="num">${esc(row.cap)}</td>`,
+
+      `<td class="num sep">${DASH}</td>`,
+      `<td class="num">${esc(util)}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+
+      `<td class="num sep">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+
+      `<td class="num sep">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td class="num">${DASH}</td>`,
+      `<td>${DASH}</td>`,
+    ].join('');
+    return `<tr class="closed">${cells}</tr>`;
+  }
+
+  function renderOpen(row) {
+    const bk = row.bk, fc = row.fc, pr = row.pr;
+
+    const bkUtilLYCls = classFor(pctSign(bk.utLY));
+    const bkPLYCls    = classFor(pctSign(bk.pLY));
+    const bkRLYCls    = classFor(pctSign(bk.rLY));
+    const fcUtilLYCls = classFor(pctSign(fc.utLY));
+    const fcPLYCls    = classFor(pctSign(fc.pLY));
+    const fcRLYCls    = classFor(pctSign(fc.rLY));
+    const recCls      = recClass(pr.rec, pr.c);
+
+    const optsHtml = ACTIONS.map(o =>
+      `<option value="${o}"${o === pr.a ? ' selected' : ''}>${o}</option>`
+    ).join('');
+
+    const cells = [
+      `<td>${esc(row.date)}</td>`,
+      `<td>${esc(row.day)}</td>`,
+      `<td>${esc(row.lane)}</td>`,
+      `<td class="muted">LDM</td>`,
+      `<td>${esc(row.origin)}</td>`,
+      `<td>${esc(row.dest)}</td>`,
+      `<td class="num">${esc(row.cap)}</td>`,
+
+      `<td class="num sep">${esc(bk.u)}</td>`,
+      `<td class="num">${esc(bk.ut)}</td>`,
+      `<td class="num${bkUtilLYCls}">${esc(pctLY(bk.utLY))}</td>`,
+      `<td class="num">${esc(bk.p)}</td>`,
+      `<td class="num${bkPLYCls}">${esc(pctLY(bk.pLY))}</td>`,
+      `<td class="num">${esc(bk.r)}</td>`,
+      `<td class="num${bkRLYCls}">${esc(pctLY(bk.rLY))}</td>`,
+
+      `<td class="num sep">${esc(fc.u)}</td>`,
+      `<td class="num">${esc(fc.ut)}</td>`,
+      `<td class="num${fcUtilLYCls}">${esc(pctLY(fc.utLY))}</td>`,
+      `<td class="num">${esc(fc.p)}</td>`,
+      `<td class="num${fcPLYCls}">${esc(pctLY(fc.pLY))}</td>`,
+      `<td class="num">${esc(fc.r)}</td>`,
+      `<td class="num${fcRLYCls}">${esc(pctLY(fc.rLY))}</td>`,
+
+      `<td class="num sep">${esc(pr.c)}</td>`,
+      `<td class="num">${esc(pr.ly)}</td>`,
+      `<td class="num${recCls}">${esc(pr.rec)}</td>`,
+      `<td><select class="rec-action" aria-label="Recommended action">${optsHtml}</select></td>`,
+    ].join('');
+    return `<tr>${cells}</tr>`;
+  }
+
+  function renderList() {
+    const visible = ROWS.filter(rowMatches);
+    const body = document.getElementById('srt-body');
+    if (!visible.length) {
+      body.innerHTML = `<tr><td colspan="25" style="padding:32px;text-align:center;color:var(--text-muted);font-style:italic;">No matching rows for the current filters.</td></tr>`;
+      return;
+    }
+    body.innerHTML = visible.map(r => r.closed ? renderClosed(r) : renderOpen(r)).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Calendar view
+     ════════════════════════════════════════════════════════════ */
+
+  const CAL_ROUTES = [
+    'Chicago, IL (606) → Dallas-Fort Worth, TX (752)',
+    'Dallas-Fort Worth, TX (752) → Chicago, IL (606)',
+    'Chicago, IL (606) → Atlanta, GA (303)',
+    'Atlanta, GA (303) → Chicago, IL (606)',
+    'North NJ (070) → Chicago, IL (606)',
+    'Chicago, IL (606) → North NJ (070)',
+    'Los Angeles, CA (900) → Dallas-Fort Worth, TX (752)',
+    'Dallas-Fort Worth, TX (752) → Los Angeles, CA (900)',
+    'Atlanta, GA (303) → Orlando, FL (328)',
+    'Orlando, FL (328) → Atlanta, GA (303)',
+  ];
+
+  const MONTH_LABELS = [
+    'Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','Apr-26',
+    'May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26',
+  ];
+  // [revenueYoY%, unitsYoY%, priceYoY%] for each route × month
+  const MONTHLY_DATA = [
+    // Chicago, IL (606) → Dallas-Fort Worth, TX (752)
+    [[12.1,8.0,3.8],[13.4,9.0,4.0],[3.8,2.0,1.8],[5.1,3.0,2.0],[6.0,5.0,1.0],[9.1,6.0,2.9],[9.5,6.5,2.8],[9.5,6.5,2.8],[8.9,6.0,2.7],[9.5,6.5,2.8],[11.7,7.5,3.9],[12.9,8.0,4.5]],
+    // Dallas-Fort Worth, TX (752) → Chicago, IL (606)
+    [[-3.7,-4.6,0.9],[-2.7,-3.9,1.3],[-10.9,-8.8,-2.3],[-9.6,-8.1,-1.7],[-7.9,-6.7,-1.3],[-7.2,-6.0,-1.3],[-6.9,-5.6,-1.4],[-6.9,-5.6,-1.4],[-6.5,-5.3,-1.3],[-6.9,-5.6,-1.4],[-5.2,-4.9,-0.3],[-4.0,-4.6,0.6]],
+    // Chicago, IL (606) → Atlanta, GA (303)
+    [[15.4,10.0,4.9],[16.8,11.0,5.2],[7.3,4.0,3.1],[8.4,5.0,3.2],[9.8,7.0,2.6],[12.8,8.0,4.4],[13.2,8.5,4.3],[13.2,8.5,4.3],[12.7,8.0,4.3],[13.2,8.5,4.3],[14.9,9.5,5.0],[16.2,10.0,5.6]],
+    // Atlanta, GA (303) → Chicago, IL (606)
+    [[-1.6,-2.6,1.0],[-0.7,-1.9,1.2],[-9.7,-6.8,-3.1],[-8.3,-6.1,-2.3],[-6.6,-4.7,-2.0],[-6.0,-4.0,-2.1],[-5.6,-3.6,-2.0],[-5.6,-3.6,-2.0],[-5.1,-3.3,-1.9],[-5.6,-3.6,-2.0],[-3.8,-2.9,-0.9],[-2.6,-2.6,0.0]],
+    // North NJ (070) → Chicago, IL (606)
+    [[10.4,8.0,2.2],[11.7,9.0,2.5],[2.6,2.0,0.6],[3.6,3.0,0.6],[4.8,5.0,-0.2],[8.0,6.0,1.9],[8.3,6.5,1.7],[8.3,6.5,1.7],[7.7,6.0,1.6],[8.3,6.5,1.7],[10.5,7.5,2.8],[11.5,8.0,3.2]],
+    // Chicago, IL (606) → North NJ (070)
+    [[-7.1,-4.6,-2.6],[-6.2,-3.9,-2.4],[-14.6,-8.8,-6.3],[-13.0,-8.1,-5.4],[-11.4,-6.7,-5.0],[-10.5,-6.0,-4.8],[-10.2,-5.6,-4.8],[-10.2,-5.6,-4.8],[-9.8,-5.3,-4.8],[-10.2,-5.6,-4.8],[-8.6,-4.9,-3.9],[-7.5,-4.6,-3.1]],
+    // Los Angeles, CA (900) → Dallas-Fort Worth, TX (752)
+    [[17.8,11.0,6.1],[19.2,12.0,6.4],[9.7,5.0,4.5],[10.8,6.0,4.5],[12.3,8.0,4.0],[15.5,9.0,6.0],[15.9,9.5,5.9],[15.9,9.5,5.9],[15.4,9.0,5.9],[15.9,9.5,5.9],[17.7,10.5,6.5],[19.0,11.0,7.2]],
+    // Dallas-Fort Worth, TX (752) → Los Angeles, CA (900)
+    [[1.2,-0.9,2.1],[2.2,-0.2,2.4],[-6.2,-5.3,-1.0],[-4.7,-4.6,-0.1],[-3.0,-3.2,0.2],[-2.0,-2.5,0.5],[-1.6,-2.1,0.5],[-1.6,-2.1,0.5],[-1.2,-1.8,0.6],[-1.6,-2.1,0.5],[0.1,-1.4,1.6],[1.1,-0.9,2.1]],
+    // Atlanta, GA (303) → Orlando, FL (328)
+    [[2.1,1.4,0.7],[3.2,2.1,1.1],[-3.4,-2.8,-0.6],[-1.7,-2.1,0.4],[0.5,-0.7,1.2],[-1.0,0.0,-1.0],[-0.6,0.4,-1.0],[-0.6,0.4,-1.0],[-0.5,0.0,-0.5],[-0.6,0.4,-1.0],[1.2,1.0,0.2],[2.6,1.4,1.2]],
+    // Orlando, FL (328) → Atlanta, GA (303)
+    [[-10.9,-10.6,-0.3],[-9.5,-9.9,0.4],[-16.7,-14.8,-2.2],[-15.1,-14.1,-1.2],[-13.3,-12.7,-0.7],[-12.6,-12.0,-0.7],[-12.3,-11.6,-0.8],[-12.3,-11.6,-0.8],[-11.9,-11.3,-0.7],[-12.3,-11.6,-0.8],[-10.3,-10.9,0.6],[-8.2,-10.6,2.7]],
+  ];
+
+  const DAY_LABELS = [
+    'Mon 03/02','Tue 03/03','Wed 03/04','Thu 03/05','Fri 03/06','Sat 03/07','Sun 03/08',
+    'Mon 03/09','Tue 03/10','Wed 03/11','Thu 03/12','Fri 03/13','Sat 03/14','Sun 03/15',
+    'Mon 03/16','Tue 03/17','Wed 03/18','Thu 03/19','Fri 03/20','Sat 03/21','Sun 03/22',
+    'Mon 03/23','Tue 03/24','Wed 03/25','Thu 03/26','Fri 03/27','Sat 03/28','Sun 03/29',
+    'Mon 03/30','Tue 03/31',
+  ];
+  // [revenueYoY%, unitsYoY%, priceYoY%] for each route × day (30 days)
+  const DAILY_DATA = [
+    // Chicago, IL (606) → Dallas-Fort Worth, TX (752)
+    [[11.6,6.1,3.1],[7.1,7.9,3.3],[11.4,4.1,3.1],[9.1,4.3,3.4],[12.3,4.2,2.3],[13.5,9.5,2.4],[8.7,8.5,2.9],[11.4,4.8,3.4],[9.9,7.7,4.1],[10.2,5.5,3.3],[8.4,6.7,2.6],[10.1,6.5,3.2],[10.0,8.7,3.3],[11.0,8.3,3.4],[9.8,6.6,3.4],[11.8,7.7,3.1],[7.3,6.1,2.8],[10.5,7.5,3.9],[9.0,5.8,4.1],[13.8,8.9,2.1],[9.9,6.3,2.7],[7.3,4.0,3.6],[9.7,6.7,4.1],[9.8,7.6,3.0],[6.8,7.6,3.4],[9.3,6.6,3.2],[13.4,5.5,3.5],[10.8,6.7,4.0],[11.1,6.0,2.0],[7.8,7.3,3.0]],
+    // Dallas-Fort Worth, TX (752) → Chicago, IL (606)
+    [[-3.8,-5.4,0.2],[-9.4,-6.8,-0.6],[-9.4,-7.2,-1.8],[-6.4,-4.9,-0.7],[-6.0,-6.9,-0.5],[-10.9,-6.7,-1.8],[-8.7,-7.5,0.1],[-9.0,-7.3,-1.1],[-7.1,-6.1,-0.8],[-8.3,-4.0,-1.2],[-5.8,-3.9,-0.1],[-8.8,-5.3,-1.8],[-10.2,-7.2,-0.3],[-5.3,-8.3,0.3],[-9.3,-5.0,0.3],[-7.2,-4.6,-0.4],[-8.5,-6.0,-0.8],[-6.5,-4.3,-0.6],[-5.1,-7.4,-1.7],[-10.5,-9.2,-0.4],[-9.1,-5.4,-0.6],[-8.2,-5.4,0.4],[-6.3,-7.2,-0.1],[-7.4,-6.6,-0.6],[-6.2,-6.1,-0.5],[-8.5,-5.8,0.1],[-7.2,-7.5,0.2],[-8.6,-6.6,-0.8],[-4.5,-6.1,0.3],[-3.9,-5.2,-0.9]],
+    // Chicago, IL (606) → Atlanta, GA (303)
+    [[11.9,8.8,4.9],[12.6,8.4,3.7],[15.4,6.9,5.3],[12.9,8.5,4.5],[13.5,6.6,3.8],[16.9,10.0,3.6],[14.4,11.1,5.1],[12.9,6.3,5.1],[15.1,9.2,4.5],[15.1,7.9,5.3],[14.2,7.6,3.4],[12.7,9.5,4.1],[14.1,10.8,3.3],[13.8,9.1,4.2],[11.7,6.5,3.9],[11.0,9.7,5.5],[11.9,8.4,5.1],[14.3,9.7,3.2],[11.8,9.7,5.0],[16.3,10.0,5.0],[17.2,9.0,4.7],[13.6,6.6,4.0],[13.6,10.0,3.2],[14.3,7.0,5.3],[12.9,8.9,3.3],[11.1,7.2,3.4],[15.0,11.4,4.4],[14.7,9.7,3.9],[15.3,9.9,5.1],[12.7,8.0,3.6]],
+    // Atlanta, GA (303) → Chicago, IL (606)
+    [[-6.3,-2.1,-2.0],[-2.9,-3.0,-1.6],[-4.6,-3.6,-1.1],[-2.9,-2.7,-0.3],[-3.4,-4.5,-0.4],[-5.8,-3.1,-1.7],[-7.8,-6.1,-2.1],[-3.9,-4.1,-2.1],[-7.0,-5.7,-2.3],[-5.4,-2.0,-1.2],[-4.3,-3.4,-1.6],[-7.3,-4.9,-2.2],[-6.9,-2.8,-1.4],[-9.3,-4.4,-1.5],[-5.7,-4.3,-1.2],[-4.7,-3.9,-1.9],[-4.6,-2.4,-0.1],[-2.6,-2.1,-0.8],[-4.4,-2.9,-1.0],[-3.5,-4.6,-1.2],[-7.6,-4.0,-2.4],[-6.1,-2.1,-1.7],[-5.1,-2.3,-0.4],[-7.1,-5.0,-0.1],[-5.6,-5.2,-1.5],[-2.5,-3.7,-1.3],[-8.4,-3.3,-2.1],[-7.9,-3.6,-0.2],[-4.2,-2.4,-1.1],[-7.1,-3.1,-0.7]],
+    // North NJ (070) → Chicago, IL (606)
+    [[10.6,7.5,1.0],[7.0,4.6,1.7],[9.6,7.4,1.9],[10.5,7.5,2.0],[7.6,6.7,2.6],[8.5,5.9,0.8],[11.3,7.9,0.8],[8.2,5.7,2.2],[8.6,5.3,0.3],[6.1,4.6,2.3],[6.5,4.9,1.5],[5.9,6.8,0.9],[9.5,7.0,2.1],[12.7,7.1,1.9],[10.7,5.0,1.8],[5.1,4.5,1.4],[8.8,6.4,1.0],[10.1,4.8,2.5],[5.1,7.7,1.5],[8.5,6.5,0.8],[12.5,7.2,1.5],[6.5,6.9,0.3],[5.0,5.3,0.3],[8.3,6.7,1.5],[6.2,6.9,1.4],[6.5,6.0,0.7],[8.9,7.2,0.6],[11.1,6.6,1.9],[7.8,7.2,2.4],[6.1,4.3,1.0]],
+    // Chicago, IL (606) → North NJ (070)
+    [[-10.5,-5.7,-3.5],[-8.5,-5.6,-4.5],[-7.1,-5.3,-4.3],[-12.7,-5.3,-3.8],[-9.4,-6.4,-5.3],[-11.2,-8.7,-3.3],[-12.2,-8.0,-4.2],[-12.5,-7.5,-3.7],[-11.4,-4.9,-4.2],[-11.4,-7.6,-3.3],[-12.5,-4.2,-4.2],[-8.4,-5.0,-4.7],[-14.7,-6.2,-3.4],[-12.1,-5.9,-3.6],[-9.7,-4.2,-3.9],[-8.9,-7.4,-5.2],[-10.5,-5.5,-5.2],[-9.9,-5.3,-5.3],[-7.4,-6.3,-3.5],[-15.1,-6.8,-4.0],[-13.9,-6.3,-4.2],[-10.4,-6.1,-4.5],[-9.7,-6.1,-5.4],[-8.6,-3.9,-5.4],[-12.7,-7.5,-5.1],[-9.7,-6.8,-4.8],[-12.8,-9.1,-4.4],[-12.6,-8.2,-3.3],[-10.9,-3.9,-4.7],[-7.1,-6.1,-3.2]],
+    // Los Angeles, CA (900) → Dallas-Fort Worth, TX (752)
+    [[14.8,9.2,5.1],[17.5,10.6,5.2],[15.6,10.9,5.1],[17.4,7.2,4.9],[14.5,10.7,5.4],[20.3,12.3,6.0],[18.5,13.1,5.5],[15.9,9.2,5.8],[12.8,10.3,4.5],[15.1,10.2,4.3],[15.4,7.2,4.8],[17.9,8.7,4.5],[16.9,11.1,6.4],[19.8,9.4,5.6],[14.6,10.8,5.7],[13.5,7.8,6.6],[12.6,8.9,5.3],[17.9,9.2,5.1],[16.1,10.6,5.0],[19.1,12.0,5.0],[18.0,10.8,5.7],[12.4,9.3,5.7],[17.6,8.0,4.9],[17.0,9.7,4.5],[17.4,8.7,5.7],[13.3,8.0,5.5],[19.7,11.2,5.0],[17.2,11.2,4.8],[18.2,8.5,6.4],[16.7,9.7,4.7]],
+    // Dallas-Fort Worth, TX (752) → Los Angeles, CA (900)
+    [[-0.5,-4.2,1.3],[-0.7,-0.8,1.4],[-2.2,-2.7,-0.4],[-2.4,-3.8,1.8],[-3.0,-1.7,2.0],[-4.9,-4.2,0.7],[0.6,-3.1,0.8],[-2.7,-3.0,1.9],[0.3,-2.1,0.9],[-3.7,-3.3,0.8],[-4.2,-0.7,-0.2],[1.0,-2.0,1.3],[0.3,-4.3,0.1],[-0.9,-4.4,0.5],[-4.1,-3.9,1.2],[-3.7,-3.5,0.9],[-0.6,-1.0,1.9],[-0.5,-2.3,0.0],[-2.2,-2.7,1.1],[0.7,-4.4,0.5],[-4.2,-3.9,1.5],[-1.8,-2.0,1.7],[-4.4,-0.8,1.6],[1.1,-1.8,0.6],[-0.7,-2.0,1.8],[-4.0,-3.2,1.7],[-4.0,-1.6,0.2],[-2.7,-4.8,-0.4],[0.7,-1.9,1.3],[-1.3,-3.4,1.0]],
+    // Atlanta, GA (303) → Orlando, FL (328)
+    [[2.4,-0.7,-0.1],[-1.8,0.4,0.3],[-2.1,-1.5,-0.6],[-1.5,-1.8,0.6],[0.8,1.7,0.2],[-2.8,-0.7,-0.7],[-2.2,1.3,0.3],[1.3,-1.7,-1.2],[2.4,0.5,0.3],[0.9,-1.8,-0.9],[-0.3,1.9,-0.1],[-1.8,1.5,-0.5],[-2.9,-1.7,-0.2],[-0.7,1.4,-0.4],[0.4,1.1,1.1],[2.6,0.3,1.2],[2.2,-1.1,-0.3],[-0.9,0.4,0.7],[0.5,0.2,-0.7],[1.9,-1.5,0.5],[0.1,1.2,-0.1],[1.7,1.8,0.9],[0.5,0.9,0.7],[-2.1,-0.4,0.4],[1.3,0.8,0.9],[-1.3,1.3,0.4],[2.7,1.1,0.7],[0.9,1.2,-0.8],[1.5,-0.5,0.8],[-2.5,-1.1,-0.6]],
+    // Orlando, FL (328) → Atlanta, GA (303)
+    [[-12.6,-12.8,0.3],[-13.0,-13.1,0.4],[-10.8,-12.0,0.1],[-9.6,-11.2,0.0],[-13.5,-10.0,0.8],[-15.6,-13.8,-0.2],[-16.7,-13.4,-0.4],[-9.8,-12.0,-1.2],[-14.3,-13.3,-1.6],[-11.6,-10.3,-0.1],[-13.6,-12.6,-0.3],[-12.7,-12.4,-0.2],[-15.1,-14.5,-0.9],[-12.3,-12.9,-1.6],[-14.9,-13.7,-0.9],[-13.7,-12.6,0.0],[-12.3,-11.4,-0.2],[-13.0,-13.7,0.0],[-11.3,-13.5,-0.9],[-15.7,-16.1,-0.1],[-14.0,-14.6,-1.4],[-13.8,-12.6,-1.4],[-11.3,-11.0,0.3],[-9.9,-11.8,-0.1],[-9.6,-11.6,0.4],[-11.5,-10.0,-1.2],[-17.9,-16.1,-1.6],[-13.1,-15.7,-0.1],[-10.1,-13.0,-0.7],[-12.2,-13.6,-0.2]],
+  ];
+
+  function tier(rev) {
+    if (rev >=  10) return 'tier-pos2';
+    if (rev >=   3) return 'tier-pos1';
+    if (rev >   -3) return 'tier-zero';
+    if (rev >  -10) return 'tier-neg1';
+    return 'tier-neg2';
+  }
+  function fmtPct(n) {
+    const sign = n > 0 ? '+' : (n < 0 ? '' : '');
+    return sign + n.toFixed(1) + '%';
+  }
+
+  function renderCalendar(mode) {
+    const labels = mode === 'daily' ? DAY_LABELS : MONTH_LABELS;
+    const data   = mode === 'daily' ? DAILY_DATA : MONTHLY_DATA;
+
+    const visibleColIdx = labels
+      .map((l, i) => ({ l, i }))
+      .filter(x => colInRange(x.l, mode))
+      .map(x => x.i);
+    const visibleLabels = visibleColIdx.map(i => labels[i]);
+
+    document.getElementById('calHead').innerHTML =
+      `<th class="cal-corner">Route</th>` +
+      visibleLabels.map(l => `<th>${esc(l)}</th>`).join('');
+
+    const visibleRowIdx = CAL_ROUTES
+      .map((r, i) => ({ r, i }))
+      .filter(x => calRouteMatches(x.r))
+      .map(x => x.i);
+
+    const body = document.getElementById('calBody');
+
+    if (!visibleRowIdx.length) {
+      body.innerHTML =
+        `<tr><th class="cal-empty-th">No matching routes for the current filters.</th>` +
+        visibleLabels.map(() => `<td></td>`).join('') + `</tr>`;
+      return;
+    }
+    if (!visibleColIdx.length) {
+      body.innerHTML =
+        `<tr><th class="cal-empty-th">No dates match the current range.</th></tr>`;
+      return;
+    }
+
+    body.innerHTML = visibleRowIdx.map(i => {
+      const route = CAL_ROUTES[i];
+      const cells = visibleColIdx.map(ci => {
+        const [rev, units, price] = data[i][ci];
+        const cls = tier(rev);
+        return `<td class="${cls}">
+          <div class="cell-rev">${fmtPct(rev)}</div>
+          <div class="cell-meta">
+            <span>U ${fmtPct(units)}</span>
+            <span class="pipe" aria-hidden="true">|</span>
+            <span>P ${fmtPct(price)}</span>
+          </div>
+        </td>`;
+      }).join('');
+      return `<tr><th class="cal-route">${esc(route)}</th>${cells}</tr>`;
+    }).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Filters (origin / destination / lane / date range)
+     ════════════════════════════════════════════════════════════ */
+
+  const filters = {
+    origin: 'all',
+    destination: 'all',
+    lane: 'all',
+    dateRange: { start: null, end: null },
+  };
+
+  function uniqueSorted(arr) {
+    return [...new Set(arr)].sort((a, b) => a.localeCompare(b));
+  }
+
+  function buildFilterOptions() {
+    const origins      = uniqueSorted(ROWS.map(r => r.origin));
+    const destinations = uniqueSorted(ROWS.map(r => r.dest));
+    const lanes        = uniqueSorted(ROWS.map(r => `${r.origin} → ${r.dest}`));
+
+    const fill = (key, allLabel, items) => {
+      const sel = document.querySelector(`[data-filter="${key}"]`);
+      sel.innerHTML =
+        `<option value="all">${esc(allLabel)}</option>` +
+        items.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    };
+    fill('origin',      'All Origins',      origins);
+    fill('destination', 'All Destinations', destinations);
+    fill('lane',        'All Lanes',        lanes);
+  }
+
+  function rowMatches(row) {
+    if (filters.origin      !== 'all' && row.origin !== filters.origin) return false;
+    if (filters.destination !== 'all' && row.dest   !== filters.destination) return false;
+    if (filters.lane        !== 'all' && `${row.origin} → ${row.dest}` !== filters.lane) return false;
+    const { start, end } = filters.dateRange;
+    if (start || end) {
+      const rd = parseListDate(row.date);
+      if (rd) {
+        if (start && rd < startOfDay(start)) return false;
+        if (end   && rd > endOfDay(end))     return false;
+      }
+    }
+    return true;
+  }
+  function calRouteMatches(routeStr) {
+    const m = routeStr.match(/^(.+?)\s*→\s*(.+)$/);
+    if (!m) return true;
+    const origin = m[1], dest = m[2];
+    if (filters.origin      !== 'all' && origin !== filters.origin) return false;
+    if (filters.destination !== 'all' && dest   !== filters.destination) return false;
+    if (filters.lane        !== 'all' && routeStr !== filters.lane) return false;
+    return true;
+  }
+
+  function applyFilters() {
+    document.querySelectorAll('.filter-pill[data-filter]').forEach(sel => {
+      sel.classList.toggle('active', sel.value !== 'all');
+    });
+    updateDateTrigger();
+
+    const anyActive =
+      filters.origin      !== 'all' ||
+      filters.destination !== 'all' ||
+      filters.lane        !== 'all' ||
+      !!(filters.dateRange.start || filters.dateRange.end);
+    document.getElementById('filterClear').hidden = !anyActive;
+
+    renderList();
+    const activeMode = document.querySelector('#modeToggle button.active');
+    renderCalendar(activeMode ? activeMode.dataset.mode : 'monthly');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Wiring
+     ════════════════════════════════════════════════════════════ */
+
+  function wireToggle(rootId, onChange) {
+    const root = document.getElementById(rootId);
+    root.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn || btn.classList.contains('active')) return;
+      root.querySelectorAll('button').forEach(b => {
+        b.classList.toggle('active', b === btn);
+        b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+      });
+      onChange(btn.dataset);
+    });
+  }
+
+  wireToggle('viewToggle', ({ view }) => {
+    document.getElementById('listView').hidden = (view !== 'list');
+    document.getElementById('calView').hidden  = (view !== 'calendar');
+  });
+
+  wireToggle('modeToggle', ({ mode }) => {
+    renderCalendar(mode);
+  });
+
+  document.getElementById('filterGroup').addEventListener('change', e => {
+    const sel = e.target.closest('.filter-pill');
+    if (!sel) return;
+    filters[sel.dataset.filter] = sel.value;
+    applyFilters();
+  });
+  document.getElementById('filterClear').addEventListener('click', () => {
+    filters.origin = 'all';
+    filters.destination = 'all';
+    filters.lane = 'all';
+    filters.dateRange = { start: null, end: null };
+    document.querySelectorAll('.filter-pill[data-filter]').forEach(sel => { sel.value = 'all'; });
+    applyFilters();
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     Date-range picker
+     ════════════════════════════════════════════════════════════ */
+
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const MONTHS_LONG  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOWS_SHORT   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function endOfDay(d)   { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999); }
+  function sameDay(a, b) { return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  function fmtShort(d)   { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+
+  // Parse a list-row date "10/24" — every list row is dated Fri Oct 24, 2025.
+  function parseListDate(s) {
+    const m = /^(\d{1,2})\/(\d{1,2})$/.exec(s);
+    if (!m) return null;
+    return new Date(2025, +m[1] - 1, +m[2]);
+  }
+  // Parse a calendar monthly label "Nov-25" or "Nov 25" (tolerant of either separator).
+  function parseMonthLabel(s) {
+    const m = /^([A-Za-z]{3,9})[\s-](\d{2})$/.exec(s);
+    if (!m) return null;
+    const mi = MONTHS_SHORT.indexOf(m[1].slice(0, 3));
+    if (mi < 0) return null;
+    const yy = +m[2];
+    const year = yy < 50 ? 2000 + yy : 1900 + yy;
+    return new Date(year, mi, 1);
+  }
+  // Parse a daily label "Mon 03/02" — all daily entries are 2026.
+  function parseDayLabel(s) {
+    const m = /^[A-Za-z]{3}\s+(\d{1,2})\/(\d{1,2})$/.exec(s);
+    if (!m) return null;
+    return new Date(2026, +m[1] - 1, +m[2]);
+  }
+
+  function colInRange(label, mode) {
+    const r = filters.dateRange;
+    if (!r.start && !r.end) return true;
+    let colStart, colEnd;
+    if (mode === 'daily') {
+      const d = parseDayLabel(label);
+      if (!d) return true;
+      colStart = startOfDay(d);
+      colEnd   = endOfDay(d);
+    } else {
+      const d = parseMonthLabel(label);
+      if (!d) return true;
+      colStart = startOfDay(d);
+      colEnd   = endOfDay(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+    }
+    if (r.end   && colStart > endOfDay(r.end))   return false;
+    if (r.start && colEnd   < startOfDay(r.start)) return false;
+    return true;
+  }
+
+  // Picker state + DOM
+  let popover = null;
+  let popoverOpen = false;
+  const picker = { start: null, end: null, hover: null };
+  let viewMonth = (() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1); })();
+
+  function updateDateTrigger() {
+    const trigger = document.getElementById('dateRangeTrigger');
+    const label   = document.getElementById('dateRangeLabel');
+    const r = filters.dateRange;
+    if (r.start && r.end) {
+      label.textContent = fmtShort(r.start) + ' → ' + fmtShort(r.end);
+    } else {
+      label.textContent = 'All Dates';
+    }
+    trigger.classList.toggle('active', !!(r.start || r.end));
+  }
+
+  function rangeBounds() {
+    if (!picker.start) return [null, null];
+    let a = picker.start;
+    let b = picker.end || (picker.hover && !picker.end ? picker.hover : null);
+    if (!b) return [a, null];
+    if (a > b) { const t = a; a = b; b = t; }
+    return [a, b];
+  }
+  function isStart(d)   { const [a] = rangeBounds(); return a && sameDay(d, a); }
+  function isEnd(d)     { const b = rangeBounds()[1]; return b && sameDay(d, b); }
+  function isInRange(d) {
+    const [a, b] = rangeBounds();
+    if (!a || !b) return false;
+    return d >= a && d <= b;
+  }
+
+  function buildPopover() {
+    if (popover) return;
+    popover = document.createElement('div');
+    popover.className = 'dp-popover';
+    popover.id = 'dateRangePopover';
+    popover.setAttribute('role', 'dialog');
+    popover.setAttribute('aria-label', 'Select date range');
+    popover.hidden = true;
+    popover.innerHTML = `
+      <div class="dp-months">
+        <div class="dp-month">
+          <div class="dp-month-header">
+            <button class="dp-nav-btn" data-nav="prev" type="button" aria-label="Previous month">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="7,2 3,6 7,10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="dp-month-label" data-label="left"></div>
+            <span></span>
+          </div>
+          <div class="dp-grid" data-grid="left"></div>
+        </div>
+        <div class="dp-month">
+          <div class="dp-month-header">
+            <span></span>
+            <div class="dp-month-label" data-label="right"></div>
+            <button class="dp-nav-btn" data-nav="next" type="button" aria-label="Next month">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="5,2 9,6 5,10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <div class="dp-grid" data-grid="right"></div>
+        </div>
+      </div>
+      <div class="dp-footer">
+        <div class="dp-status" id="dpStatus">Select start date</div>
+        <div class="dp-actions">
+          <button class="dp-btn dp-btn-ghost"   id="dpClear" type="button">Clear</button>
+          <button class="dp-btn dp-btn-primary" id="dpApply" type="button" disabled>Apply</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(popover);
+
+    popover.addEventListener('click', e => {
+      const nav = e.target.closest('[data-nav]');
+      if (nav) { shiftMonths(nav.dataset.nav === 'prev' ? -1 : 1); return; }
+      const dayBtn = e.target.closest('[data-date]');
+      if (dayBtn) { onDayClick(new Date(+dayBtn.dataset.date)); return; }
+    });
+    popover.querySelector('#dpClear').addEventListener('click', clearPickerSelection);
+    popover.querySelector('#dpApply').addEventListener('click', applyPicker);
+    popover.addEventListener('mouseover', e => {
+      const dayBtn = e.target.closest('[data-date]');
+      if (!dayBtn) return;
+      if (picker.start && !picker.end) {
+        const d = new Date(+dayBtn.dataset.date);
+        if (!sameDay(picker.hover, d)) {
+          picker.hover = d;
+          renderPicker();
+        }
+      }
+    });
+    popover.addEventListener('mouseleave', () => {
+      if (picker.hover) { picker.hover = null; renderPicker(); }
+    });
+  }
+
+  function renderGrid(side, year, month) {
+    const grid  = popover.querySelector(`[data-grid="${side}"]`);
+    const label = popover.querySelector(`[data-label="${side}"]`);
+    label.textContent = MONTHS_LONG[month] + ' ' + year;
+
+    let html = DOWS_SHORT.map(d => `<div class="dp-dow">${d}</div>`).join('');
+    const first = new Date(year, month, 1);
+    const startOff = first.getDay();
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(year, month, 1 - startOff + i);
+      const cls = ['dp-day'];
+      if (d.getMonth() !== month) cls.push('out-of-month');
+      if (isStart(d))   cls.push('is-start');
+      if (isEnd(d))     cls.push('is-end');
+      if (isInRange(d)) cls.push('in-range');
+      html += `<button type="button" class="${cls.join(' ')}" data-date="${d.getTime()}" aria-label="${fmtShort(d)}"><span class="dp-day-num">${d.getDate()}</span></button>`;
+    }
+    grid.innerHTML = html;
+  }
+
+  function renderPicker() {
+    const ly = viewMonth.getFullYear(), lm = viewMonth.getMonth();
+    const right = new Date(ly, lm + 1, 1);
+    renderGrid('left',  ly, lm);
+    renderGrid('right', right.getFullYear(), right.getMonth());
+
+    const status = document.getElementById('dpStatus');
+    if (!picker.start)      status.textContent = 'Select start date';
+    else if (!picker.end)   status.textContent = 'Select end date';
+    else                    status.textContent = fmtShort(picker.start) + ' → ' + fmtShort(picker.end);
+
+    document.getElementById('dpApply').disabled = !(picker.start && picker.end);
+  }
+
+  function onDayClick(d) {
+    d = startOfDay(d);
+    if (!picker.start || (picker.start && picker.end)) {
+      picker.start = d; picker.end = null; picker.hover = null;
+    } else if (d < picker.start) {
+      picker.start = d; picker.end = null;
+    } else if (sameDay(d, picker.start)) {
+      // single-day range
+      picker.end = d;
+    } else {
+      picker.end = d; picker.hover = null;
+    }
+    renderPicker();
+  }
+  function shiftMonths(delta) {
+    viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + delta, 1);
+    renderPicker();
+  }
+  function clearPickerSelection() {
+    picker.start = null; picker.end = null; picker.hover = null;
+    renderPicker();
+  }
+  function applyPicker() {
+    if (!picker.start || !picker.end) return;
+    filters.dateRange = { start: picker.start, end: picker.end };
+    closePopover();
+    applyFilters();
+  }
+
+  function positionPopover() {
+    const trigger = document.getElementById('dateRangeTrigger');
+    const tr = trigger.getBoundingClientRect();
+    // align the popover's left to the trigger's left, but constrain to viewport
+    const pw = popover.offsetWidth;
+    let left = tr.left;
+    const margin = 8;
+    if (left + pw + margin > window.innerWidth) left = window.innerWidth - pw - margin;
+    if (left < margin) left = margin;
+    popover.style.top  = (tr.bottom + 6) + 'px';
+    popover.style.left = left + 'px';
+  }
+
+  function openPopover() {
+    buildPopover();
+    // Seed picker from existing filter
+    picker.start = filters.dateRange.start;
+    picker.end   = filters.dateRange.end;
+    picker.hover = null;
+    // Snap view to the start date if set, else current month
+    if (picker.start) {
+      viewMonth = new Date(picker.start.getFullYear(), picker.start.getMonth(), 1);
+    } else {
+      const t = new Date();
+      viewMonth = new Date(t.getFullYear(), t.getMonth(), 1);
+    }
+    popover.hidden = false;
+    popoverOpen = true;
+    renderPicker();
+    positionPopover();
+    document.addEventListener('keydown',  onPopoverKey);
+    document.addEventListener('mousedown', onPopoverOutside, true);
+    window.addEventListener('resize', closePopover);
+    window.addEventListener('scroll', closePopover, true);
+  }
+  function closePopover() {
+    if (!popover || !popoverOpen) return;
+    popover.hidden = true;
+    popoverOpen = false;
+    document.removeEventListener('keydown',  onPopoverKey);
+    document.removeEventListener('mousedown', onPopoverOutside, true);
+    window.removeEventListener('resize', closePopover);
+    window.removeEventListener('scroll', closePopover, true);
+  }
+  function onPopoverKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); closePopover(); }
+  }
+  function onPopoverOutside(e) {
+    const trigger = document.getElementById('dateRangeTrigger');
+    if (popover.contains(e.target) || trigger.contains(e.target)) return;
+    closePopover();
+  }
+
+  document.getElementById('dateRangeTrigger').addEventListener('click', e => {
+    e.stopPropagation();
+    if (popoverOpen) closePopover(); else openPopover();
+  });
+
+  // Initial render
+  buildFilterOptions();
+  applyFilters();
+</script>
+</body>
+</html>
