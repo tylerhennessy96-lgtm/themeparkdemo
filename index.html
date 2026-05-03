@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pricing — Dynamica SmartRents</title>
+  <title>Pricing — Dynamica SmartRates</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     /* SmartRates pricing table — scoped to .srt so styles.css stays untouched */
@@ -163,12 +163,253 @@
     th.sort-asc .sort-ind .sa-down,
     th.sort-desc .sort-ind .sa-up { display: none; }
 
+    /* ── Action band + cell ── */
+    table.srt thead tr.bands th.band-action {
+      background: #eef0f5;
+      color: #475569;
+    }
+
+    table.srt tbody td.action-cell {
+      padding: 6px 12px;
+      position: relative;
+      vertical-align: middle;
+      white-space: nowrap;
+      border-left: 1px solid var(--border);
+    }
+    .action-cell-inner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .action-corner {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 1.5px var(--surface);
+      display: none;
+      pointer-events: none;
+    }
+
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1.5px solid;
+      background: var(--surface);
+      cursor: pointer;
+      padding: 0;
+      transition: background .12s, border-color .12s, color .12s, opacity .12s;
+      flex-shrink: 0;
+    }
+    .action-btn svg { display: block; }
+    .act-accept { color: #16a34a; border-color: #bbf7d0; }
+    .act-accept:hover { background: #dcfce7; border-color: #16a34a; }
+    .act-accept.solid { background: #16a34a; color: #fff; border-color: #16a34a; }
+    .act-reject { color: #dc2626; border-color: #fecaca; }
+    .act-reject:hover { background: #fee2e2; border-color: #dc2626; }
+    .act-reject.solid { background: #dc2626; color: #fff; border-color: #dc2626; }
+    .action-btn.dim { opacity: 0.42; }
+
+    .act-notes {
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-left: 2px;
+      position: relative;
+      flex-shrink: 0;
+      padding: 0;
+      transition: color .12s, background .12s;
+    }
+    .act-notes:hover { color: var(--accent); background: rgba(232,0,125,0.08); }
+    .act-notes svg { display: block; }
+    .act-notes .note-dot {
+      position: absolute;
+      top: 1px;
+      right: 1px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: none;
+    }
+    .act-notes.has-note .note-dot { display: block; }
+    .act-notes.has-note { color: var(--accent); }
+
+    .action-badge {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 999px;
+      margin-right: 6px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .action-badge.b-accepted   { background: #dcfce7; color: #166534; }
+    .action-badge.b-rejected   { background: #fee2e2; color: #991b1b; }
+    .action-badge.b-overridden { background: #e0e7ff; color: #3730a3; }
+
+    /* Row state tints — only on neutral cells, so cell-pos/cell-neg keep their colors */
+    table.srt tbody tr.row-accepted   td:not(.cell-pos):not(.cell-neg) { background: #f1faf3; }
+    table.srt tbody tr.row-rejected   td:not(.cell-pos):not(.cell-neg) { background: #fdf3f3; }
+    table.srt tbody tr.row-overridden td:not(.cell-pos):not(.cell-neg) { background: #f3f4ff; }
+    table.srt tbody tr.row-accepted:hover   td:not(.cell-pos):not(.cell-neg) { background-color: #e7f4ec; }
+    table.srt tbody tr.row-rejected:hover   td:not(.cell-pos):not(.cell-neg) { background-color: #f7e6e6; }
+    table.srt tbody tr.row-overridden:hover td:not(.cell-pos):not(.cell-neg) { background-color: #e8eafc; }
+
+    /* Action corner dot per state */
+    .action-cell.state-accepted   .action-corner { display: block; background: #16a34a; }
+    .action-cell.state-rejected   .action-corner { display: block; background: #dc2626; }
+    .action-cell.state-overridden .action-corner { display: block; background: #6366f1; }
+
+    /* Editable Rec. price cell */
+    table.srt tbody td.rec-cell {
+      cursor: text;
+      position: relative;
+    }
+    table.srt tbody td.rec-cell:hover {
+      outline: 1px dashed var(--accent);
+      outline-offset: -2px;
+    }
+    .rec-edit-icon {
+      display: none;
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      pointer-events: none;
+    }
+    table.srt tbody td.rec-cell:hover .rec-edit-icon { display: block; }
+    table.srt tbody td.rec-cell.editing {
+      outline: 1.5px solid var(--accent);
+      outline-offset: -1px;
+      padding: 0;
+    }
+    input.rec-input {
+      width: 100%;
+      height: 28px;
+      box-sizing: border-box;
+      border: none;
+      padding: 0 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      background: var(--surface);
+      outline: none;
+      color: var(--text-primary);
+    }
+
+    /* Chart hover tooltips (Booking + Price curves) */
+    .dm-chart-area { position: relative; }
+    .chart-tooltip {
+      position: absolute;
+      z-index: 50;
+      background: var(--nav-bg);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      line-height: 1.45;
+      box-shadow: var(--shadow-lg);
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      min-width: 150px;
+    }
+    .chart-tooltip-header {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: rgba(255,255,255,0.96);
+      letter-spacing: 0.01em;
+    }
+    .chart-tooltip-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.82);
+      padding: 1px 0;
+    }
+    .chart-tooltip-row .swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      transition: width .08s, height .08s;
+    }
+    .chart-tooltip-row .label  { flex: 1; }
+    .chart-tooltip-row .value  { font-variant-numeric: tabular-nums; font-weight: 500; }
+    .chart-tooltip-row.emphasized {
+      font-weight: 700;
+      color: #fff;
+    }
+    .chart-tooltip-row.emphasized .swatch {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Notes popover */
+    .notes-popover {
+      position: fixed;
+      z-index: 600;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      padding: 10px;
+      width: 240px;
+      font-family: 'Inter', sans-serif;
+    }
+    .notes-popover textarea {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 60px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      color: var(--text-primary);
+      padding: 8px 10px;
+      border: 1px solid var(--border-mid);
+      border-radius: 6px;
+      outline: none;
+      resize: vertical;
+      background: var(--surface);
+    }
+    .notes-popover textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(232,0,125,0.10);
+    }
+    .notes-popover-hint {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
     /* Group separator: left border on first cell of each band */
     table.srt thead tr.cols th.sep,
     table.srt tbody td.sep { border-left: 1px solid var(--border); }
 
     /* ── Body ── */
     table.srt tbody tr { transition: background .1s; }
+    table.srt tbody tr[data-row-key] { cursor: pointer; }
     table.srt tbody td {
       padding: 7px 14px;
       vertical-align: middle;
@@ -781,9 +1022,9 @@
 
     /* ── Calendar cell click affordance + decision indicators ── */
     table.cal-table tbody td[data-row] { cursor: pointer; }
-    table.cal-table tbody td.decided-confirm,
+    table.cal-table tbody td.decided-accept,
     table.cal-table tbody td.decided-reject { position: relative; }
-    table.cal-table tbody td.decided-confirm::after,
+    table.cal-table tbody td.decided-accept::after,
     table.cal-table tbody td.decided-reject::after {
       content: '';
       position: absolute;
@@ -795,8 +1036,8 @@
       z-index: 1;
       box-shadow: 0 0 0 1.5px var(--surface);
     }
-    table.cal-table tbody td.decided-confirm::after { background: #16a34a; }
-    table.cal-table tbody td.decided-reject::after  { background: #dc2626; }
+    table.cal-table tbody td.decided-accept::after { background: #16a34a; }
+    table.cal-table tbody td.decided-reject::after { background: #dc2626; }
 
     /* ── Detail modal ── */
     .dm-backdrop {
@@ -1181,10 +1422,10 @@
       </svg>
     </button>
     <a href="index.html" style="display:flex;align-items:center;gap:8px;margin-right:32px;text-decoration:none;flex-shrink:0;">
-      <img src="engine_logo (2).png" style="height:28px;width:auto;display:block;" alt="Dynamica SmartRents">
+      <img src="engine_logo (2).png" style="height:28px;width:auto;display:block;" alt="Dynamica SmartRates">
       <div style="display:flex;flex-direction:column;line-height:1;gap:2px;">
         <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;color:#ffffff;text-transform:uppercase;">DYNAMICA</span>
-        <span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:400;letter-spacing:0.02em;color:rgba(255,255,255,0.55);">SmartRents</span>
+        <span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:400;letter-spacing:0.02em;color:rgba(255,255,255,0.55);">SmartRates</span>
       </div>
     </a>
   </nav>
@@ -1229,6 +1470,7 @@
             <th colspan="7" class="band-bookings">Bookings to date</th>
             <th colspan="7" class="band-forecast">Forecast</th>
             <th colspan="4" class="band-price">Price recommendations</th>
+            <th colspan="1" class="band-action">Action</th>
           </tr>
           <tr class="cols">
             <th class="sortable" data-sort-key="date" data-sort-type="text"><span class="th-inner"><span class="th-text">Date</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
@@ -1259,6 +1501,7 @@
             <th class="num sortable" data-sort-key="pr.ly" data-sort-type="num"><span class="th-inner"><span class="th-text">LY price <span class="sub">per LDM ($)</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="pr.rec" data-sort-type="num"><span class="th-inner"><span class="th-text">Rec. price <span class="sub">per LDM ($)</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="pr.a" data-sort-type="text"><span class="th-inner"><span class="th-text">Rec. Action</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="action-col">Action</th>
           </tr>
         </thead>
         <tbody id="srt-body"></tbody>
@@ -1444,12 +1687,24 @@
       `<td class="num">${DASH}</td>`,
       `<td class="num">${DASH}</td>`,
       `<td>${DASH}</td>`,
+
+      `<td class="action-cell"><span class="action-corner"></span></td>`,
     ].join('');
     return `<tr class="closed">${cells}</tr>`;
   }
 
   function renderOpen(row) {
     const bk = row.bk, fc = row.fc, pr = row.pr;
+    const key = rowKey(row);
+    const st  = rowStates[key] || {};
+    const recDisplay = st.overrideValue != null
+      ? '$' + Math.round(st.overrideValue).toLocaleString('en-US')
+      : pr.rec;
+    const recNumeric = st.overrideValue != null ? st.overrideValue : parseSortNum(pr.rec);
+    const curNumeric = parseSortNum(pr.c);
+    const recCls = recNumeric == null || curNumeric == null
+      ? ''
+      : (recNumeric > curNumeric ? ' cell-pos' : (recNumeric < curNumeric ? ' cell-neg' : ''));
 
     const bkUtilLYCls = classFor(pctSign(bk.utLY));
     const bkPLYCls    = classFor(pctSign(bk.pLY));
@@ -1457,11 +1712,12 @@
     const fcUtilLYCls = classFor(pctSign(fc.utLY));
     const fcPLYCls    = classFor(pctSign(fc.pLY));
     const fcRLYCls    = classFor(pctSign(fc.rLY));
-    const recCls      = recClass(pr.rec, pr.c);
 
     const optsHtml = ACTIONS.map(o =>
       `<option value="${o}"${o === pr.a ? ' selected' : ''}>${o}</option>`
     ).join('');
+
+    const trCls = st.state ? ` row-${st.state}` : '';
 
     const cells = [
       `<td>${esc(row.date)}</td>`,
@@ -1490,18 +1746,48 @@
 
       `<td class="num sep">${esc(pr.c)}</td>`,
       `<td class="num">${esc(pr.ly)}</td>`,
-      `<td class="num${recCls}">${esc(pr.rec)}</td>`,
+      `<td class="num rec-cell${recCls}" data-row-key="${esc(key)}"><span class="rec-edit-icon" aria-hidden="true">${PENCIL_SVG}</span><span class="rec-value">${esc(recDisplay)}</span></td>`,
       `<td><select class="rec-action" aria-label="Recommended action">${optsHtml}</select></td>`,
+
+      renderActionCell(key, st),
     ].join('');
-    return `<tr>${cells}</tr>`;
+    return `<tr data-row-key="${esc(key)}"${trCls ? ` class="${trCls.trim()}"` : ''}>${cells}</tr>`;
   }
+
+  function renderActionCell(key, st) {
+    const stateCls = st.state ? ` state-${st.state}` : '';
+    const acceptSolid = st.state === 'accepted'  ? ' solid' : '';
+    const rejectSolid = st.state === 'rejected'  ? ' solid' : '';
+    const acceptDim   = st.state === 'rejected'  ? ' dim'   : '';
+    const rejectDim   = st.state === 'accepted'  ? ' dim'   : '';
+    const noteCls     = st.note ? ' has-note' : '';
+    const badgeHtml   = st.state
+      ? `<span class="action-badge b-${st.state}">${st.state.charAt(0).toUpperCase() + st.state.slice(1)}</span>`
+      : '';
+    return (
+      `<td class="action-cell${stateCls}" data-row-key="${esc(key)}">` +
+        `<span class="action-corner"></span>` +
+        `<div class="action-cell-inner">` +
+          badgeHtml +
+          `<button class="action-btn act-accept${acceptSolid}${acceptDim}" type="button" aria-label="Accept" data-act="accept">${CHECK_SVG}</button>` +
+          `<button class="action-btn act-reject${rejectSolid}${rejectDim}" type="button" aria-label="Reject" data-act="reject">${CROSS_SVG}</button>` +
+          `<button class="act-notes${noteCls}" type="button" aria-label="Add note" data-act="notes">${NOTE_SVG}<span class="note-dot"></span></button>` +
+        `</div>` +
+      `</td>`
+    );
+  }
+
+  const CHECK_SVG = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.7 2.5L11 4.5"/></svg>`;
+  const CROSS_SVG = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="4" x2="10" y2="10"/><line x1="10" y1="4" x2="4" y2="10"/></svg>`;
+  const NOTE_SVG  = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h9v6.2L8.5 12.5H2.5z"/><path d="M8.5 9h3"/><path d="M5 6h4M5 8h2.5"/></svg>`;
+  const PENCIL_SVG = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 8.5h2L8 4 6 2 1.5 6.5z"/></svg>`;
 
   function renderList() {
     const filtered = ROWS.filter(rowMatches);
     const visible = applyListSort(filtered);
     const body = document.getElementById('srt-body');
     if (!visible.length) {
-      body.innerHTML = `<tr><td colspan="25" style="padding:32px;text-align:center;color:var(--text-muted);font-style:italic;">No matching rows for the current filters.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="26" style="padding:32px;text-align:center;color:var(--text-muted);font-style:italic;">No matching rows for the current filters.</td></tr>`;
       return;
     }
     body.innerHTML = visible.map(r => r.closed ? renderClosed(r) : renderOpen(r)).join('');
@@ -1713,8 +1999,10 @@
       const cells = visibleColIdx.map(ci => {
         const [rev, units, price] = data[i][ci];
         const cls = tier(rev);
-        const decision = decisions[`${route}|${labels[ci]}`];
-        const decisionCls = decision ? ` decided-${decision === 'confirmed' ? 'confirm' : 'reject'}` : '';
+        const st = rowStates[`${route}|${labels[ci]}`];
+        const decisionCls = st && st.state === 'accepted'
+          ? ' decided-accept'
+          : (st && st.state === 'rejected' ? ' decided-reject' : '');
         return `<td class="${cls}${decisionCls}" data-row="${i}" data-col="${ci}">
           <div class="cell-rev">${fmtPct(rev)}</div>
           <div class="cell-meta">
@@ -1840,6 +2128,140 @@
     const activeMode = document.querySelector('#modeToggle button.active');
     renderCalendar(activeMode ? activeMode.dataset.mode : 'monthly');
   });
+
+  /* ── Open detail modal on List row click (anywhere except interactive controls) ── */
+  document.getElementById('srt-body').addEventListener('click', e => {
+    if (e.target.closest('[data-act]')) return;        // accept/reject/notes
+    if (e.target.closest('.rec-action')) return;       // rec action dropdown
+    if (e.target.closest('td.rec-cell')) return;       // editable rec price
+    const tr = e.target.closest('tr[data-row-key]');
+    if (!tr) return;
+    const key = tr.dataset.rowKey;
+    const row = ROWS.find(r => rowKey(r) === key);
+    if (row) openModalForRow(row);
+  });
+
+  /* ── Action column: Accept / Reject / Notes click handling ── */
+  document.getElementById('srt-body').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    e.stopPropagation();
+    const cell = btn.closest('.action-cell');
+    const key  = cell && cell.dataset.rowKey;
+    if (!key) return;
+    const act  = btn.dataset.act;
+    const st   = ensureState(key);
+
+    if (act === 'accept') {
+      st.state = st.state === 'accepted' ? undefined : 'accepted';
+    } else if (act === 'reject') {
+      st.state = st.state === 'rejected' ? undefined : 'rejected';
+    } else if (act === 'notes') {
+      openNotesPopover(btn, key);
+      return;
+    }
+    if (!st.state && st.overrideValue == null && !st.note) delete rowStates[key];
+    renderList();
+  });
+
+  /* ── Inline Rec. price editing ── */
+  document.getElementById('srt-body').addEventListener('click', e => {
+    if (e.target.closest('[data-act]')) return;       // accept/reject/notes
+    if (e.target.closest('.rec-action')) return;      // dropdown
+    const cell = e.target.closest('td.rec-cell');
+    if (!cell || cell.classList.contains('editing')) return;
+    enterRecEdit(cell);
+  });
+
+  function enterRecEdit(cell) {
+    const key = cell.dataset.rowKey;
+    const valueEl = cell.querySelector('.rec-value');
+    const current = (valueEl ? valueEl.textContent : '').replace(/[^\d.\-]/g, '');
+    cell.classList.add('editing');
+    cell.innerHTML = `<input class="rec-input" type="text" value="${esc(current)}" inputmode="decimal">`;
+    const input = cell.querySelector('.rec-input');
+    input.focus();
+    input.select();
+    let cancelled = false;
+    function commit() {
+      input.removeEventListener('blur', onBlur);
+      const raw = input.value.replace(/[^\d.\-]/g, '');
+      const n = parseFloat(raw);
+      if (cancelled || raw === '' || isNaN(n)) {
+        renderList();
+        return;
+      }
+      const st = ensureState(key);
+      st.overrideValue = n;
+      st.state = 'overridden';
+      renderList();
+    }
+    function onBlur() { commit(); }
+    input.addEventListener('blur', onBlur);
+    input.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+      else if (ev.key === 'Escape') { cancelled = true; input.blur(); }
+    });
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^\d.\-]/g, '');
+    });
+  }
+
+  /* ── Notes popover ── */
+  let notesPopover = null;
+  function closeNotesPopover() {
+    if (!notesPopover) return;
+    const { popEl, key } = notesPopover;
+    const note = popEl.querySelector('textarea').value.trim();
+    const st = ensureState(key);
+    if (note) st.note = note; else delete st.note;
+    if (!st.state && st.overrideValue == null && !st.note) delete rowStates[key];
+    popEl.remove();
+    notesPopover = null;
+    renderList();
+  }
+  function openNotesPopover(btn, key) {
+    if (notesPopover) {
+      const wasSame = notesPopover.key === key;
+      closeNotesPopover();
+      if (wasSame) return;
+    }
+    const st = rowStates[key] || {};
+    const popEl = document.createElement('div');
+    popEl.className = 'notes-popover';
+    popEl.innerHTML = `<textarea placeholder="Add a note…" rows="3">${esc(st.note || '')}</textarea><div class="notes-popover-hint">Saves on blur · Esc to close</div>`;
+    document.body.appendChild(popEl);
+    const r = btn.getBoundingClientRect();
+    let left = r.left;
+    if (left + 240 > window.innerWidth - 12) left = window.innerWidth - 252;
+    popEl.style.left = Math.max(12, left) + 'px';
+    popEl.style.top  = (r.bottom + 6) + 'px';
+    notesPopover = { popEl, key };
+    const ta = popEl.querySelector('textarea');
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+    ta.addEventListener('keydown', ev => {
+      if (ev.key === 'Escape') { ev.preventDefault(); closeNotesPopover(); }
+    });
+    ta.addEventListener('blur', () => {
+      // Defer so a same-tick refocus (e.g., from outside-click handler) can cancel the close
+      setTimeout(() => {
+        if (notesPopover && document.activeElement !== ta) closeNotesPopover();
+      }, 0);
+    });
+    setTimeout(() => {
+      document.addEventListener('mousedown', notesOutsideClick, { once: true });
+    }, 0);
+  }
+  function notesOutsideClick(ev) {
+    if (!notesPopover) return;
+    if (notesPopover.popEl.contains(ev.target)) {
+      // re-arm
+      setTimeout(() => document.addEventListener('mousedown', notesOutsideClick, { once: true }), 0);
+      return;
+    }
+    closeNotesPopover();
+  }
 
   /* ════════════════════════════════════════════════════════════
      Date-range picker
@@ -2121,7 +2543,17 @@
      Detail modal — opens on calendar cell click
      ════════════════════════════════════════════════════════════ */
 
-  const decisions = {};   // key: `${route}|${label}` → 'confirmed' | 'rejected'
+  /* Unified row/cell state: { state?: 'accepted'|'rejected'|'overridden', note?: string, overrideValue?: number }
+     Keyed by `${route}|${anchor}` where anchor is the calendar label (e.g. "Mar-26")
+     for calendar cells, or the row date (e.g. "10/24") for List rows. */
+  const rowStates = {};
+  function rowKey(row) {
+    return `${row.origin} → ${row.dest}|${row.date}`;
+  }
+  function ensureState(key) {
+    if (!rowStates[key]) rowStates[key] = {};
+    return rowStates[key];
+  }
 
   function hashStr(s) {
     let h = 2166136261 >>> 0;
@@ -2233,11 +2665,19 @@
       { d: pathD(b.forecast), color: '#0d9488' },
     ];
 
-    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    return `<svg class="chart-svg chart-booking" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"
+      data-padl="${padL}" data-padr="${padR}" data-padt="${padT}" data-padb="${padB}" data-w="${W}" data-h="${H}" data-n="${cN}">
       ${grid}
       <path d="${currentArea}" fill="rgba(96,165,250,0.18)" stroke="none"/>
       ${lines.map(l => `<path d="${l.d}" fill="none" stroke="${l.color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`).join('')}
       <path d="${currentPath}" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+      <line class="chart-guide" x1="0" y1="${padT}" x2="0" y2="${H - padB}" stroke="#9ca3af" stroke-width="1" stroke-dasharray="3 3" style="display:none" pointer-events="none"/>
+      <g class="chart-markers" style="display:none" pointer-events="none">
+        <circle r="4.5" fill="#374151" stroke="#fff" stroke-width="1.5"/>
+        <circle r="4.5" fill="#e8007d" stroke="#fff" stroke-width="1.5"/>
+        <circle r="4.5" fill="#0d9488" stroke="#fff" stroke-width="1.5"/>
+        <circle r="4.5" fill="#60a5fa" stroke="#fff" stroke-width="1.5"/>
+      </g>
       <text x="${padL}" y="${H - 8}" font-size="10" fill="#9ca3af">26-04-2025</text>
       <text x="${W - padR}" y="${H - 8}" text-anchor="end" font-size="10" fill="#9ca3af">11-04-2026</text>
     </svg>`;
@@ -2265,9 +2705,14 @@
       d += i === 0 ? `M ${x} ${y}` : ` H ${x} V ${y}`;
     });
 
-    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    return `<svg class="chart-svg chart-price" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"
+      data-padl="${padL}" data-padr="${padR}" data-padt="${padT}" data-padb="${padB}" data-w="${W}" data-h="${H}">
       ${grid}
       <path d="${d}" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="miter" stroke-linecap="butt"/>
+      <line class="chart-guide" x1="0" y1="${padT}" x2="0" y2="${H - padB}" stroke="#9ca3af" stroke-width="1" stroke-dasharray="3 3" style="display:none" pointer-events="none"/>
+      <g class="chart-markers" style="display:none" pointer-events="none">
+        <circle r="4.5" fill="#7c3aed" stroke="#fff" stroke-width="1.5"/>
+      </g>
       <text x="${padL}" y="${H - 8}" font-size="10" fill="#9ca3af">350 days</text>
       <text x="${W - padR}" y="${H - 8}" text-anchor="end" font-size="10" fill="#9ca3af">0 days</text>
     </svg>`;
@@ -2302,7 +2747,33 @@
     const [rev, units, price] = data[row][col];
     const m = mockData(route, label, rev, units, price);
 
-    modalCtx = { row, col, mode, route, label, rev, units, price, data: m };
+    modalCtx = { row, col, mode, route, label, rev, units, price, data: m, source: 'calendar' };
+    overrideMode = 'pct';
+    overrideValue = m.recommendation.defaultOverridePct;
+
+    buildModal();
+    modalRoot.innerHTML = renderModal(modalCtx);
+    modalRoot.hidden = false;
+    requestAnimationFrame(() => modalRoot.classList.add('is-open'));
+    modalOpen = true;
+    wireModalControls();
+    document.addEventListener('keydown', onModalKey);
+  }
+
+  function openModalForRow(row) {
+    const route = `${row.origin} → ${row.dest}`;
+    const label = row.date;
+    const parsePct = s => {
+      if (!s) return 0;
+      const n = parseFloat(String(s).replace(/[^\-0-9.]/g, ''));
+      return isNaN(n) ? 0 : n;
+    };
+    const rev   = parsePct(row.bk && row.bk.rLY);
+    const units = parsePct(row.bk && row.bk.utLY);
+    const price = parsePct(row.bk && row.bk.pLY);
+    const m = mockData(route, label, rev, units, price);
+
+    modalCtx = { row: -1, col: -1, mode: 'list', route, label, rev, units, price, data: m, source: 'list' };
     overrideMode = 'pct';
     overrideValue = m.recommendation.defaultOverridePct;
 
@@ -2327,7 +2798,7 @@
   }
 
   function renderModal(ctx) {
-    const { route, data: m } = ctx;
+    const { route, label, data: m } = ctx;
     const arrow = ' → ';
     const arrowIdx = route.indexOf(arrow);
     const origin = arrowIdx >= 0 ? route.slice(0, arrowIdx) : route;
@@ -2340,7 +2811,7 @@
     return `
       <div class="dm-modal" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
         <div class="dm-header">
-          <h2 class="dm-title" id="dmTitle">${esc(origin)} → ${esc(dest)}</h2>
+          <h2 class="dm-title" id="dmTitle">${esc(origin)} → ${esc(dest)}${label ? ' · ' + esc(label) : ''}</h2>
           <div class="dm-header-right">
             <span class="dm-go-live">Go live: 20/04/2026</span>
             <button class="dm-close" type="button" aria-label="Close" id="dmCloseBtn">×</button>
@@ -2473,17 +2944,194 @@
       document.getElementById('dmOverrideResult').textContent =
         '$' + Math.round(computeOverrideResult(r, overrideMode, overrideValue));
     });
+
+    // Chart hover tooltips
+    const bookingSvg = modalRoot.querySelector('.chart-booking');
+    const priceSvg   = modalRoot.querySelector('.chart-price');
+    if (bookingSvg) wireBookingTooltip(bookingSvg, modalCtx.data.booking);
+    if (priceSvg)   wirePriceTooltip(priceSvg, modalCtx.data.price);
+  }
+
+  /* ── Chart tooltip wiring ── */
+  const MONTH_NAMES_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtChartDate(d) {
+    return d.getDate() + ' ' + MONTH_NAMES_SHORT[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function wireBookingTooltip(svg, data) {
+    const container = svg.parentElement;
+    const ds = svg.dataset;
+    const W = +ds.w, H = +ds.h;
+    const padL = +ds.padl, padR = +ds.padr, padT = +ds.padt, padB = +ds.padb;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const N = data.target.length;
+    const yScale = (p) => padT + innerH * (1 - p / 60);
+
+    const guide   = svg.querySelector('.chart-guide');
+    const markersG = svg.querySelector('.chart-markers');
+    const markers = [...markersG.querySelectorAll('circle')];
+    const tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    container.appendChild(tip);
+
+    const startDate = new Date(2025, 3, 26);  // 26 Apr 2025
+    const endDate   = new Date(2026, 3, 11);  // 11 Apr 2026
+    const dateAt = (i) => new Date(startDate.getTime() + (endDate.getTime() - startDate.getTime()) * i / (N - 1));
+
+    function hide() {
+      guide.style.display = 'none';
+      markersG.style.display = 'none';
+      tip.style.display = 'none';
+    }
+    function onMove(e) {
+      const rect = container.getBoundingClientRect();
+      if (rect.width === 0) return hide();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      const sx = px * (W / rect.width);
+      const sy = py * (H / rect.height);
+      if (sx < padL || sx > W - padR || sy < padT || sy > H - padB) return hide();
+
+      const i = Math.max(0, Math.min(N - 1, Math.round((sx - padL) / innerW * (N - 1))));
+      const snapVbX = padL + innerW * (i / (N - 1));
+
+      guide.setAttribute('x1', snapVbX);
+      guide.setAttribute('x2', snapVbX);
+      guide.style.display = '';
+
+      const series = [
+        { name: 'Historic', color: '#374151', value: data.historic[i] },
+        { name: 'Target',   color: '#e8007d', value: data.target[i] },
+        { name: 'Forecast', color: '#0d9488', value: data.forecast[i] },
+        { name: 'Current',  color: '#60a5fa', value: data.current[i] },
+      ];
+      series.forEach((s, idx) => {
+        markers[idx].setAttribute('cx', snapVbX);
+        markers[idx].setAttribute('cy', yScale(s.value));
+        markers[idx].setAttribute('fill', s.color);
+      });
+      markersG.style.display = '';
+
+      let bestIdx = 0, bestDelta = Infinity;
+      series.forEach((s, idx) => {
+        const d = Math.abs(yScale(s.value) - sy);
+        if (d < bestDelta) { bestDelta = d; bestIdx = idx; }
+      });
+
+      tip.innerHTML =
+        `<div class="chart-tooltip-header">${fmtChartDate(dateAt(i))}</div>` +
+        series.map((s, idx) =>
+          `<div class="chart-tooltip-row${idx === bestIdx ? ' emphasized' : ''}">` +
+          `<span class="swatch" style="background:${s.color}"></span>` +
+          `<span class="label">${s.name}</span>` +
+          `<span class="value">${Math.round(s.value)}%</span></div>`
+        ).join('');
+      tip.style.display = 'block';
+
+      const tipR = tip.getBoundingClientRect();
+      let tx = px + 12, ty = py + 12;
+      if (tx + tipR.width > rect.width)  tx = px - tipR.width - 12;
+      if (ty + tipR.height > rect.height) ty = py - tipR.height - 12;
+      tip.style.left = Math.max(0, tx) + 'px';
+      tip.style.top  = Math.max(0, ty) + 'px';
+    }
+    container.addEventListener('mousemove', onMove);
+    container.addEventListener('mouseleave', hide);
+  }
+
+  function wirePriceTooltip(svg, steps) {
+    const container = svg.parentElement;
+    const ds = svg.dataset;
+    const W = +ds.w, H = +ds.h;
+    const padL = +ds.padl, padR = +ds.padr, padT = +ds.padt, padB = +ds.padb;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const xScale = (day) => padL + innerW * (1 - day / 350);
+    const yScale = (price) => padT + innerH * (1 - (price - 150) / 50);
+
+    const guide = svg.querySelector('.chart-guide');
+    const markersG = svg.querySelector('.chart-markers');
+    const marker = markersG.querySelector('circle');
+    const tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    container.appendChild(tip);
+
+    // Reference launch date (matches modal "Go live: 20/04/2026")
+    const goLiveDate = new Date(2026, 3, 20);
+    const dayMs = 86400000;
+
+    function hide() {
+      guide.style.display = 'none';
+      markersG.style.display = 'none';
+      tip.style.display = 'none';
+    }
+    function onMove(e) {
+      const rect = container.getBoundingClientRect();
+      if (rect.width === 0) return hide();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      const sx = px * (W / rect.width);
+      const sy = py * (H / rect.height);
+      if (sx < padL || sx > W - padR || sy < padT || sy > H - padB) return hide();
+
+      // Find nearest step by xScale
+      let bestI = 0, bestD = Infinity;
+      steps.forEach((pt, i) => {
+        const d = Math.abs(xScale(pt.day) - sx);
+        if (d < bestD) { bestD = d; bestI = i; }
+      });
+      const pt = steps[bestI];
+      const snapVbX = xScale(pt.day);
+
+      guide.setAttribute('x1', snapVbX);
+      guide.setAttribute('x2', snapVbX);
+      guide.style.display = '';
+      marker.setAttribute('cx', snapVbX);
+      marker.setAttribute('cy', yScale(pt.price));
+      markersG.style.display = '';
+
+      const date = new Date(goLiveDate.getTime() - pt.day * dayMs);
+      const pctChange = (pt.price - 175) / 25 * 17;
+      const pctTxt = (pctChange > 0 ? '+' : '') + pctChange.toFixed(1) + '%';
+      const priceTxt = '$' + Math.round(pt.price);
+
+      tip.innerHTML =
+        `<div class="chart-tooltip-header">${fmtChartDate(date)}</div>` +
+        `<div class="chart-tooltip-row"><span class="label">Days to departure</span><span class="value">${Math.round(pt.day)}</span></div>` +
+        `<div class="chart-tooltip-row"><span class="label">Price change</span><span class="value">${pctTxt}</span></div>` +
+        `<div class="chart-tooltip-row"><span class="label">Price</span><span class="value">${priceTxt}</span></div>`;
+      tip.style.display = 'block';
+
+      const tipR = tip.getBoundingClientRect();
+      let tx = px + 12, ty = py + 12;
+      if (tx + tipR.width > rect.width)  tx = px - tipR.width - 12;
+      if (ty + tipR.height > rect.height) ty = py - tipR.height - 12;
+      tip.style.left = Math.max(0, tx) + 'px';
+      tip.style.top  = Math.max(0, ty) + 'px';
+    }
+    container.addEventListener('mousemove', onMove);
+    container.addEventListener('mouseleave', hide);
   }
 
   function recordDecision(status) {
-    const { row, col, route, label, mode } = modalCtx;
-    decisions[`${route}|${label}`] = status;
+    const { row, col, route, label, source } = modalCtx;
+    const unifiedState = status === 'confirmed' ? 'accepted' : 'rejected';
+    const key = source === 'list'
+      ? `${route}|${label}`            // list rows already use route|date
+      : `${route}|${label}`;           // calendar cells use route|label — same shape
+    ensureState(key).state = unifiedState;
 
-    // Apply class to the cell directly so it updates without a full re-render
-    const td = document.querySelector(`#calBody td[data-row="${row}"][data-col="${col}"]`);
-    if (td) {
-      td.classList.remove('decided-confirm', 'decided-reject');
-      td.classList.add(status === 'confirmed' ? 'decided-confirm' : 'decided-reject');
+    // Calendar cell visual update (only when modal was opened from calendar)
+    if (source !== 'list') {
+      const td = document.querySelector(`#calBody td[data-row="${row}"][data-col="${col}"]`);
+      if (td) {
+        td.classList.remove('decided-accept', 'decided-reject');
+        td.classList.add(unifiedState === 'accepted' ? 'decided-accept' : 'decided-reject');
+      }
+    } else {
+      // List row visual update — re-render the list so badges/tints/buttons refresh
+      renderList();
     }
 
     closeModal();
@@ -2747,7 +3395,7 @@
     <img src="engine_logo (2).png" alt="Dynamica">
     <div class="drawer-brand">
       <span class="wordmark">DYNAMICA</span>
-      <span class="sub">SmartRents</span>
+      <span class="sub">SmartRates</span>
     </div>
     <button class="drawer-close" type="button" aria-label="Close menu">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
