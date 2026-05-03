@@ -103,6 +103,66 @@
       text-transform: none;
     }
 
+    /* ── Sortable column headers (List + Calendar Route) ── */
+    table.srt thead tr.cols th.sortable,
+    table.cal-table thead th.cal-corner.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: background .12s, color .12s;
+    }
+    table.srt thead tr.cols th.sortable:hover {
+      background: #eef0f5;
+      color: var(--text-primary);
+    }
+    table.cal-table thead th.cal-corner.sortable:hover {
+      background: #eef0f5;
+      color: var(--text-primary);
+    }
+    table.srt thead tr.cols th.sort-asc,
+    table.srt thead tr.cols th.sort-desc {
+      background: #e8eaf1;
+      color: var(--text-primary);
+    }
+    table.cal-table thead th.cal-corner.sort-asc,
+    table.cal-table thead th.cal-corner.sort-desc {
+      background: #e8eaf1;
+      color: var(--text-primary);
+    }
+    .th-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      vertical-align: middle;
+    }
+    .th-text {
+      display: inline-flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .sort-ind {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 7px;
+      line-height: 1;
+      color: var(--text-muted);
+      opacity: 0.45;
+      flex-shrink: 0;
+      width: 8px;
+    }
+    .sort-ind .sa-up,
+    .sort-ind .sa-down { display: block; }
+    .sort-ind .sa-down { margin-top: 1px; }
+    th.sort-asc .sort-ind,
+    th.sort-desc .sort-ind {
+      opacity: 1;
+      color: var(--accent);
+      font-size: 10px;
+    }
+    th.sort-asc .sort-ind .sa-down,
+    th.sort-desc .sort-ind .sa-up { display: none; }
+
     /* Group separator: left border on first cell of each band */
     table.srt thead tr.cols th.sep,
     table.srt tbody td.sep { border-left: 1px solid var(--border); }
@@ -1113,6 +1173,13 @@
 
   <!-- ── Top Nav ── -->
   <nav class="topnav">
+    <button class="burger-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="appDrawer">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="6"  x2="17" y2="6"/>
+        <line x1="3" y1="10" x2="17" y2="10"/>
+        <line x1="3" y1="14" x2="17" y2="14"/>
+      </svg>
+    </button>
     <a href="index.html" style="display:flex;align-items:center;gap:8px;margin-right:32px;text-decoration:none;flex-shrink:0;">
       <img src="engine_logo (2).png" style="height:28px;width:auto;display:block;" alt="Dynamica SmartRents">
       <div style="display:flex;flex-direction:column;line-height:1;gap:2px;">
@@ -1164,34 +1231,34 @@
             <th colspan="4" class="band-price">Price recommendations</th>
           </tr>
           <tr class="cols">
-            <th>Date</th>
-            <th>Day</th>
-            <th>Lane</th>
-            <th>LDM <span class="sub">Pricing unit</span></th>
-            <th>Origin</th>
-            <th>Destination</th>
-            <th class="num">Capacity <span class="sub">LDM</span></th>
+            <th class="sortable" data-sort-key="date" data-sort-type="text"><span class="th-inner"><span class="th-text">Date</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="day" data-sort-type="text"><span class="th-inner"><span class="th-text">Day</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="lane" data-sort-type="text"><span class="th-inner"><span class="th-text">Lane</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="unit" data-sort-type="text"><span class="th-inner"><span class="th-text">LDM <span class="sub">Pricing unit</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="origin" data-sort-type="text"><span class="th-inner"><span class="th-text">Origin</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="dest" data-sort-type="text"><span class="th-inner"><span class="th-text">Destination</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="cap" data-sort-type="num"><span class="th-inner"><span class="th-text">Capacity <span class="sub">LDM</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num sep">Units booked <span class="sub">LDM</span></th>
-            <th class="num">Utilisation <span class="sub">%</span></th>
-            <th class="num">Utilisation <span class="sub">%, vs LY</span></th>
-            <th class="num">Price per LDM <span class="sub">$</span></th>
-            <th class="num">Price per LDM <span class="sub">%, vs LY</span></th>
-            <th class="num">Revenue <span class="sub">$</span></th>
-            <th class="num">Revenue <span class="sub">%, vs LY</span></th>
+            <th class="num sep sortable" data-sort-key="bk.u" data-sort-type="num"><span class="th-inner"><span class="th-text">Units booked <span class="sub">LDM</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="bk.ut" data-sort-type="num"><span class="th-inner"><span class="th-text">Utilisation <span class="sub">%</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="bk.utLY" data-sort-type="num"><span class="th-inner"><span class="th-text">Utilisation <span class="sub">%, vs LY</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="bk.p" data-sort-type="num"><span class="th-inner"><span class="th-text">Price per LDM <span class="sub">$</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="bk.pLY" data-sort-type="num"><span class="th-inner"><span class="th-text">Price per LDM <span class="sub">%, vs LY</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="bk.r" data-sort-type="num"><span class="th-inner"><span class="th-text">Revenue <span class="sub">$</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="bk.rLY" data-sort-type="num"><span class="th-inner"><span class="th-text">Revenue <span class="sub">%, vs LY</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num sep">Units forecasted <span class="sub">LDM</span></th>
-            <th class="num">Utilisation <span class="sub">%</span></th>
-            <th class="num">Utilisation <span class="sub">%, vs LY</span></th>
-            <th class="num">Price per LDM <span class="sub">$</span></th>
-            <th class="num">Price per LDM <span class="sub">%, vs LY</span></th>
-            <th class="num">Revenue <span class="sub">$</span></th>
-            <th class="num">Revenue <span class="sub">%, vs LY</span></th>
+            <th class="num sep sortable" data-sort-key="fc.u" data-sort-type="num"><span class="th-inner"><span class="th-text">Units forecasted <span class="sub">LDM</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="fc.ut" data-sort-type="num"><span class="th-inner"><span class="th-text">Utilisation <span class="sub">%</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="fc.utLY" data-sort-type="num"><span class="th-inner"><span class="th-text">Utilisation <span class="sub">%, vs LY</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="fc.p" data-sort-type="num"><span class="th-inner"><span class="th-text">Price per LDM <span class="sub">$</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="fc.pLY" data-sort-type="num"><span class="th-inner"><span class="th-text">Price per LDM <span class="sub">%, vs LY</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="fc.r" data-sort-type="num"><span class="th-inner"><span class="th-text">Revenue <span class="sub">$</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="fc.rLY" data-sort-type="num"><span class="th-inner"><span class="th-text">Revenue <span class="sub">%, vs LY</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num sep">Current price <span class="sub">per LDM ($)</span></th>
-            <th class="num">LY price <span class="sub">per LDM ($)</span></th>
-            <th class="num">Rec. price <span class="sub">per LDM ($)</span></th>
-            <th>Rec. Action</th>
+            <th class="num sep sortable" data-sort-key="pr.c" data-sort-type="num"><span class="th-inner"><span class="th-text">Current price <span class="sub">per LDM ($)</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="pr.ly" data-sort-type="num"><span class="th-inner"><span class="th-text">LY price <span class="sub">per LDM ($)</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="pr.rec" data-sort-type="num"><span class="th-inner"><span class="th-text">Rec. price <span class="sub">per LDM ($)</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="pr.a" data-sort-type="text"><span class="th-inner"><span class="th-text">Rec. Action</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
           </tr>
         </thead>
         <tbody id="srt-body"></tbody>
@@ -1430,13 +1497,91 @@
   }
 
   function renderList() {
-    const visible = ROWS.filter(rowMatches);
+    const filtered = ROWS.filter(rowMatches);
+    const visible = applyListSort(filtered);
     const body = document.getElementById('srt-body');
     if (!visible.length) {
       body.innerHTML = `<tr><td colspan="25" style="padding:32px;text-align:center;color:var(--text-muted);font-style:italic;">No matching rows for the current filters.</td></tr>`;
       return;
     }
     body.innerHTML = visible.map(r => r.closed ? renderClosed(r) : renderOpen(r)).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Sorting (List view + Calendar Route column)
+     ════════════════════════════════════════════════════════════ */
+
+  const listSort = { key: null, dir: null };
+  const calSort  = { dir: null };
+
+  function getCellRaw(row, key) {
+    if (key === 'unit') return 'LDM';
+    return key.split('.').reduce((o, k) => (o == null ? undefined : o[k]), row);
+  }
+  function parseSortNum(raw) {
+    if (raw == null) return null;
+    const s = String(raw).trim();
+    if (s === '' || s === DASH || s === 'Closed') return null;
+    const cleaned = s.replace(/[$,%\s]/g, '');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? null : n;
+  }
+  function rowSortValue(row, key, type) {
+    if (row.closed) return { placeholder: true };
+    const raw = getCellRaw(row, key);
+    if (raw == null || raw === '' || raw === DASH || raw === 'Closed') {
+      return { placeholder: true };
+    }
+    if (type === 'num') {
+      const n = parseSortNum(raw);
+      return n === null ? { placeholder: true } : { placeholder: false, value: n };
+    }
+    return { placeholder: false, value: String(raw).toLowerCase() };
+  }
+  function applyListSort(rows) {
+    if (!listSort.key || !listSort.dir) return rows;
+    const th = document.querySelector(`table.srt thead tr.cols th[data-sort-key="${listSort.key}"]`);
+    const type = th ? th.dataset.sortType : 'text';
+    const dir = listSort.dir === 'asc' ? 1 : -1;
+    return rows
+      .map((r, i) => ({ r, i, sv: rowSortValue(r, listSort.key, type) }))
+      .sort((a, b) => {
+        if (a.sv.placeholder && b.sv.placeholder) return a.i - b.i;
+        if (a.sv.placeholder) return 1;
+        if (b.sv.placeholder) return -1;
+        if (a.sv.value < b.sv.value) return -1 * dir;
+        if (a.sv.value > b.sv.value) return  1 * dir;
+        return a.i - b.i;
+      })
+      .map(x => x.r);
+  }
+  function applyCalRouteSort(idxList) {
+    if (!calSort.dir) return idxList;
+    const dir = calSort.dir === 'asc' ? 1 : -1;
+    return idxList.slice().sort((a, b) => {
+      const sa = CAL_ROUTES[a].toLowerCase();
+      const sb = CAL_ROUTES[b].toLowerCase();
+      if (sa < sb) return -1 * dir;
+      if (sa > sb) return  1 * dir;
+      return a - b;
+    });
+  }
+  function updateListSortIndicators() {
+    document.querySelectorAll('table.srt thead tr.cols th[data-sort-key]').forEach(th => {
+      th.classList.remove('sort-asc', 'sort-desc');
+      if (th.dataset.sortKey === listSort.key && listSort.dir) {
+        th.classList.add(listSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+      }
+    });
+  }
+  function cycleSort(state, key) {
+    if (key !== undefined && state.key !== key) {
+      state.key = key;
+      state.dir = 'asc';
+      return;
+    }
+    state.dir = state.dir === 'asc' ? 'desc' : (state.dir === 'desc' ? null : 'asc');
+    if (key !== undefined && state.dir === null) state.key = null;
   }
 
   /* ════════════════════════════════════════════════════════════
@@ -1537,14 +1682,17 @@
       .map(x => x.i);
     const visibleLabels = visibleColIdx.map(i => labels[i]);
 
+    const calSortClass = calSort.dir === 'asc' ? ' sort-asc' : (calSort.dir === 'desc' ? ' sort-desc' : '');
     document.getElementById('calHead').innerHTML =
-      `<th class="cal-corner">Route</th>` +
+      `<th class="cal-corner sortable${calSortClass}" data-sort-key="route"><span class="th-inner"><span class="th-text">Route</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>` +
       visibleLabels.map(l => `<th>${esc(l)}</th>`).join('');
 
-    const visibleRowIdx = CAL_ROUTES
-      .map((r, i) => ({ r, i }))
-      .filter(x => calRouteMatches(x.r))
-      .map(x => x.i);
+    const visibleRowIdx = applyCalRouteSort(
+      CAL_ROUTES
+        .map((r, i) => ({ r, i }))
+        .filter(x => calRouteMatches(x.r))
+        .map(x => x.i)
+    );
 
     const body = document.getElementById('calBody');
 
@@ -1675,6 +1823,22 @@
     filters.lane = [];
     filters.dateRange = { start: null, end: null };
     applyFilters();
+  });
+
+  /* Sort click wiring (delegated; List header is static, Calendar corner re-renders) */
+  document.querySelector('table.srt thead tr.cols').addEventListener('click', e => {
+    const th = e.target.closest('th[data-sort-key]');
+    if (!th) return;
+    cycleSort(listSort, th.dataset.sortKey);
+    updateListSortIndicators();
+    renderList();
+  });
+  document.getElementById('calTable').addEventListener('click', e => {
+    const th = e.target.closest('thead th.cal-corner[data-sort-key]');
+    if (!th) return;
+    cycleSort(calSort);
+    const activeMode = document.querySelector('#modeToggle button.active');
+    renderCalendar(activeMode ? activeMode.dataset.mode : 'monthly');
   });
 
   /* ════════════════════════════════════════════════════════════
@@ -2575,5 +2739,67 @@
   buildFilterOptions();
   applyFilters();
 </script>
+
+<!-- ── Slide-out drawer ── -->
+<div class="drawer-backdrop"></div>
+<aside class="drawer" id="appDrawer" aria-label="Main menu">
+  <div class="drawer-header">
+    <img src="engine_logo (2).png" alt="Dynamica">
+    <div class="drawer-brand">
+      <span class="wordmark">DYNAMICA</span>
+      <span class="sub">SmartRents</span>
+    </div>
+    <button class="drawer-close" type="button" aria-label="Close menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <line x1="4"  y1="4"  x2="14" y2="14"/>
+        <line x1="14" y1="4"  x2="4"  y2="14"/>
+      </svg>
+    </button>
+  </div>
+  <nav>
+    <ul class="drawer-menu">
+      <li>
+        <a href="index.html" class="drawer-item active">
+          <span class="drawer-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5"  y="9"  width="3" height="6"  rx="0.8"/>
+              <rect x="7.5"  y="5"  width="3" height="10" rx="0.8"/>
+              <rect x="12.5" y="2"  width="3" height="13" rx="0.8"/>
+            </svg>
+          </span>
+          Pricing
+        </a>
+      </li>
+      <li>
+        <a href="settings.html" class="drawer-item">
+          <span class="drawer-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="9" r="2.2"/>
+              <path d="M9 1.6v1.7M9 14.7v1.7M16.4 9h-1.7M3.3 9H1.6M14.2 3.8l-1.2 1.2M5 13l-1.2 1.2M14.2 14.2L13 13M5 5L3.8 3.8"/>
+            </svg>
+          </span>
+          Settings
+        </a>
+      </li>
+      <li>
+        <button class="drawer-item drawer-logout" type="button">
+          <span class="drawer-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 13v1.2A1.3 1.3 0 0 1 9.7 15.5h-5.2A1.3 1.3 0 0 1 3.2 14.2V3.8A1.3 1.3 0 0 1 4.5 2.5h5.2A1.3 1.3 0 0 1 11 3.8V5"/>
+              <path d="M7.5 9h8.4"/>
+              <path d="M13.4 6.5L15.9 9 13.4 11.5"/>
+            </svg>
+          </span>
+          Log out
+        </button>
+      </li>
+    </ul>
+  </nav>
+</aside>
+<div class="logout-overlay" aria-hidden="true">
+  <div class="logout-spinner"></div>
+</div>
+<script src="app.js"></script>
+
 </body>
 </html>
