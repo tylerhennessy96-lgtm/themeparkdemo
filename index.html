@@ -367,40 +367,164 @@
       height: 12px;
     }
 
-    /* Notes popover */
-    .notes-popover {
+    /* ── Note modal ── */
+    .note-backdrop {
       position: fixed;
-      z-index: 600;
+      inset: 0;
+      background: rgba(26,26,46,0.55);
+      z-index: 1200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity .15s ease;
+      overflow-y: auto;
+    }
+    .note-backdrop.is-open { opacity: 1; }
+    .note-modal {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg);
-      padding: 10px;
-      width: 240px;
+      width: 540px;
+      max-width: calc(100vw - 48px);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(8px);
+      transition: transform .15s ease;
       font-family: 'Inter', sans-serif;
     }
-    .notes-popover textarea {
+    .note-backdrop.is-open .note-modal { transform: translateY(0); }
+    .note-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+    .note-modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .note-modal-sub {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .note-modal-close {
+      width: 28px; height: 28px;
+      border: none;
+      background: transparent;
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background .12s, color .12s;
+      line-height: 1;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .note-modal-close:hover { background: var(--row-hover); color: var(--text-primary); }
+    .note-modal-body { padding: 18px 24px 22px; }
+    .note-expired-banner {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--warn);
+      margin-bottom: 10px;
+    }
+    .note-textarea {
       width: 100%;
       box-sizing: border-box;
-      min-height: 60px;
       font-family: 'Inter', sans-serif;
-      font-size: 12.5px;
+      font-size: 13px;
       color: var(--text-primary);
-      padding: 8px 10px;
+      padding: 10px 12px;
       border: 1px solid var(--border-mid);
-      border-radius: 6px;
+      border-radius: var(--radius);
       outline: none;
       resize: vertical;
       background: var(--surface);
+      line-height: 1.45;
+      min-height: 110px;
     }
-    .notes-popover textarea:focus {
+    .note-textarea:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(232,0,125,0.10);
+      box-shadow: 0 0 0 3px rgba(232,0,125,0.12);
     }
-    .notes-popover-hint {
-      margin-top: 6px;
-      font-size: 11px;
+    .note-textarea.is-expired {
+      text-decoration: line-through;
       color: var(--text-muted);
+    }
+    .note-expiry-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .note-expiry-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      flex-shrink: 0;
+      min-width: 60px;
+    }
+    .note-expiry-input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 7px 10px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    .note-expiry-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(232,0,125,0.12);
+    }
+    .note-expiry-clear {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      background: none;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background .12s;
+    }
+    .note-expiry-clear:hover { background: rgba(232,0,125,0.08); }
+    .note-expiry-clear[hidden] { display: none; }
+    .note-expiry-formatted {
+      margin-top: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .note-expiry-hint {
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Expired note styling on the action column notes button + badge */
+    .act-notes.is-expired { color: var(--text-muted); }
+    .act-notes.is-expired .note-dot { background: var(--text-muted); }
+    .action-badge.b-expired {
+      background: #e5e7eb;
+      color: var(--text-secondary);
     }
 
     /* Group separator: left border on first cell of each band */
@@ -492,6 +616,63 @@
     .seg-toggle.secondary button {
       padding: 4px 12px;
       font-size: 11.5px;
+    }
+
+    /* ── Commit button ── */
+    .commit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: background .15s, opacity .15s;
+      flex-shrink: 0;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(232,0,125,0.25);
+    }
+    .commit-btn:hover:not(:disabled):not(.is-loading) {
+      background: var(--accent-dim);
+    }
+    .commit-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .commit-btn.is-loading {
+      cursor: default;
+      pointer-events: none;
+    }
+    .commit-btn .commit-icon,
+    .commit-btn .commit-spinner {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    .commit-btn .commit-spinner {
+      display: none;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: commitSpin .7s linear infinite;
+      box-sizing: border-box;
+    }
+    .commit-btn.is-loading .commit-icon { display: none; }
+    .commit-btn.is-loading .commit-spinner { display: inline-block; }
+    @keyframes commitSpin { to { transform: rotate(360deg); } }
+
+    .commit-cluster {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
     /* ── Calendar view ── */
@@ -1457,9 +1638,20 @@
         </button>
         <button class="filter-clear" id="filterClear" type="button" hidden>Clear filters</button>
       </div>
-      <div class="seg-toggle" id="viewToggle" role="tablist" aria-label="View">
-        <button type="button" class="active" data-view="list" role="tab" aria-selected="true">List</button>
-        <button type="button" data-view="calendar" role="tab" aria-selected="false">Calendar</button>
+      <div class="commit-cluster">
+        <button class="commit-btn" id="commitBtn" type="button" disabled aria-label="Commit pending changes">
+          <svg class="commit-icon" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3.6 10a2.5 2.5 0 0 1 .55-4.93 3.6 3.6 0 0 1 7.05.43A2.4 2.4 0 0 1 11 10"/>
+            <path d="M7 6.2v5.4"/>
+            <path d="M5 8.2l2-2 2 2"/>
+          </svg>
+          <span class="commit-spinner" aria-hidden="true"></span>
+          <span class="commit-label">Commit</span>
+        </button>
+        <div class="seg-toggle" id="viewToggle" role="tablist" aria-label="View">
+          <button type="button" class="active" data-view="list" role="tab" aria-selected="true">List</button>
+          <button type="button" data-view="calendar" role="tab" aria-selected="false">Calendar</button>
+        </div>
       </div>
     </div>
     <div class="srt-wrap" id="listView">
@@ -1760,9 +1952,13 @@
     const rejectSolid = st.state === 'rejected'  ? ' solid' : '';
     const acceptDim   = st.state === 'rejected'  ? ' dim'   : '';
     const rejectDim   = st.state === 'accepted'  ? ' dim'   : '';
-    const noteCls     = st.note ? ' has-note' : '';
+    const expired     = isNoteExpired(st);
+    const noteCls     = st.note ? ' has-note' + (expired ? ' is-expired' : '') : '';
     const badgeHtml   = st.state
       ? `<span class="action-badge b-${st.state}">${st.state.charAt(0).toUpperCase() + st.state.slice(1)}</span>`
+      : '';
+    const expiredBadge = (st.note && expired)
+      ? `<span class="action-badge b-expired">Expired</span>`
       : '';
     return (
       `<td class="action-cell${stateCls}" data-row-key="${esc(key)}">` +
@@ -1771,6 +1967,7 @@
           badgeHtml +
           `<button class="action-btn act-accept${acceptSolid}${acceptDim}" type="button" aria-label="Accept" data-act="accept">${CHECK_SVG}</button>` +
           `<button class="action-btn act-reject${rejectSolid}${rejectDim}" type="button" aria-label="Reject" data-act="reject">${CROSS_SVG}</button>` +
+          expiredBadge +
           `<button class="act-notes${noteCls}" type="button" aria-label="Add note" data-act="notes">${NOTE_SVG}<span class="note-dot"></span></button>` +
         `</div>` +
       `</td>`
@@ -1788,10 +1985,83 @@
     const body = document.getElementById('srt-body');
     if (!visible.length) {
       body.innerHTML = `<tr><td colspan="26" style="padding:32px;text-align:center;color:var(--text-muted);font-style:italic;">No matching rows for the current filters.</td></tr>`;
-      return;
+    } else {
+      body.innerHTML = visible.map(r => r.closed ? renderClosed(r) : renderOpen(r)).join('');
     }
-    body.innerHTML = visible.map(r => r.closed ? renderClosed(r) : renderOpen(r)).join('');
+    updateCommitButton();
   }
+
+  /* ── Commit button: count of accepted/rejected/overridden rows in rowStates ── */
+  const COMMITTABLE_STATES = { accepted: 1, rejected: 1, overridden: 1 };
+  function countCommittable() {
+    let n = 0;
+    for (const k in rowStates) {
+      if (rowStates[k] && COMMITTABLE_STATES[rowStates[k].state]) n++;
+    }
+    return n;
+  }
+  function updateCommitButton() {
+    const btn = document.getElementById('commitBtn');
+    if (!btn || btn.classList.contains('is-loading')) return;
+    const n = countCommittable();
+    const label = btn.querySelector('.commit-label');
+    if (n > 0) {
+      btn.disabled = false;
+      label.textContent = 'Commit (' + n + ')';
+    } else {
+      btn.disabled = true;
+      label.textContent = 'Commit';
+    }
+  }
+
+  /* ── Commit toast (uses .app-toast from styles.css) ── */
+  let commitToastEl = null;
+  let commitToastTimer = null;
+  function showCommitToast(msg) {
+    if (!commitToastEl) {
+      commitToastEl = document.createElement('div');
+      commitToastEl.className = 'app-toast';
+      document.body.appendChild(commitToastEl);
+    }
+    if (commitToastTimer) { clearTimeout(commitToastTimer); commitToastTimer = null; }
+    commitToastEl.textContent = msg;
+    void commitToastEl.offsetHeight;
+    commitToastEl.classList.add('show');
+    commitToastTimer = setTimeout(() => {
+      commitToastEl.classList.remove('show');
+    }, 3000);
+  }
+
+  /* ── Commit click handler ── */
+  function commitChanges() {
+    const btn = document.getElementById('commitBtn');
+    if (!btn || btn.disabled || btn.classList.contains('is-loading')) return;
+    const n = countCommittable();
+    if (n <= 0) return;
+
+    btn.classList.add('is-loading');
+    btn.disabled = true;
+    btn.querySelector('.commit-label').textContent = 'Committing...';
+
+    setTimeout(() => {
+      Object.keys(rowStates).forEach(key => {
+        const st = rowStates[key];
+        if (!st) { delete rowStates[key]; return; }
+        delete st.state;
+        delete st.overrideValue;
+        if (!st.note && !st.noteExpiry) delete rowStates[key];
+      });
+
+      btn.classList.remove('is-loading');
+
+      renderList();
+      const activeMode = document.querySelector('#modeToggle button.active');
+      renderCalendar(activeMode ? activeMode.dataset.mode : 'monthly');
+
+      showCommitToast(n + ' changes committed');
+    }, 1200);
+  }
+  document.getElementById('commitBtn').addEventListener('click', commitChanges);
 
   /* ════════════════════════════════════════════════════════════
      Sorting (List view + Calendar Route column)
@@ -2157,10 +2427,10 @@
     } else if (act === 'reject') {
       st.state = st.state === 'rejected' ? undefined : 'rejected';
     } else if (act === 'notes') {
-      openNotesPopover(btn, key);
+      openNoteModal(key);
       return;
     }
-    if (!st.state && st.overrideValue == null && !st.note) delete rowStates[key];
+    if (!st.state && st.overrideValue == null && !st.note && !st.noteExpiry) delete rowStates[key];
     renderList();
   });
 
@@ -2207,60 +2477,139 @@
     });
   }
 
-  /* ── Notes popover ── */
-  let notesPopover = null;
-  function closeNotesPopover() {
-    if (!notesPopover) return;
-    const { popEl, key } = notesPopover;
-    const note = popEl.querySelector('textarea').value.trim();
-    const st = ensureState(key);
-    if (note) st.note = note; else delete st.note;
-    if (!st.state && st.overrideValue == null && !st.note) delete rowStates[key];
-    popEl.remove();
-    notesPopover = null;
-    renderList();
+  /* ── Note modal (notes + optional expiry date) ── */
+  function isNoteExpired(st) {
+    if (!st || !st.noteExpiry) return false;
+    const expiryEnd = new Date(st.noteExpiry + 'T23:59:59.999');
+    return Date.now() > expiryEnd.getTime();
   }
-  function openNotesPopover(btn, key) {
-    if (notesPopover) {
-      const wasSame = notesPopover.key === key;
-      closeNotesPopover();
-      if (wasSame) return;
-    }
+  function fmtExpiry(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-').map(n => parseInt(n, 10));
+    const dt = new Date(y, m - 1, d);
+    return MONTH_NAMES_SHORT[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear();
+  }
+  function rowFromKey(key) {
+    return ROWS.find(r => rowKey(r) === key) || null;
+  }
+
+  let noteModalRoot = null;
+  let noteModalOpen = false;
+  let noteModalKey  = null;
+
+  function buildNoteModal() {
+    if (noteModalRoot) return;
+    noteModalRoot = document.createElement('div');
+    noteModalRoot.className = 'note-backdrop';
+    noteModalRoot.id = 'noteModal';
+    noteModalRoot.hidden = true;
+    document.body.appendChild(noteModalRoot);
+    noteModalRoot.addEventListener('click', e => {
+      if (e.target === noteModalRoot) closeNoteModal();
+    });
+  }
+
+  function openNoteModal(key) {
+    noteModalKey = key;
     const st = rowStates[key] || {};
-    const popEl = document.createElement('div');
-    popEl.className = 'notes-popover';
-    popEl.innerHTML = `<textarea placeholder="Add a note…" rows="3">${esc(st.note || '')}</textarea><div class="notes-popover-hint">Saves on blur · Esc to close</div>`;
-    document.body.appendChild(popEl);
-    const r = btn.getBoundingClientRect();
-    let left = r.left;
-    if (left + 240 > window.innerWidth - 12) left = window.innerWidth - 252;
-    popEl.style.left = Math.max(12, left) + 'px';
-    popEl.style.top  = (r.bottom + 6) + 'px';
-    notesPopover = { popEl, key };
-    const ta = popEl.querySelector('textarea');
+    const row = rowFromKey(key);
+    const sub = row ? `${row.origin} → ${row.dest} · ${row.date}` : '';
+    const expired = isNoteExpired(st);
+    buildNoteModal();
+    noteModalRoot.innerHTML = `
+      <div class="note-modal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
+        <div class="note-modal-header">
+          <div>
+            <h2 class="note-modal-title" id="noteModalTitle">Note</h2>
+            <div class="note-modal-sub">${esc(sub)}</div>
+          </div>
+          <button class="note-modal-close" type="button" aria-label="Close" id="noteModalCloseBtn">×</button>
+        </div>
+        <div class="note-modal-body">
+          <div class="note-expired-banner" id="noteExpiredBanner"${expired && st.noteExpiry ? '' : ' hidden'}>
+            ${expired && st.noteExpiry ? 'This note expired on ' + esc(fmtExpiry(st.noteExpiry)) : ''}
+          </div>
+          <textarea class="note-textarea${expired ? ' is-expired' : ''}" id="noteModalTextarea" placeholder="Add a note…" rows="7">${esc(st.note || '')}</textarea>
+          <div class="note-expiry-row">
+            <label class="note-expiry-label" for="noteModalExpiry">Expires</label>
+            <input class="note-expiry-input" id="noteModalExpiry" type="date" value="${esc(st.noteExpiry || '')}">
+            <button class="note-expiry-clear" type="button" id="noteModalExpiryClear"${st.noteExpiry ? '' : ' hidden'}>Clear</button>
+          </div>
+          <div class="note-expiry-formatted" id="noteExpiryFormatted"${st.noteExpiry ? '' : ' hidden'}>
+            ${st.noteExpiry ? 'Expires ' + esc(fmtExpiry(st.noteExpiry)) : ''}
+          </div>
+          <div class="note-expiry-hint">Note will be marked expired after end of selected day. Leave empty for no expiry.</div>
+        </div>
+      </div>`;
+    noteModalRoot.hidden = false;
+    // Force reflow before adding the open class so the opacity/transform transition runs
+    void noteModalRoot.offsetHeight;
+    noteModalRoot.classList.add('is-open');
+    noteModalOpen = true;
+    document.addEventListener('keydown', onNoteModalKey);
+    wireNoteModalControls();
+
+    const ta = document.getElementById('noteModalTextarea');
     ta.focus();
     ta.setSelectionRange(ta.value.length, ta.value.length);
-    ta.addEventListener('keydown', ev => {
-      if (ev.key === 'Escape') { ev.preventDefault(); closeNotesPopover(); }
-    });
-    ta.addEventListener('blur', () => {
-      // Defer so a same-tick refocus (e.g., from outside-click handler) can cancel the close
-      setTimeout(() => {
-        if (notesPopover && document.activeElement !== ta) closeNotesPopover();
-      }, 0);
-    });
-    setTimeout(() => {
-      document.addEventListener('mousedown', notesOutsideClick, { once: true });
-    }, 0);
   }
-  function notesOutsideClick(ev) {
-    if (!notesPopover) return;
-    if (notesPopover.popEl.contains(ev.target)) {
-      // re-arm
-      setTimeout(() => document.addEventListener('mousedown', notesOutsideClick, { once: true }), 0);
-      return;
+  function closeNoteModal() {
+    if (!noteModalOpen) return;
+    noteModalRoot.classList.remove('is-open');
+    document.removeEventListener('keydown', onNoteModalKey);
+    noteModalOpen = false;
+    noteModalKey  = null;
+    setTimeout(() => { if (!noteModalOpen) noteModalRoot.hidden = true; }, 160);
+  }
+  function onNoteModalKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); closeNoteModal(); }
+  }
+  function wireNoteModalControls() {
+    document.getElementById('noteModalCloseBtn').addEventListener('click', closeNoteModal);
+    const ta       = document.getElementById('noteModalTextarea');
+    const expiryEl = document.getElementById('noteModalExpiry');
+    const clearBtn = document.getElementById('noteModalExpiryClear');
+    ta.addEventListener('input', autosaveNote);
+    expiryEl.addEventListener('change', autosaveNote);
+    clearBtn.addEventListener('click', () => {
+      expiryEl.value = '';
+      autosaveNote();
+    });
+  }
+  function autosaveNote() {
+    if (!noteModalKey) return;
+    const ta       = document.getElementById('noteModalTextarea');
+    const expiryEl = document.getElementById('noteModalExpiry');
+    const txt = ta.value;
+    const dt  = expiryEl.value || '';
+    const st  = ensureState(noteModalKey);
+    if (txt.trim()) st.note = txt; else delete st.note;
+    if (dt)         st.noteExpiry = dt; else delete st.noteExpiry;
+    if (!st.note && !st.noteExpiry && !st.state && st.overrideValue == null) {
+      delete rowStates[noteModalKey];
     }
-    closeNotesPopover();
+    // Refresh modal indicators (banner, formatted date, clear button visibility, strikethrough)
+    const stNow   = rowStates[noteModalKey] || {};
+    const expired = isNoteExpired(stNow);
+    const banner  = document.getElementById('noteExpiredBanner');
+    const fmt     = document.getElementById('noteExpiryFormatted');
+    const clrBtn  = document.getElementById('noteModalExpiryClear');
+    ta.classList.toggle('is-expired', expired);
+    if (stNow.noteExpiry) {
+      fmt.textContent = 'Expires ' + fmtExpiry(stNow.noteExpiry);
+      fmt.hidden = false;
+      clrBtn.hidden = false;
+    } else {
+      fmt.hidden = true;
+      clrBtn.hidden = true;
+    }
+    if (expired && stNow.noteExpiry) {
+      banner.textContent = 'This note expired on ' + fmtExpiry(stNow.noteExpiry);
+      banner.hidden = false;
+    } else {
+      banner.hidden = true;
+    }
+    renderList();
   }
 
   /* ════════════════════════════════════════════════════════════
@@ -3133,6 +3482,7 @@
       // List row visual update — re-render the list so badges/tints/buttons refresh
       renderList();
     }
+    updateCommitButton();
 
     closeModal();
     showToast(status, route, label);
