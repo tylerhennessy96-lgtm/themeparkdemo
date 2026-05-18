@@ -8,6 +8,9 @@
   <style>
     /* SmartGate pricing — scoped to .srt */
 
+    /* View visibility — beats display:flex on .cal-wrap so [hidden] actually hides it */
+    [hidden] { display: none !important; }
+
     .pricing-page {
       flex: 1;
       display: flex;
@@ -20,10 +23,13 @@
       padding: 12px 24px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      row-gap: 10px;
+      flex-wrap: wrap;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
     }
+    .pricing-header-row .filter-group { flex: 1 1 auto; min-width: 0; }
     .pricing-heading {
       font-family: 'Inter', sans-serif;
       font-size: 22px;
@@ -184,23 +190,23 @@
 
     /* ── Park row (level 1) ── */
     table.srt tbody tr.row-park td {
-      background: #eef2f8;
+      background: #f6f8fc;
       font-weight: 600;
       color: var(--text-primary);
       border-bottom: 1px solid var(--border);
     }
     table.srt tbody tr.row-park:hover td:not(.cell-pos):not(.cell-neg) {
-      background: #e5ebf3;
+      background: #eef2f8;
     }
 
     /* ── Category row (level 2) ── */
     table.srt tbody tr.row-category td {
-      background: #f6f8fc;
+      background: #fafbfd;
       font-weight: 500;
-      color: var(--text-primary);
+      color: var(--text-secondary);
     }
     table.srt tbody tr.row-category:hover td:not(.cell-pos):not(.cell-neg) {
-      background: #eef2f8;
+      background: #f3f5f9;
     }
 
     /* ── Leaf row (level 3) ── */
@@ -227,33 +233,34 @@
       color: var(--text-secondary);
       transition: transform .15s ease, background .12s, color .12s;
     }
+    /* Smaller chevron for level 2 (Category) */
+    .accordion-name.lvl-2 .accordion-chev { width: 12px; height: 12px; }
+    .accordion-name.lvl-2 .accordion-chev svg { width: 8px; height: 8px; }
     .accordion-name:hover .accordion-chev { background: rgba(232,0,125,0.08); color: var(--accent); }
     .accordion-name.expanded .accordion-chev { transform: rotate(90deg); color: var(--accent); }
 
-    /* Indentation — chevron at start of indented padding, ~20px step per level */
-    .indent-1 { padding-left: 14px; }
-    .indent-2 { padding-left: 34px; }
-    .indent-3 { padding-left: 78px; }   /* aligns leaf name with where a level-3 chevron's name would start */
+    /* Indentation — 20px and 24px steps per level */
+    .indent-1 { padding-left: 12px; }
+    .indent-2 { padding-left: 32px; }
+    .indent-3 { padding-left: 56px; }
 
-    /* Leaf bullet — a tiny dot in place of a chevron so leaves visually anchor to the same column as parent names */
+    /* Leaf bullet — Unicode • in muted colour before the ticket name */
     .leaf-bullet {
       display: inline-block;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--text-muted);
-      margin-right: 12px;
+      color: var(--text-muted);
+      margin-right: 8px;
+      font-size: 14px;
+      line-height: 1;
       vertical-align: middle;
       transform: translateY(-1px);
     }
 
     /* Per-level name styling */
     .lvl-park-name   { font-weight: 600; color: var(--text-primary); }
-    .lvl-cat-name    { font-weight: 500; color: var(--text-primary); }
+    .lvl-cat-name    { font-weight: 500; color: var(--text-secondary); }
     .lvl-ticket-name { font-weight: 400; color: var(--text-primary); }
 
-    /* Nesting accent — coloured left border on category + leaf rows to make
-       the hierarchy obvious without restyling the surrounding bands. */
+    /* Subtle vertical guide line on the left edge of nested rows */
     table.srt tbody tr.row-category td:first-child {
       box-shadow: inset 3px 0 0 #d6dbe6;
     }
@@ -601,6 +608,381 @@
       color: var(--text-primary);
       box-shadow: var(--shadow-sm);
       font-weight: 600;
+    }
+
+    /* ── Filter pills ── */
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .filter-pill {
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 20px;
+      padding: 5px 28px 5px 12px;
+      height: 30px;
+      max-width: 240px;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color .15s, color .15s, background-image .15s;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .filter-pill:hover { border-color: var(--accent); }
+    .filter-pill:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; }
+    .filter-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%23e8007d' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    }
+
+    .filter-clear {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--accent);
+      background: none;
+      border: none;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background .12s;
+    }
+    .filter-clear:hover { background: rgba(232,0,125,0.08); }
+
+    .filter-pill.ms-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 28px 0 12px;
+    }
+    .filter-pill.ms-pill .ms-trigger-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .filter-pill.ms-pill .ms-trigger-count {
+      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .filter-pill.ms-pill.active .ms-trigger-count { color: var(--accent); }
+
+    /* ── Multi-select popover ── */
+    .ms-popover {
+      position: fixed;
+      z-index: 200;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      min-width: 280px;
+      max-width: 360px;
+      max-height: 380px;
+      overflow: hidden;
+    }
+    .ms-search-wrap {
+      position: relative;
+      padding: 10px 10px 6px;
+      flex-shrink: 0;
+    }
+    .ms-search {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      padding: 0 10px 0 30px;
+      height: 30px;
+      box-sizing: border-box;
+    }
+    .ms-search::placeholder { color: var(--text-muted); font-weight: 400; }
+    .ms-search:focus {
+      outline: 1.5px solid var(--accent);
+      outline-offset: -1px;
+      border-color: var(--accent);
+    }
+    .ms-search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(calc(-50% + 2px));
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .ms-quick-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 14px 8px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ms-link {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--accent);
+      background: transparent;
+      border: none;
+      padding: 2px 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .ms-link:hover { color: var(--accent-dim); text-decoration: underline; }
+    .ms-options {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+      min-height: 60px;
+    }
+    .ms-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 7px 14px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: left;
+    }
+    .ms-option:hover,
+    .ms-option:focus { background: var(--row-hover); outline: none; }
+    .ms-option .ms-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .ms-check {
+      width: 16px; height: 16px;
+      border: 1.5px solid var(--border-mid);
+      border-radius: 4px;
+      flex-shrink: 0;
+      position: relative;
+      transition: background .12s, border-color .12s;
+      background: var(--surface);
+    }
+    .ms-option[aria-checked="true"] .ms-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .ms-option[aria-checked="true"] .ms-check::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 4px; height: 8px;
+      border: solid #fff;
+      border-width: 0 1.5px 1.5px 0;
+      transform: rotate(45deg);
+    }
+    .ms-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+    .ms-empty {
+      padding: 24px 14px;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Date-range trigger pill */
+    .filter-pill.date-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 28px 0 10px;
+    }
+    .filter-pill.date-pill .cal-icon { color: var(--text-secondary); flex-shrink: 0; }
+    .filter-pill.date-pill.active .cal-icon { color: var(--accent); }
+    .filter-pill.date-pill > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Date-range popover ── */
+    .dp-popover {
+      position: fixed;
+      z-index: 200;
+      background: var(--nav-bg);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid var(--nav-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+    }
+    .dp-months { display: flex; gap: 24px; }
+    .dp-month { width: 252px; }
+    .dp-month-header {
+      display: grid;
+      grid-template-columns: 24px 1fr 24px;
+      align-items: center;
+      margin-bottom: 6px;
+      height: 28px;
+    }
+    .dp-month-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+    .dp-nav-btn {
+      width: 24px; height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 0;
+      transition: background .12s, color .12s;
+    }
+    .dp-nav-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .dp-grid { display: grid; grid-template-columns: repeat(7, 36px); }
+    .dp-dow {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      padding: 6px 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .dp-day {
+      width: 36px; height: 36px;
+      position: relative;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.85);
+      font-variant-numeric: tabular-nums;
+      padding: 0;
+    }
+    .dp-day-num {
+      position: relative;
+      z-index: 2;
+      width: 30px; height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: outline-color .1s, background-color .1s, color .1s;
+    }
+    .dp-day:hover .dp-day-num {
+      outline: 1.5px solid var(--accent);
+      outline-offset: -1.5px;
+    }
+    .dp-day.in-range { background: rgba(232,0,125,0.18); }
+    .dp-day.is-start { background: linear-gradient(to right, transparent 50%, rgba(232,0,125,0.18) 50%); }
+    .dp-day.is-end   { background: linear-gradient(to right, rgba(232,0,125,0.18) 50%, transparent 50%); }
+    .dp-day.is-start.is-end { background: transparent; }
+    .dp-day.is-start .dp-day-num,
+    .dp-day.is-end   .dp-day-num {
+      background: var(--accent);
+      color: #fff;
+    }
+    .dp-day.is-start:hover .dp-day-num,
+    .dp-day.is-end:hover .dp-day-num {
+      background: var(--accent-dim);
+      outline: none;
+    }
+    .dp-day.out-of-month { color: rgba(255,255,255,0.25); }
+    .dp-day.out-of-month:hover .dp-day-num { outline-color: rgba(232,0,125,0.45); }
+
+    .dp-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--nav-border);
+      gap: 12px;
+    }
+    .dp-status { font-size: 11.5px; color: rgba(255,255,255,0.65); font-weight: 500; }
+    .dp-actions { display: flex; gap: 8px; }
+    .dp-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    .dp-btn-ghost {
+      background: transparent;
+      border-color: rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85);
+    }
+    .dp-btn-ghost:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.4);
+    }
+    .dp-btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .dp-btn-primary:hover:not(:disabled) {
+      background: var(--accent-dim);
+      border-color: var(--accent-dim);
+    }
+    .dp-btn-primary:disabled {
+      background: rgba(232,0,125,0.4);
+      border-color: rgba(232,0,125,0.4);
+      cursor: not-allowed;
+    }
+
+    /* Empty-state row in the Table */
+    table.srt tbody tr.srt-empty td {
+      text-align: center;
+      font-style: italic;
+      color: var(--text-muted);
+      padding: 32px 16px;
+      background: var(--surface);
     }
 
     /* ── Calendar view ── */
@@ -1054,6 +1436,40 @@
     <div class="pricing-header-row">
       <h1 class="pricing-heading">Pricing</h1>
       <span class="pricing-sub" id="pricingSub"></span>
+
+      <div class="filter-group" id="filterGroup">
+        <button class="filter-pill ms-pill" data-filter="park" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ms-trigger-text">All Parks</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="category" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ms-trigger-text">All Categories</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="ticket" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ms-trigger-text">All Ticket Types</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="daytype" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ms-trigger-text">All Day Types</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="alert" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ms-trigger-text">All Alerts</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill date-pill" id="dateRangeTrigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+          <svg class="cal-icon" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="10" height="9" rx="1.2"/>
+            <line x1="2" y1="6" x2="12" y2="6"/>
+            <line x1="5" y1="1.5" x2="5" y2="4"/>
+            <line x1="9" y1="1.5" x2="9" y2="4"/>
+          </svg>
+          <span id="dateRangeLabel">All Dates</span>
+        </button>
+        <button class="filter-clear" id="filterClear" type="button" hidden>Clear filters</button>
+      </div>
+
       <div class="view-toggle" role="tablist" aria-label="View">
         <button class="view-toggle-btn is-active" type="button" data-view="table" role="tab" aria-selected="true">Table</button>
         <button class="view-toggle-btn" type="button" data-view="calendar" role="tab" aria-selected="false">Calendar</button>
@@ -1621,8 +2037,13 @@
     const body = document.getElementById('srtBody');
     const out  = [];
 
-    DATES.forEach(date => {
-      PARKS.forEach(park => {
+    const visibleDates = DATES.filter(dateInDateRange);
+
+    visibleDates.forEach(date => {
+      PARKS.filter(parkMatchesFilter).forEach(park => {
+        // Skip park-date pairs where no leaf passes the active filters
+        if (!anyLeafPassesIn(park, date)) return;
+
         const parkExpanded = expanded.parks.has(park.id + '|' + date.iso);
 
         // Compute category aggregates + leaf rows
@@ -1646,14 +2067,23 @@
 
         // ── Category + leaf rows ──
         catAggs.forEach(({ cat, leafRows, agg, capMode }) => {
+          // Skip category if none of its leaves pass filters
+          if (!anyLeafPassesIn(park, date, cat)) return;
+
           const catExpanded = expanded.cats.has(park.id + '|' + cat.id + '|' + date.iso);
           out.push(categoryRowHtml(park, cat, date, agg, capMode, catExpanded));
 
           if (!catExpanded) return;
-          leafRows.forEach(leaf => out.push(leafRowHtml(leaf)));
+          leafRows.forEach(leaf => {
+            if (leafPasses(leaf)) out.push(leafRowHtml(leaf));
+          });
         });
       });
     });
+
+    if (!out.length) {
+      out.push('<tr class="srt-empty"><td colspan="15">No matching rows for the current filters.</td></tr>');
+    }
 
     body.innerHTML = out.join('');
 
@@ -1710,7 +2140,7 @@
     return (
       '<tr class="row-category" data-park="' + park.id + '" data-cat="' + cat.id + '" data-date="' + date.iso + '">' +
         '<td class="indent-2">' +
-          '<span class="accordion-name ' + (isExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="cat" aria-expanded="' + isExpanded + '">' +
+          '<span class="accordion-name lvl-2 ' + (isExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="cat" aria-expanded="' + isExpanded + '">' +
             '<span class="accordion-chev">' +
               '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>' +
             '</span>' +
@@ -1778,7 +2208,7 @@
     return (
       '<tr class="row-leaf' + stateCls + '" data-key="' + leaf.stateKey + '" data-park="' + leaf.park.id + '" data-cat="' + leaf.category.id + '" data-date="' + leaf.date.iso + '">' +
         '<td class="indent-3 col-leafname">' +
-          '<span class="leaf-bullet" aria-hidden="true"></span>' +
+          '<span class="leaf-bullet" aria-hidden="true">•</span>' +
           '<span class="lvl-ticket-name">' + leaf.ticket.label + '</span>' +
         '</td>' +
         '<td class="col-date">' +
@@ -2098,19 +2528,100 @@
     ));
   }
 
-  // ── Filter stubs (Park / Day type / Alert status). Empty array = all-pass.
-  //    Other filter screens will write to this object in a later build step.
-  const filters = (window.__sgFilters = window.__sgFilters || { parks: [], dayType: [], alertStatus: [] });
-  function parkMatchesFilter(park) {
-    if (!filters.parks || !filters.parks.length) return true;
-    return filters.parks.indexOf(park.id) !== -1;
+  // ── Filter state ──
+  const filters = {
+    park: [], category: [], ticket: [], daytype: [], alert: [],
+    dateRange: { start: null, end: null },
+  };
+
+  // Filter option lists (built from the data, sorted alphabetically)
+  function uniqueSorted(arr) { return [...new Set(arr)].sort((a, b) => a.localeCompare(b)); }
+  const ALL_TICKET_LABELS = (function () {
+    const out = [];
+    PARKS.forEach(p => p.categories.forEach(c => c.tickets.forEach(t => out.push(t.label))));
+    return uniqueSorted(out);
+  })();
+  const filterItems = {
+    park:     PARKS.map(p => p.name),
+    category: ['Individual', 'Group'],
+    ticket:   ALL_TICKET_LABELS,
+    daytype:  ['Weekday', 'Weekend', 'Holiday'],
+    alert:    ['Any alert', 'No alert', 'Low pace', 'High demand', 'Weather warning', 'Capacity risk'],
+  };
+  const FILTER_LABELS = {
+    park: 'Parks', category: 'Categories', ticket: 'Ticket Types',
+    daytype: 'Day Types', alert: 'Alerts',
+  };
+
+  // Date helpers
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const MONTHS_LONG  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOWS_SHORT   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function endOfDay(d)   { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999); }
+  function sameDay(a, b) { return !!a && !!b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  function fmtShort(d)   { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+  function isoToDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
   }
-  function dateMatchesDayType(date) {
-    if (!filters.dayType || !filters.dayType.length) return true;
-    const dt = filters.dayType;
-    if (date.isHoliday) return dt.indexOf('holiday') !== -1;
-    if (date.isWeekend) return dt.indexOf('weekend') !== -1;
-    return dt.indexOf('weekday') !== -1;
+
+  // Day-type label for a date object (our date model has isWeekend/isHoliday)
+  function dateDayType(date) {
+    if (date.isHoliday) return 'Holiday';
+    if (date.isWeekend) return 'Weekend';
+    return 'Weekday';
+  }
+
+  // Leaf-level alerts. Real alert wiring lands in a later build step;
+  // for now leaves carry no alerts, so this returns an empty array.
+  function leafActiveAlerts(leaf) {
+    return leaf.alerts || [];
+  }
+
+  // Predicates
+  function parkMatchesFilter(park) {
+    if (!filters.park.length) return true;
+    return filters.park.indexOf(park.name) !== -1;
+  }
+  function dateInDateRange(date) {
+    const r = filters.dateRange;
+    if (!r.start && !r.end) return true;
+    const d = isoToDate(date.iso);
+    if (r.start && d < startOfDay(r.start)) return false;
+    if (r.end   && d > endOfDay(r.end))     return false;
+    return true;
+  }
+  function periodInDateRange(period) {
+    const r = filters.dateRange;
+    if (!r.start && !r.end) return true;
+    // accept if any date inside the period falls within the range
+    return period.dates.some(d => dateInDateRange(d));
+  }
+  function leafMatchesAlertFilter(leaf) {
+    if (!filters.alert.length) return true;
+    const active = leafActiveAlerts(leaf);
+    // OR semantics across selected filter values
+    return filters.alert.some(filterVal => {
+      if (filterVal === 'Any alert') return active.length > 0;
+      if (filterVal === 'No alert')  return active.length === 0;
+      return active.includes(filterVal);
+    });
+  }
+  function leafPasses(leaf) {
+    if (filters.park.length     && !filters.park.includes(leaf.park.name)) return false;
+    if (filters.category.length && !filters.category.includes(leaf.category.label)) return false;
+    if (filters.ticket.length   && !filters.ticket.includes(leaf.ticket.label)) return false;
+    if (filters.daytype.length  && !filters.daytype.includes(dateDayType(leaf.date))) return false;
+    if (!dateInDateRange(leaf.date)) return false;
+    if (!leafMatchesAlertFilter(leaf)) return false;
+    return true;
+  }
+  function anyLeafPassesIn(park, date, cat /* optional */) {
+    if (cat) {
+      return cat.tickets.some(t => leafPasses(ALL_LEAVES[stateKey(park, cat, t, date)]));
+    }
+    return park.categories.some(c => anyLeafPassesIn(park, date, c));
   }
 
   // ── Period model (Daily / Monthly) ──
@@ -2221,7 +2732,7 @@
   // ── Calendar rendering ──
   function renderCalendar() {
     const periods = (calMode === 'daily' ? DAY_PERIODS : MONTH_PERIODS)
-      .filter(p => calMode === 'monthly' ? true : dateMatchesDayType(p.dates[0]));
+      .filter(periodInDateRange);
 
     const sortCls = calSort.dir === 'asc' ? ' sort-asc' : (calSort.dir === 'desc' ? ' sort-desc' : '');
     const headCells =
@@ -2507,7 +3018,424 @@
     }, 1200);
   });
 
+  // ─────────────────────────────────────────────────────────────
+  //  Filter pills — multi-select popover (portaled, position:fixed)
+  // ─────────────────────────────────────────────────────────────
+  let msPopover = null;
+  let msActiveFilter = null;
+  let msSearchTerm = '';
+
+  function buildMsPopover() {
+    if (msPopover) return;
+    msPopover = document.createElement('div');
+    msPopover.className = 'ms-popover';
+    msPopover.id = 'msPopover';
+    msPopover.hidden = true;
+    msPopover.innerHTML =
+      '<div class="ms-search-wrap">' +
+        '<svg class="ms-search-icon" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
+          '<circle cx="6" cy="6" r="4"/>' +
+          '<line x1="9" y1="9" x2="12.5" y2="12.5" stroke-linecap="round"/>' +
+        '</svg>' +
+        '<input type="text" class="ms-search" id="msSearch" placeholder="Search…">' +
+      '</div>' +
+      '<div class="ms-quick-actions">' +
+        '<button class="ms-link" id="msSelectAll" type="button">Select all</button>' +
+        '<button class="ms-link" id="msClearLink"  type="button">Clear</button>' +
+      '</div>' +
+      '<div class="ms-options" id="msOptions" role="listbox" aria-multiselectable="true"></div>';
+    document.body.appendChild(msPopover);
+
+    msPopover.querySelector('#msSearch').addEventListener('input', e => {
+      msSearchTerm = e.target.value.toLowerCase();
+      renderMsOptions();
+    });
+    msPopover.querySelector('#msSelectAll').addEventListener('click', onMsSelectAll);
+    msPopover.querySelector('#msClearLink').addEventListener('click', onMsClearOne);
+
+    const optionsEl = msPopover.querySelector('#msOptions');
+    optionsEl.addEventListener('click', e => {
+      const opt = e.target.closest('.ms-option');
+      if (!opt) return;
+      onMsToggle(opt.dataset.value);
+    });
+  }
+
+  function getVisibleMsItems() {
+    if (!msActiveFilter) return [];
+    const all = filterItems[msActiveFilter];
+    if (!msSearchTerm) return all;
+    return all.filter(v => v.toLowerCase().includes(msSearchTerm));
+  }
+
+  function renderMsOptions() {
+    const container = msPopover.querySelector('#msOptions');
+    const visible = getVisibleMsItems();
+    if (!visible.length) {
+      container.innerHTML = '<div class="ms-empty">No matches</div>';
+      return;
+    }
+    const selected = new Set(filters[msActiveFilter]);
+    const sel   = visible.filter(v =>  selected.has(v));
+    const unsel = visible.filter(v => !selected.has(v));
+    const row = (v, checked) =>
+      '<button class="ms-option" data-value="' + esc(v) + '" role="option" aria-checked="' + checked + '" type="button" title="' + esc(v) + '">' +
+        '<span class="ms-check"></span><span class="ms-label">' + esc(v) + '</span>' +
+      '</button>';
+    let html = sel.map(v => row(v, true)).join('');
+    if (sel.length && unsel.length) html += '<div class="ms-divider"></div>';
+    html += unsel.map(v => row(v, false)).join('');
+    container.innerHTML = html;
+  }
+
+  function onMsToggle(value) {
+    if (!msActiveFilter) return;
+    const arr = filters[msActiveFilter];
+    const idx = arr.indexOf(value);
+    if (idx >= 0) arr.splice(idx, 1);
+    else arr.push(value);
+    renderMsOptions();
+    applyFilters();
+  }
+  function onMsSelectAll() {
+    if (!msActiveFilter) return;
+    const visible = getVisibleMsItems();
+    const cur = new Set(filters[msActiveFilter]);
+    visible.forEach(v => cur.add(v));
+    filters[msActiveFilter] = [...cur];
+    renderMsOptions();
+    applyFilters();
+  }
+  function onMsClearOne() {
+    if (!msActiveFilter) return;
+    filters[msActiveFilter] = [];
+    renderMsOptions();
+    applyFilters();
+  }
+
+  function positionMsPopover(filter) {
+    const trigger = document.querySelector('[data-filter="' + filter + '"]');
+    const tr = trigger.getBoundingClientRect();
+    const minW = Math.max(tr.width, 280);
+    msPopover.style.minWidth = minW + 'px';
+    const pw = Math.max(msPopover.offsetWidth, minW);
+    let left = tr.left;
+    const margin = 8;
+    if (left + pw + margin > window.innerWidth) left = window.innerWidth - pw - margin;
+    if (left < margin) left = margin;
+    msPopover.style.top  = (tr.bottom + 4) + 'px';
+    msPopover.style.left = left + 'px';
+  }
+
+  function openMsPopover(filter) {
+    buildMsPopover();
+    if (msActiveFilter === filter) { closeMsPopover(); return; }
+    if (msActiveFilter) closeMsPopover();
+    msActiveFilter = filter;
+    msSearchTerm = '';
+    const search = msPopover.querySelector('#msSearch');
+    search.value = '';
+    search.placeholder = 'Search ' + FILTER_LABELS[filter].toLowerCase() + '…';
+    renderMsOptions();
+    msPopover.hidden = false;
+    positionMsPopover(filter);
+    document.querySelector('[data-filter="' + filter + '"]').setAttribute('aria-expanded', 'true');
+    requestAnimationFrame(() => search.focus());
+    document.addEventListener('keydown',  onMsKey);
+    document.addEventListener('mousedown', onMsOutside, true);
+    window.addEventListener('resize', closeMsPopover);
+  }
+  function closeMsPopover() {
+    if (!msActiveFilter) return;
+    const filter = msActiveFilter;
+    msActiveFilter = null;
+    msPopover.hidden = true;
+    const trigger = document.querySelector('[data-filter="' + filter + '"]');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('keydown',  onMsKey);
+    document.removeEventListener('mousedown', onMsOutside, true);
+    window.removeEventListener('resize', closeMsPopover);
+  }
+  function onMsKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); closeMsPopover(); }
+  }
+  function onMsOutside(e) {
+    if (msPopover.contains(e.target)) return;
+    if (e.target.closest('.ms-pill')) return;
+    closeMsPopover();
+  }
+
+  function updateMsTrigger(filter) {
+    const trigger = document.querySelector('[data-filter="' + filter + '"]');
+    if (!trigger) return;
+    const sel = filters[filter] || [];
+    const textEl  = trigger.querySelector('.ms-trigger-text');
+    const countEl = trigger.querySelector('.ms-trigger-count');
+    if (sel.length === 0) {
+      textEl.textContent = 'All ' + FILTER_LABELS[filter];
+      countEl.hidden = true;
+      countEl.textContent = '';
+    } else if (sel.length === 1) {
+      textEl.textContent = sel[0];
+      countEl.hidden = true;
+      countEl.textContent = '';
+    } else {
+      textEl.textContent = sel[0];
+      countEl.hidden = false;
+      countEl.textContent = '+' + (sel.length - 1);
+    }
+    trigger.classList.toggle('active', sel.length > 0);
+  }
+
+  // Wire pill triggers
+  document.querySelectorAll('.ms-pill').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openMsPopover(btn.dataset.filter);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  //  Date-range popover (portaled, dark)
+  // ─────────────────────────────────────────────────────────────
+  let dpPopover = null;
+  let dpOpen = false;
+  const picker = { start: null, end: null, hover: null };
+  let viewMonth = (function () {
+    // default view = the month of the first horizon date (2026-05)
+    const d = isoToDate(DATES[0].iso);
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  })();
+
+  function updateDateTrigger() {
+    const trigger = document.getElementById('dateRangeTrigger');
+    const label   = document.getElementById('dateRangeLabel');
+    const r = filters.dateRange;
+    label.textContent = (r.start && r.end) ? (fmtShort(r.start) + ' → ' + fmtShort(r.end)) : 'All Dates';
+    trigger.classList.toggle('active', !!(r.start || r.end));
+  }
+
+  function rangeBounds() {
+    if (!picker.start) return [null, null];
+    let a = picker.start;
+    let b = picker.end || (picker.hover && !picker.end ? picker.hover : null);
+    if (!b) return [a, null];
+    if (a > b) { const t = a; a = b; b = t; }
+    return [a, b];
+  }
+  function isStart(d)   { const [a] = rangeBounds(); return a && sameDay(d, a); }
+  function isEnd(d)     { const b = rangeBounds()[1]; return b && sameDay(d, b); }
+  function isInRange(d) {
+    const [a, b] = rangeBounds();
+    if (!a || !b) return false;
+    return d >= a && d <= b;
+  }
+
+  function buildDpPopover() {
+    if (dpPopover) return;
+    dpPopover = document.createElement('div');
+    dpPopover.className = 'dp-popover';
+    dpPopover.id = 'dateRangePopover';
+    dpPopover.setAttribute('role', 'dialog');
+    dpPopover.setAttribute('aria-label', 'Select date range');
+    dpPopover.hidden = true;
+    dpPopover.innerHTML =
+      '<div class="dp-months">' +
+        '<div class="dp-month">' +
+          '<div class="dp-month-header">' +
+            '<button class="dp-nav-btn" data-nav="prev" type="button" aria-label="Previous month">' +
+              '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="7,2 3,6 7,10" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+            '<div class="dp-month-label" data-label="left"></div>' +
+            '<span></span>' +
+          '</div>' +
+          '<div class="dp-grid" data-grid="left"></div>' +
+        '</div>' +
+        '<div class="dp-month">' +
+          '<div class="dp-month-header">' +
+            '<span></span>' +
+            '<div class="dp-month-label" data-label="right"></div>' +
+            '<button class="dp-nav-btn" data-nav="next" type="button" aria-label="Next month">' +
+              '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="5,2 9,6 5,10" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<div class="dp-grid" data-grid="right"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dp-footer">' +
+        '<div class="dp-status" id="dpStatus">Select start date</div>' +
+        '<div class="dp-actions">' +
+          '<button class="dp-btn dp-btn-ghost"   id="dpClear" type="button">Clear</button>' +
+          '<button class="dp-btn dp-btn-primary" id="dpApply" type="button" disabled>Apply</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(dpPopover);
+
+    dpPopover.addEventListener('click', e => {
+      const nav = e.target.closest('[data-nav]');
+      if (nav) { shiftMonths(nav.dataset.nav === 'prev' ? -1 : 1); return; }
+      const dayBtn = e.target.closest('[data-date]');
+      if (dayBtn) { onDayClick(new Date(+dayBtn.dataset.date)); return; }
+    });
+    dpPopover.querySelector('#dpClear').addEventListener('click', clearPickerSelection);
+    dpPopover.querySelector('#dpApply').addEventListener('click', applyPicker);
+    dpPopover.addEventListener('mouseover', e => {
+      const dayBtn = e.target.closest('[data-date]');
+      if (!dayBtn) return;
+      if (picker.start && !picker.end) {
+        const d = new Date(+dayBtn.dataset.date);
+        if (!sameDay(picker.hover, d)) { picker.hover = d; renderPicker(); }
+      }
+    });
+    dpPopover.addEventListener('mouseleave', () => {
+      if (picker.hover) { picker.hover = null; renderPicker(); }
+    });
+  }
+
+  function renderDpGrid(side, year, month) {
+    const grid  = dpPopover.querySelector('[data-grid="' + side + '"]');
+    const label = dpPopover.querySelector('[data-label="' + side + '"]');
+    label.textContent = MONTHS_LONG[month] + ' ' + year;
+    let html = DOWS_SHORT.map(d => '<div class="dp-dow">' + d + '</div>').join('');
+    const first = new Date(year, month, 1);
+    const startOff = first.getDay();
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(year, month, 1 - startOff + i);
+      const cls = ['dp-day'];
+      if (d.getMonth() !== month) cls.push('out-of-month');
+      if (isStart(d))   cls.push('is-start');
+      if (isEnd(d))     cls.push('is-end');
+      if (isInRange(d)) cls.push('in-range');
+      html += '<button type="button" class="' + cls.join(' ') + '" data-date="' + d.getTime() + '" aria-label="' + fmtShort(d) + '"><span class="dp-day-num">' + d.getDate() + '</span></button>';
+    }
+    grid.innerHTML = html;
+  }
+
+  function renderPicker() {
+    const ly = viewMonth.getFullYear(), lm = viewMonth.getMonth();
+    const right = new Date(ly, lm + 1, 1);
+    renderDpGrid('left',  ly, lm);
+    renderDpGrid('right', right.getFullYear(), right.getMonth());
+    const status = dpPopover.querySelector('#dpStatus');
+    if (!picker.start)    status.textContent = 'Select start date';
+    else if (!picker.end) status.textContent = 'Select end date';
+    else                  status.textContent = fmtShort(picker.start) + ' → ' + fmtShort(picker.end);
+    dpPopover.querySelector('#dpApply').disabled = !(picker.start && picker.end);
+  }
+
+  function onDayClick(d) {
+    d = startOfDay(d);
+    if (!picker.start || (picker.start && picker.end)) {
+      picker.start = d; picker.end = null; picker.hover = null;
+    } else if (d < picker.start) {
+      picker.start = d; picker.end = null;
+    } else if (sameDay(d, picker.start)) {
+      picker.end = d;
+    } else {
+      picker.end = d; picker.hover = null;
+    }
+    renderPicker();
+  }
+  function shiftMonths(delta) {
+    viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + delta, 1);
+    renderPicker();
+  }
+  function clearPickerSelection() {
+    picker.start = null; picker.end = null; picker.hover = null;
+    renderPicker();
+  }
+  function applyPicker() {
+    if (!picker.start || !picker.end) return;
+    filters.dateRange = { start: picker.start, end: picker.end };
+    closeDpPopover();
+    applyFilters();
+  }
+
+  function positionDpPopover() {
+    const trigger = document.getElementById('dateRangeTrigger');
+    const tr = trigger.getBoundingClientRect();
+    const pw = dpPopover.offsetWidth;
+    let left = tr.left;
+    const margin = 8;
+    if (left + pw + margin > window.innerWidth) left = window.innerWidth - pw - margin;
+    if (left < margin) left = margin;
+    dpPopover.style.top  = (tr.bottom + 6) + 'px';
+    dpPopover.style.left = left + 'px';
+  }
+  function openDpPopover() {
+    buildDpPopover();
+    picker.start = filters.dateRange.start;
+    picker.end   = filters.dateRange.end;
+    picker.hover = null;
+    if (picker.start) viewMonth = new Date(picker.start.getFullYear(), picker.start.getMonth(), 1);
+    else {
+      const d = isoToDate(DATES[0].iso);
+      viewMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    }
+    dpPopover.hidden = false;
+    dpOpen = true;
+    renderPicker();
+    positionDpPopover();
+    document.getElementById('dateRangeTrigger').setAttribute('aria-expanded', 'true');
+    document.addEventListener('keydown',  onDpKey);
+    document.addEventListener('mousedown', onDpOutside, true);
+    window.addEventListener('resize', closeDpPopover);
+    window.addEventListener('scroll', closeDpPopover, true);
+  }
+  function closeDpPopover() {
+    if (!dpPopover || !dpOpen) return;
+    dpPopover.hidden = true;
+    dpOpen = false;
+    const trig = document.getElementById('dateRangeTrigger');
+    if (trig) trig.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('keydown',  onDpKey);
+    document.removeEventListener('mousedown', onDpOutside, true);
+    window.removeEventListener('resize', closeDpPopover);
+    window.removeEventListener('scroll', closeDpPopover, true);
+  }
+  function onDpKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); closeDpPopover(); }
+  }
+  function onDpOutside(e) {
+    const trigger = document.getElementById('dateRangeTrigger');
+    if (dpPopover.contains(e.target) || (trigger && trigger.contains(e.target))) return;
+    closeDpPopover();
+  }
+  document.getElementById('dateRangeTrigger').addEventListener('click', e => {
+    e.stopPropagation();
+    if (dpOpen) closeDpPopover(); else openDpPopover();
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  //  applyFilters — single source of truth that re-renders both views
+  // ─────────────────────────────────────────────────────────────
+  function applyFilters() {
+    ['park', 'category', 'ticket', 'daytype', 'alert'].forEach(updateMsTrigger);
+    updateDateTrigger();
+    const anyActive =
+      filters.park.length     > 0 ||
+      filters.category.length > 0 ||
+      filters.ticket.length   > 0 ||
+      filters.daytype.length  > 0 ||
+      filters.alert.length    > 0 ||
+      !!(filters.dateRange.start || filters.dateRange.end);
+    document.getElementById('filterClear').hidden = !anyActive;
+    render();
+  }
+
+  // Clear button
+  document.getElementById('filterClear').addEventListener('click', () => {
+    filters.park = [];
+    filters.category = [];
+    filters.ticket = [];
+    filters.daytype = [];
+    filters.alert = [];
+    filters.dateRange = { start: null, end: null };
+    applyFilters();
+  });
+
   render();
+  applyFilters();   // populate trigger labels + initial filter-clear hidden state
 })();
 </script>
 
