@@ -188,29 +188,30 @@
     table.srt tbody td.col-date .date-dow { color: var(--text-muted); margin-left: 6px; font-size: 10.5px; }
     table.srt tbody td.col-date .holiday-tag { color: var(--accent); font-weight: 500; margin-left: 6px; font-size: 10.5px; }
 
-    /* ── Park row (level 1) ── */
-    table.srt tbody tr.row-park td {
-      background: #f6f8fc;
-      font-weight: 600;
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border);
-    }
-    table.srt tbody tr.row-park:hover td:not(.cell-pos):not(.cell-neg) {
-      background: #eef2f8;
-    }
+    /* ── Per-level row backgrounds (Park / Category / Leaf) ──
+       Use :not(.cell-pos):not(.cell-neg) so YoY tints still read through. */
+    table.srt tbody tr.row-park    td:not(.cell-pos):not(.cell-neg) { background: #f6f8fc; }
+    table.srt tbody tr.row-category td:not(.cell-pos):not(.cell-neg) { background: #fbfcfe; }
+    table.srt tbody tr.row-leaf     td:not(.cell-pos):not(.cell-neg) { background: var(--surface); }
 
-    /* ── Category row (level 2) ── */
-    table.srt tbody tr.row-category td {
-      background: #fafbfd;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    table.srt tbody tr.row-category:hover td:not(.cell-pos):not(.cell-neg) {
-      background: #f3f5f9;
-    }
+    table.srt tbody tr.row-park    { font-weight: 600; }
+    table.srt tbody tr.row-park    td { border-bottom: 1px solid var(--border); }
+    table.srt tbody tr.row-park:hover    td:not(.cell-pos):not(.cell-neg) { background: #eef2f8; }
+    table.srt tbody tr.row-category:hover td:not(.cell-pos):not(.cell-neg) { background: #f3f5f9; }
 
-    /* ── Leaf row (level 3) ── */
-    table.srt tbody tr.row-leaf td { background: var(--surface); }
+    /* ── First-cell indentation per level ──
+       Higher specificity than the generic `table.srt tbody td { padding: 7px 14px }`
+       rule, so padding-left actually applies. Two earlier passes lost this
+       silently because `.indent-1/2/3 { padding-left }` was outranked by the
+       generic shorthand `padding`. */
+    table.srt tbody tr.row-park     td.col-name { padding-left: 14px; }
+    table.srt tbody tr.row-category td.col-name { padding-left: 36px; }
+    table.srt tbody tr.row-leaf     td.col-name { padding-left: 60px; }
+
+    /* Vertical guide-line on the left edge of nested rows (inset shadow
+       composes with row background and survives table-cell rendering). */
+    table.srt tbody tr.row-category td.col-name { box-shadow: inset 2px 0 0 var(--border); }
+    table.srt tbody tr.row-leaf     td.col-name { box-shadow: inset 2px 0 0 var(--border); }
 
     /* hidden rows in collapsed accordion */
     table.srt tbody tr.is-hidden { display: none; }
@@ -239,11 +240,6 @@
     .accordion-name:hover .accordion-chev { background: rgba(232,0,125,0.08); color: var(--accent); }
     .accordion-name.expanded .accordion-chev { transform: rotate(90deg); color: var(--accent); }
 
-    /* Indentation — 20px and 24px steps per level */
-    .indent-1 { padding-left: 12px; }
-    .indent-2 { padding-left: 32px; }
-    .indent-3 { padding-left: 56px; }
-
     /* Leaf bullet — Unicode • in muted colour before the ticket name */
     .leaf-bullet {
       display: inline-block;
@@ -259,14 +255,6 @@
     .lvl-park-name   { font-weight: 600; color: var(--text-primary); }
     .lvl-cat-name    { font-weight: 500; color: var(--text-secondary); }
     .lvl-ticket-name { font-weight: 400; color: var(--text-primary); }
-
-    /* Subtle vertical guide line on the left edge of nested rows */
-    table.srt tbody tr.row-category td:first-child {
-      box-shadow: inset 3px 0 0 #d6dbe6;
-    }
-    table.srt tbody tr.row-leaf td:first-child {
-      box-shadow: inset 3px 0 0 #e4e6eb;
-    }
 
     .park-country {
       font-weight: 400;
@@ -2239,7 +2227,7 @@
     const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
     return (
       '<tr class="row-park" data-park="' + park.id + '" data-date="' + date.iso + '">' +
-        '<td class="indent-1">' +
+        '<td class="col-name">' +
           '<span class="accordion-name ' + (isExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="park" aria-expanded="' + isExpanded + '">' +
             '<span class="accordion-chev">' +
               '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>' +
@@ -2278,7 +2266,7 @@
   function categoryRowHtml(park, cat, date, agg, capMode, isExpanded) {
     return (
       '<tr class="row-category" data-park="' + park.id + '" data-cat="' + cat.id + '" data-date="' + date.iso + '">' +
-        '<td class="indent-2">' +
+        '<td class="col-name">' +
           '<span class="accordion-name lvl-2 ' + (isExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="cat" aria-expanded="' + isExpanded + '">' +
             '<span class="accordion-chev">' +
               '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>' +
@@ -2346,7 +2334,7 @@
 
     return (
       '<tr class="row-leaf' + stateCls + '" data-key="' + leaf.stateKey + '" data-park="' + leaf.park.id + '" data-cat="' + leaf.category.id + '" data-date="' + leaf.date.iso + '">' +
-        '<td class="indent-3 col-leafname">' +
+        '<td class="col-name">' +
           '<span class="leaf-bullet" aria-hidden="true">•</span>' +
           '<span class="lvl-ticket-name">' + leaf.ticket.label + '</span>' +
         '</td>' +
