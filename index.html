@@ -38,12 +38,6 @@
       letter-spacing: -0.01em;
       margin: 0;
     }
-    .pricing-sub {
-      font-family: 'Inter', sans-serif;
-      font-size: 12.5px;
-      color: var(--text-secondary);
-      margin-left: 4px;
-    }
     .pricing-spacer { flex: 1; }
 
     /* Accept-all + Commit cluster */
@@ -1411,6 +1405,251 @@
     }
     .dm-month-totals .label { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; }
     .dm-month-totals .value { color: var(--text-primary); font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+    /* ── Leaf detail modal (row click) ── */
+    .lm-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,0.55);
+      z-index: 1300;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .lm-backdrop.is-open { display: flex; }
+    .lm-modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: min(1080px, calc(100vw - 48px));
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      font-family: 'Inter', sans-serif;
+    }
+    .lm-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .lm-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .lm-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .lm-close {
+      margin-left: auto;
+      width: 28px; height: 28px;
+      border: none; background: transparent;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .lm-close:hover { background: #f3f4f8; color: var(--text-primary); }
+    .lm-body {
+      overflow-y: auto;
+      padding: 18px 22px 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+      gap: 20px;
+    }
+    .lm-col-left, .lm-col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+    .lm-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 14px 16px;
+    }
+    .lm-panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .lm-chart-area { position: relative; }
+    .lm-chart-area svg { display: block; width: 100%; height: auto; }
+    .lm-legend {
+      display: inline-flex;
+      gap: 14px;
+      margin-bottom: 8px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+    .lm-legend .swatch {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* Weather panel */
+    .lm-wx {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .lm-wx-icon { font-size: 32px; line-height: 1; }
+    .lm-wx-text { display: flex; flex-direction: column; gap: 2px; }
+    .lm-wx-temp { font-size: 18px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+    .lm-wx-desc { font-size: 12px; color: var(--text-secondary); }
+
+    /* Comparison table */
+    table.lm-compare { width: 100%; border-collapse: collapse; font-size: 12px; }
+    table.lm-compare th, table.lm-compare td {
+      padding: 7px 8px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      border-bottom: 1px solid var(--border);
+    }
+    table.lm-compare th {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    table.lm-compare th:first-child,
+    table.lm-compare td:first-child {
+      text-align: left;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    table.lm-compare td { color: var(--text-primary); }
+    table.lm-compare tr:last-child td { border-bottom: none; }
+
+    /* Recommendation panel */
+    .lm-rec-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+    .lm-rec-row .label { color: var(--text-secondary); }
+    .lm-rec-row .value { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .lm-rec-row .value.pct.cell-pos { background: #dcfce7; color: #166534; padding: 1px 8px; border-radius: 999px; font-size: 12px; }
+    .lm-rec-row .value.pct.cell-neg { background: #fee2e2; color: #991b1b; padding: 1px 8px; border-radius: 999px; font-size: 12px; }
+    .lm-rec-row .value.pct.cell-neutral { background: #f1f5f9; color: #475569; padding: 1px 8px; border-radius: 999px; font-size: 12px; }
+    .lm-override-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .lm-override-row label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .lm-override-input {
+      flex: 1;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .lm-override-input:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+    .lm-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .lm-btn {
+      flex: 1;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background .12s, border-color .12s, color .12s;
+    }
+    .lm-btn-reject { color: #dc2626; border-color: #fecaca; background: var(--surface); }
+    .lm-btn-reject:hover { background: #fee2e2; border-color: #dc2626; }
+    .lm-btn-reject.solid { background: #dc2626; color: #fff; border-color: #dc2626; }
+    .lm-btn-accept { color: #166534; border-color: #bbf7d0; background: var(--surface); }
+    .lm-btn-accept:hover { background: #dcfce7; border-color: #16a34a; }
+    .lm-btn-accept.solid { background: #16a34a; color: #fff; border-color: #16a34a; }
+    .lm-state-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .lm-state-tag.b-accepted   { background: #dcfce7; color: #166534; }
+    .lm-state-tag.b-rejected   { background: #fee2e2; color: #991b1b; }
+    .lm-state-tag.b-overridden { background: #e0e7ff; color: #3730a3; }
+
+    /* Chart hover tooltip */
+    .chart-tooltip {
+      position: absolute;
+      z-index: 50;
+      background: var(--nav-bg);
+      color: #fff;
+      padding: 8px 11px;
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      box-shadow: var(--shadow-lg);
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      min-width: 130px;
+    }
+    .chart-tooltip-header {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: rgba(255,255,255,0.96);
+    }
+    .chart-tooltip-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.82);
+      padding: 1px 0;
+    }
+    .chart-tooltip-row .swatch {
+      width: 9px; height: 9px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .chart-tooltip-row .label { flex: 1; }
+    .chart-tooltip-row .value { font-variant-numeric: tabular-nums; font-weight: 500; }
+    .chart-tooltip-row.emphasized { font-weight: 700; color: #fff; }
+    .chart-tooltip-row.emphasized .swatch { width: 12px; height: 12px; }
   </style>
 </head>
 <body>
@@ -1438,7 +1677,6 @@
 
     <div class="pricing-header-row">
       <h1 class="pricing-heading">Pricing</h1>
-      <span class="pricing-sub" id="pricingSub"></span>
 
       <div class="filter-group" id="filterGroup">
         <button class="filter-pill ms-pill" data-filter="park" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -1496,14 +1734,15 @@
       <table class="srt">
         <thead>
           <tr class="bands">
-            <th class="band-product" colspan="3">Ticket details</th>
+            <th class="band-product" colspan="4">Ticket details</th>
             <th class="band-sales"   colspan="4">Sales to date</th>
-            <th class="band-demand"  colspan="4">Demand forecast</th>
+            <th class="band-demand"  colspan="3">Demand forecast</th>
             <th class="band-price"   colspan="4">Price recommendation</th>
           </tr>
           <tr class="cols">
             <th class="sortable" data-sort-key="name" data-sort-type="text"><span class="th-inner"><span class="th-text">Park / Category / Ticket</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="date" data-sort-type="text"><span class="th-inner"><span class="th-text">Date</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th>Weather</th>
             <th class="sortable" data-sort-key="cap" data-sort-type="text"><span class="th-inner"><span class="th-text">Capacity</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
             <th class="num sortable" data-sort-key="sold" data-sort-type="num"><span class="th-inner"><span class="th-text">Units sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
@@ -1514,7 +1753,6 @@
             <th class="num sortable" data-sort-key="fcst" data-sort-type="num"><span class="th-inner"><span class="th-text">Forecast units</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="demand" data-sort-type="num"><span class="th-inner"><span class="th-text">Demand score</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="yoy" data-sort-type="num"><span class="th-inner"><span class="th-text">YoY revenue</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th>Weather</th>
 
             <th class="num sortable" data-sort-key="current" data-sort-type="num"><span class="th-inner"><span class="th-text">Current price</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="rec" data-sort-type="num"><span class="th-inner"><span class="th-text">Rec. price</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
@@ -1531,8 +1769,8 @@
       <div class="cal-toolbar">
         <span class="cal-toolbar-label">Granularity</span>
         <div class="seg-toggle secondary" id="modeToggle" role="tablist" aria-label="Granularity">
-          <button type="button" class="active" data-mode="monthly" role="tab" aria-selected="true">Monthly</button>
-          <button type="button" data-mode="daily" role="tab" aria-selected="false">Daily</button>
+          <button type="button" data-mode="monthly" role="tab" aria-selected="false">Monthly</button>
+          <button type="button" class="active" data-mode="daily" role="tab" aria-selected="true">Daily</button>
         </div>
       </div>
       <div class="cal-scroll">
@@ -1562,6 +1800,9 @@
         <div class="dm-body" id="dmBody"></div>
       </div>
     </div>
+
+    <!-- ── Leaf detail modal (row click) ── -->
+    <div class="lm-backdrop" id="lmBackdrop" aria-hidden="true"></div>
 
   </main>
 </div>
@@ -1929,6 +2170,22 @@
     };
   }
 
+  // Revenue-weighted price aggregation across leaf rows (override-aware).
+  function aggregatePrice(leafRows) {
+    let soldSum = 0, currentNum = 0, recNum = 0;
+    leafRows.forEach(l => {
+      soldSum    += l.sold;
+      currentNum += l.sold * l.current;
+      const st = rowStates[l.stateKey];
+      const r  = st && typeof st.overrideValue === 'number' ? st.overrideValue : l.rec;
+      recNum   += l.sold * r;
+    });
+    const avgCurrent = soldSum ? currentNum / soldSum : 0;
+    const avgRec     = soldSum ? recNum     / soldSum : 0;
+    const pctChange  = avgCurrent ? (avgRec - avgCurrent) / avgCurrent * 100 : 0;
+    return { avgCurrent, avgRec, pctChange };
+  }
+
   // ── State key (per brief) ──
   function stateKey(park, category, ticket, date) {
     return park.name + ' — ' + category.label + ' — ' + ticket.label + '|' + date.iso;
@@ -2105,6 +2362,12 @@
     }
     const agg = aggregate(leaves);
     if (key === 'cap') return capModeForParkDay(agg.fcst, park.capacity);
+    if (key === 'current' || key === 'rec' || key === 'pctChange') {
+      const price = aggregatePrice(leaves);
+      if (key === 'current')   return price.avgCurrent;
+      if (key === 'rec')       return price.avgRec;
+      if (key === 'pctChange') return price.pctChange;
+    }
     switch (key) {
       case 'sold':      return agg.sold;
       case 'ros':       return agg.ros;
@@ -2113,9 +2376,6 @@
       case 'fcst':      return agg.fcst;
       case 'demand':    return agg.demand;
       case 'yoy':       return agg.yoy;
-      case 'current':   return agg.revenue;  // parent rows show revenue in the current-price slot
-      case 'rec':       return null;
-      case 'pctChange': return null;
     }
     return null;
   }
@@ -2182,7 +2442,7 @@
         const parkWx   = weatherFor(park.id, date.iso);
 
         // ── Park row ──
-        out.push(parkRowHtml(park, date, parkAgg, parkCap, parkWx, parkExpanded));
+        out.push(parkRowHtml(park, date, parkAgg, parkCap, parkWx, parkExpanded, allLeafRows));
 
         if (!parkExpanded) return;
 
@@ -2194,7 +2454,7 @@
 
         catsToIter.forEach(({ cat, leafRows, agg, capMode }) => {
           const catExpanded = expanded.cats.has(park.id + '|' + cat.id + '|' + date.iso);
-          out.push(categoryRowHtml(park, cat, date, agg, capMode, catExpanded));
+          out.push(categoryRowHtml(park, cat, date, agg, capMode, catExpanded, leafRows));
 
           if (!catExpanded) return;
 
@@ -2214,17 +2474,13 @@
 
     body.innerHTML = out.join('');
 
-    // Sub-text under heading
-    const leafCount = PARKS.reduce((s, p) => s + p.categories.reduce((s2, c) => s2 + c.tickets.length, 0), 0);
-    document.getElementById('pricingSub').textContent =
-      '· ' + PARKS.length + ' parks · ' + leafCount + ' ticket types · 30 dates · ' +
-      DATES[0].label + ' → ' + DATES[DATES.length - 1].label;
-
     refreshHeaderCounts();
   }
 
-  function parkRowHtml(park, date, agg, capMode, wx, isExpanded) {
+  function parkRowHtml(park, date, agg, capMode, wx, isExpanded, leafRows) {
     const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
+    const price = aggregatePrice(leafRows);
+    const recTint = tintFor(Math.round(price.pctChange));
     return (
       '<tr class="row-park" data-park="' + park.id + '" data-date="' + date.iso + '">' +
         '<td class="col-name">' +
@@ -2242,6 +2498,7 @@
           '<span class="date-dow">' + date.dowLabel + '</span>' +
           (date.isHoliday ? '<span class="holiday-tag">Holiday</span>' : '') +
         '</td>' +
+        '<td>' + weatherCell(wx) + '</td>' +
         '<td>' + capChip(capMode) + '</td>' +
 
         '<td class="num">' + fmtInt(agg.sold) + '</td>' +
@@ -2252,18 +2509,20 @@
         '<td class="num">' + fmtInt(agg.fcst) + '</td>' +
         '<td class="num">' + demandCell(agg.demand) + '</td>' +
         '<td class="num ' + tintFor(agg.yoy) + '">' + signed(agg.yoy, '%') + '</td>' +
-        '<td>' + weatherCell(wx) + '</td>' +
 
-        // Price band on parent: show revenue total in current-price slot, dashes elsewhere
-        '<td class="num" style="color:var(--text-secondary);">' + fmtEurK(agg.revenue) + '</td>' +
-        '<td class="num" style="color:var(--text-muted);">—</td>' +
-        '<td class="num" style="color:var(--text-muted);">—</td>' +
+        // Price band on parent: revenue-weighted avg current/rec, computed pctChange
+        '<td class="num">' + fmtEur(price.avgCurrent) + '</td>' +
+        '<td class="num ' + recTint + '">' + fmtEur(price.avgRec) + '</td>' +
+        '<td class="num ' + recTint + '">' + signed(Math.round(price.pctChange * 10) / 10, '%') + '</td>' +
         '<td class="action-cell"><span class="row-action-meta">' + totalLeaves + ' rows</span></td>' +
       '</tr>'
     );
   }
 
-  function categoryRowHtml(park, cat, date, agg, capMode, isExpanded) {
+  function categoryRowHtml(park, cat, date, agg, capMode, isExpanded, leafRows) {
+    const price = aggregatePrice(leafRows);
+    const recTint = tintFor(Math.round(price.pctChange));
+    const wx = weatherFor(park.id, date.iso);
     return (
       '<tr class="row-category" data-park="' + park.id + '" data-cat="' + cat.id + '" data-date="' + date.iso + '">' +
         '<td class="col-name">' +
@@ -2279,6 +2538,7 @@
           '<span class="date-num">' + date.label + '</span>' +
           '<span class="date-dow">' + date.dowLabel + '</span>' +
         '</td>' +
+        '<td>' + weatherCell(wx) + '</td>' +
         '<td>' + capChip(capMode) + '</td>' +
 
         '<td class="num">' + fmtInt(agg.sold) + '</td>' +
@@ -2289,11 +2549,10 @@
         '<td class="num">' + fmtInt(agg.fcst) + '</td>' +
         '<td class="num">' + demandCell(agg.demand) + '</td>' +
         '<td class="num ' + tintFor(agg.yoy) + '">' + signed(agg.yoy, '%') + '</td>' +
-        '<td></td>' +
 
-        '<td class="num" style="color:var(--text-secondary);">' + fmtEurK(agg.revenue) + '</td>' +
-        '<td class="num" style="color:var(--text-muted);">—</td>' +
-        '<td class="num" style="color:var(--text-muted);">—</td>' +
+        '<td class="num">' + fmtEur(price.avgCurrent) + '</td>' +
+        '<td class="num ' + recTint + '">' + fmtEur(price.avgRec) + '</td>' +
+        '<td class="num ' + recTint + '">' + signed(Math.round(price.pctChange * 10) / 10, '%') + '</td>' +
         '<td class="action-cell"><span class="row-action-meta">' + cat.tickets.length + ' rows</span></td>' +
       '</tr>'
     );
@@ -2342,6 +2601,7 @@
           '<span class="date-num">' + leaf.date.label + '</span>' +
           '<span class="date-dow">' + leaf.date.dowLabel + '</span>' +
         '</td>' +
+        '<td>' + weatherCell(leaf.wx) + '</td>' +
         '<td>' + capChip(leaf.cap) + '</td>' +
 
         '<td class="num">' + fmtInt(leaf.sold) + '</td>' +
@@ -2352,7 +2612,6 @@
         '<td class="num">' + fmtInt(leaf.fcst) + '</td>' +
         '<td class="num">' + demandCell(leaf.demand) + '</td>' +
         '<td class="num ' + yoyTint + '">' + signed(leaf.yoy, '%') + '</td>' +
-        '<td>' + weatherCell(leaf.wx) + '</td>' +
 
         '<td class="num">' + fmtEur(leaf.current) + '</td>' +
         '<td class="num rec-cell ' + recTint + '" data-key="' + leaf.stateKey + '">' +
@@ -2598,6 +2857,468 @@
     showToast('Accepted ' + n + ' change' + (n === 1 ? '' : 's'));
   });
 
+  // ─────────────────────────────────────────────────────────────
+  //  Leaf detail modal — opens on leaf row click
+  // ─────────────────────────────────────────────────────────────
+  const lmBackdrop = document.getElementById('lmBackdrop');
+  let activeLeafKey = null;
+  let lmOverrideValue = null;   // pending override (€), uncommitted
+
+  function openLeafModal(key) {
+    if (!ALL_LEAVES[key]) return;
+    activeLeafKey = key;
+    lmOverrideValue = null;     // start fresh — pick up existing override on render
+    renderLeafModal();
+    lmBackdrop.classList.add('is-open');
+    lmBackdrop.setAttribute('aria-hidden', 'false');
+    document.addEventListener('keydown', onLeafModalKey);
+  }
+  function closeLeafModal() {
+    activeLeafKey = null;
+    lmOverrideValue = null;
+    lmBackdrop.classList.remove('is-open');
+    lmBackdrop.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onLeafModalKey);
+  }
+  function onLeafModalKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); closeLeafModal(); }
+  }
+  lmBackdrop.addEventListener('click', e => {
+    if (e.target === lmBackdrop) closeLeafModal();
+  });
+
+  // Synthetic data for the modal's charts + comparison table.
+  function leafModalData(leaf) {
+    const k = leaf.stateKey;
+    const r = rngFor('modal|' + k);
+
+    // ── Demand pace: cumulative units across the past 14 days leading up to the date ──
+    // Two curves: this-year (actual, ending at leaf.sold) and benchmark (last-year-style, ending at fcst * 0.82).
+    const N = 14;
+    const actualTotal    = leaf.sold;
+    const benchmarkTotal = Math.round(leaf.fcst * 0.82);
+    // Theme-park lead times skew sales to the last few days → concave-up curve
+    const pacePower = 2.4 + (r() - 0.5) * 0.3;
+    const pace = (t, total) => {
+      const x = t / (N - 1);
+      // Smooth ramp with mild noise
+      const base = Math.pow(x, pacePower);
+      return Math.round(total * base);
+    };
+    const actualSeries    = Array.from({ length: N }, (_, i) => pace(i, actualTotal));
+    const benchmarkSeries = Array.from({ length: N }, (_, i) => pace(i, benchmarkTotal));
+    // Mild day-to-day noise on the actual series
+    for (let i = 1; i < N; i++) {
+      const noise = Math.round((r() - 0.5) * actualTotal * 0.04);
+      actualSeries[i] = Math.max(actualSeries[i - 1], actualSeries[i] + noise);
+    }
+    actualSeries[N - 1] = actualTotal;
+
+    // ── 7-day hourly sales rate (avg units/hr per day for the last 7 days) ──
+    const dayLabels = [];
+    const baseDate = isoToDate(leaf.date.iso);
+    const wxKindByDay = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(baseDate.getTime() - i * 86400000);
+      const iso = d.toISOString().slice(0, 10);
+      dayLabels.push({
+        iso,
+        short: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()],
+        num:   d.getDate(),
+      });
+      const wx = weatherFor(leaf.park.id, iso);
+      wxKindByDay.push(wx.kind);
+    }
+    // baseline rate = leaf.salesRate; trend modestly toward final day, plus weather effect
+    const inverted = leaf.park.id === 'tropical';
+    const hourly = dayLabels.map((d, i) => {
+      const trend = 0.75 + (i / 6) * 0.5;      // 0.75 → 1.25
+      const wxMult = wxKindByDay[i] === 'sun'  ? (inverted ? 0.85 : 1.10)
+                   : wxKindByDay[i] === 'rain' ? (inverted ? 1.25 : 0.75)
+                   : 1.0;
+      const noise  = 0.85 + r() * 0.30;
+      return Math.max(1, Math.round(leaf.salesRate * trend * wxMult * noise));
+    });
+
+    // ── Comparison table: Current / Forecast / Last year for Units, Revenue, ROS ──
+    const cmp = {
+      units: {
+        current:  leaf.sold,
+        forecast: leaf.fcst,
+        lastYear: Math.round(leaf.sold / (1 + (leaf.yoy / 100))),
+      },
+      revenue: {
+        current:  leaf.sold * leaf.current,
+        forecast: leaf.fcst * leaf.current,
+        lastYear: Math.round((leaf.sold * leaf.current) / (1 + (leaf.yoy / 100))),
+      },
+      ros: {
+        current:  leaf.ros,
+        forecast: 0,        // benchmark by definition
+        lastYear: 0,
+      },
+    };
+
+    return { actualSeries, benchmarkSeries, hourly, dayLabels, cmp };
+  }
+
+  // ── SVG charts (inline) ──
+  function demandPaceSvg(actual, benchmark) {
+    const W = 520, H = 200;
+    const padL = 36, padR = 12, padT = 14, padB = 26;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const N = actual.length;
+    const maxY = Math.max(...actual, ...benchmark, 1);
+
+    const xAt = i => padL + (innerW * i) / (N - 1);
+    const yAt = v => padT + innerH * (1 - v / maxY);
+    const buildPath = arr => arr.map((v, i) => (i === 0 ? 'M' : 'L') + xAt(i) + ',' + yAt(v)).join(' ');
+
+    // Y-axis tick lines
+    const ticks = 4;
+    const tickLines = Array.from({ length: ticks + 1 }, (_, i) => {
+      const y = padT + (innerH * i) / ticks;
+      const v = Math.round(maxY * (1 - i / ticks));
+      return '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="#eef0f5" stroke-width="1"/>' +
+             '<text x="' + (padL - 6) + '" y="' + (y + 3) + '" font-size="9" fill="#9ca3af" text-anchor="end" font-family="Inter">' + v.toLocaleString('en-GB') + '</text>';
+    }).join('');
+
+    // X-axis day labels (every 2 days)
+    const xLabels = Array.from({ length: N }, (_, i) => {
+      if (i % 3 !== 0 && i !== N - 1) return '';
+      const x = xAt(i);
+      const label = i === N - 1 ? 'today' : 'T−' + (N - 1 - i);
+      return '<text x="' + x + '" y="' + (H - 8) + '" font-size="9" fill="#9ca3af" text-anchor="middle" font-family="Inter">' + label + '</text>';
+    }).join('');
+
+    return (
+      '<svg class="chart-demand" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" ' +
+        'data-w="' + W + '" data-h="' + H + '" data-padl="' + padL + '" data-padr="' + padR + '" data-padt="' + padT + '" data-padb="' + padB + '" data-maxy="' + maxY + '">' +
+        tickLines +
+        '<path d="' + buildPath(benchmark) + '" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/>' +
+        '<path d="' + buildPath(actual)    + '" stroke="#e8007d" stroke-width="2"   fill="none"/>' +
+        xLabels +
+        '<line class="chart-guide" x1="0" y1="' + padT + '" x2="0" y2="' + (H - padB) + '" stroke="rgba(232,0,125,0.5)" stroke-width="1" style="display:none"/>' +
+        '<g class="chart-markers" style="display:none">' +
+          '<circle r="4" fill="#9ca3af" stroke="#fff" stroke-width="1.5"/>' +
+          '<circle r="4" fill="#e8007d" stroke="#fff" stroke-width="1.5"/>' +
+        '</g>' +
+      '</svg>'
+    );
+  }
+
+  function hourlyBarsSvg(values, labels) {
+    const W = 520, H = 160;
+    const padL = 36, padR = 12, padT = 14, padB = 30;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const N = values.length;
+    const maxV = Math.max(...values, 1);
+    const gap = 8;
+    const bw = (innerW - gap * (N - 1)) / N;
+
+    const ticks = 4;
+    const tickLines = Array.from({ length: ticks + 1 }, (_, i) => {
+      const y = padT + (innerH * i) / ticks;
+      const v = Math.round(maxV * (1 - i / ticks));
+      return '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="#eef0f5" stroke-width="1"/>' +
+             '<text x="' + (padL - 6) + '" y="' + (y + 3) + '" font-size="9" fill="#9ca3af" text-anchor="end" font-family="Inter">' + v + '</text>';
+    }).join('');
+
+    const bars = values.map((v, i) => {
+      const x = padL + i * (bw + gap);
+      const h = innerH * (v / maxV);
+      const y = padT + innerH - h;
+      return '<rect class="bar" data-i="' + i + '" x="' + x + '" y="' + y + '" width="' + bw + '" height="' + h + '" rx="2" fill="#e8007d" fill-opacity="0.85"/>' +
+             '<text x="' + (x + bw / 2) + '" y="' + (H - 14) + '" font-size="10" fill="#1a1d23" text-anchor="middle" font-family="Inter" font-weight="500">' + labels[i].num + '</text>' +
+             '<text x="' + (x + bw / 2) + '" y="' + (H - 4) + '" font-size="9" fill="#9ca3af" text-anchor="middle" font-family="Inter">' + labels[i].short + '</text>';
+    }).join('');
+
+    return (
+      '<svg class="chart-hourly" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" ' +
+        'data-w="' + W + '" data-h="' + H + '" data-padl="' + padL + '" data-padr="' + padR + '" data-padt="' + padT + '" data-padb="' + padB + '">' +
+        tickLines + bars +
+      '</svg>'
+    );
+  }
+
+  // ── Modal renderer ──
+  function renderLeafModal() {
+    if (!activeLeafKey) return;
+    const leaf = ALL_LEAVES[activeLeafKey];
+    if (!leaf) return;
+    const st  = rowStates[activeLeafKey] || {};
+    const wx  = leaf.wx;
+    const m   = leafModalData(leaf);
+
+    const recCurrent = (typeof st.overrideValue === 'number') ? st.overrideValue : leaf.rec;
+    const pendingOverride = lmOverrideValue;
+    const pctChange = ((recCurrent - leaf.current) / leaf.current) * 100;
+    const pctR = Math.round(pctChange * 10) / 10;
+    const pctClass = pctR > 1 ? 'cell-pos' : (pctR < -1 ? 'cell-neg' : 'cell-neutral');
+
+    const wxDesc = {
+      sun:   'Sunny', mixed: 'Partly cloudy', cloud: 'Cloudy', rain:  'Rain expected',
+    }[wx.kind] || '';
+
+    const acceptSolid = st.state === 'accepted' ? 'solid' : '';
+    const rejectSolid = st.state === 'rejected' ? 'solid' : '';
+    const stateTag =
+      st.state === 'accepted'   ? '<span class="lm-state-tag b-accepted">Accepted</span>' :
+      st.state === 'rejected'   ? '<span class="lm-state-tag b-rejected">Rejected</span>' :
+      st.state === 'overridden' ? '<span class="lm-state-tag b-overridden">Overridden</span>' : '';
+
+    const c = m.cmp;
+    const yoyR = leaf.yoy;
+    const yoyClass = yoyR > 1 ? 'cell-pos' : (yoyR < -1 ? 'cell-neg' : 'cell-neutral');
+
+    const html =
+      '<div class="lm-modal" role="dialog" aria-modal="true">' +
+        '<header class="lm-header">' +
+          '<div>' +
+            '<div class="lm-title">' + esc(leaf.park.name) + ' — ' + esc(leaf.category.label) + ' — ' + esc(leaf.ticket.label) + '</div>' +
+            '<div class="lm-subtitle">' + esc(leaf.date.label) + ' ' + esc(leaf.date.dowLabel) +
+              (leaf.date.isHoliday ? ' · Holiday' : '') +
+              ' · Capacity ' + esc(leaf.cap === 'open' ? 'Open' : leaf.cap === 'limited' ? 'Limited' : 'Sold-out risk') +
+            '</div>' +
+          '</div>' +
+          '<button class="lm-close" type="button" id="lmCloseBtn" aria-label="Close">' +
+            '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">' +
+              '<line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/>' +
+            '</svg>' +
+          '</button>' +
+        '</header>' +
+        '<div class="lm-body">' +
+          '<div class="lm-col-left">' +
+            '<div class="lm-panel">' +
+              '<div class="lm-panel-title">Demand pace · last 14 days</div>' +
+              '<div class="lm-legend">' +
+                '<span><span class="swatch" style="background:#e8007d"></span>This year</span>' +
+                '<span><span class="swatch" style="background:#9ca3af;border:1px dashed #9ca3af"></span>Benchmark (last year)</span>' +
+              '</div>' +
+              '<div class="lm-chart-area" id="lmChartDemand">' + demandPaceSvg(m.actualSeries, m.benchmarkSeries) + '</div>' +
+            '</div>' +
+            '<div class="lm-panel">' +
+              '<div class="lm-panel-title">Last 7 days · hourly sales rate</div>' +
+              '<div class="lm-chart-area" id="lmChartHourly">' + hourlyBarsSvg(m.hourly, m.dayLabels) + '</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="lm-col-right">' +
+            '<div class="lm-panel">' +
+              '<div class="lm-wx">' +
+                '<div class="lm-wx-icon">' + wx.icon + '</div>' +
+                '<div class="lm-wx-text">' +
+                  '<div class="lm-wx-temp">' + wx.temp + '°C</div>' +
+                  '<div class="lm-wx-desc">' + esc(wxDesc) +
+                    (leaf.park.id === 'tropical' ? ' · indoor venue, rain lifts demand' : '') +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="lm-panel">' +
+              '<div class="lm-panel-title">Comparison</div>' +
+              '<table class="lm-compare">' +
+                '<thead><tr><th></th><th>Current</th><th>Forecast</th><th>Last yr</th></tr></thead>' +
+                '<tbody>' +
+                  '<tr><td>Units</td>' +
+                    '<td>' + fmtInt(c.units.current)  + '</td>' +
+                    '<td>' + fmtInt(c.units.forecast) + '</td>' +
+                    '<td>' + fmtInt(c.units.lastYear) + '</td></tr>' +
+                  '<tr><td>Revenue</td>' +
+                    '<td>' + fmtEurK(c.revenue.current)  + '</td>' +
+                    '<td>' + fmtEurK(c.revenue.forecast) + '</td>' +
+                    '<td>' + fmtEurK(c.revenue.lastYear) + '</td></tr>' +
+                  '<tr><td>ROS</td>' +
+                    '<td>' + (c.ros.current > 0 ? '+' : '') + c.ros.current + '%</td>' +
+                    '<td>0%</td>' +
+                    '<td>—</td></tr>' +
+                '</tbody>' +
+              '</table>' +
+            '</div>' +
+
+            '<div class="lm-panel">' +
+              '<div class="lm-panel-title">Recommendation</div>' +
+              stateTag +
+              '<div class="lm-rec-row"><span class="label">Current</span><span class="value">' + fmtEur(leaf.current) + '</span></div>' +
+              '<div class="lm-rec-row"><span class="label">Recommended</span><span class="value">' + fmtEur(recCurrent) + '</span></div>' +
+              '<div class="lm-rec-row"><span class="label">% change</span><span class="value pct ' + pctClass + '">' + (pctR > 0 ? '+' : '') + pctR + '%</span></div>' +
+              '<div class="lm-override-row">' +
+                '<label for="lmOverride">Override:</label>' +
+                '<input type="text" class="lm-override-input" id="lmOverride" inputmode="decimal" ' +
+                  'value="' + (pendingOverride != null ? pendingOverride : (typeof st.overrideValue === 'number' ? st.overrideValue : '')) + '" ' +
+                  'placeholder="' + fmtEur(leaf.rec) + '">' +
+              '</div>' +
+              '<div class="lm-actions">' +
+                '<button class="lm-btn lm-btn-reject ' + rejectSolid + '" type="button" id="lmReject">Reject</button>' +
+                '<button class="lm-btn lm-btn-accept ' + acceptSolid + '" type="button" id="lmAccept">Accept</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    lmBackdrop.innerHTML = html;
+
+    // Wire controls
+    document.getElementById('lmCloseBtn').addEventListener('click', closeLeafModal);
+    document.getElementById('lmAccept').addEventListener('click', () => {
+      // Commit any pending override first, then toggle accepted
+      if (lmOverrideValue != null && !isNaN(lmOverrideValue) && lmOverrideValue > 0 && Math.round(lmOverrideValue) !== leaf.current) {
+        const stRef = rowStates[activeLeafKey] || (rowStates[activeLeafKey] = {});
+        stRef.overrideValue = Math.round(lmOverrideValue);
+        stRef.state = 'overridden';
+      } else {
+        toggleAccept(activeLeafKey);   // toggles accepted state + clears override
+      }
+      lmOverrideValue = null;
+      renderLeafModal();
+    });
+    document.getElementById('lmReject').addEventListener('click', () => {
+      toggleReject(activeLeafKey);
+      lmOverrideValue = null;
+      renderLeafModal();
+    });
+    const ovIn = document.getElementById('lmOverride');
+    ovIn.addEventListener('input', () => {
+      const raw = ovIn.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+      ovIn.value = ovIn.value.replace(/[^0-9.,]/g, '');
+      const n = parseFloat(raw);
+      lmOverrideValue = isNaN(n) ? null : n;
+    });
+
+    // Wire chart tooltips
+    wireDemandPaceTooltip(lmBackdrop.querySelector('.chart-demand'), m);
+    wireHourlyTooltip(lmBackdrop.querySelector('.chart-hourly'),    m);
+  }
+
+  // ── Chart tooltip wiring ──
+  function wireDemandPaceTooltip(svg, data) {
+    if (!svg) return;
+    const container = svg.parentElement;
+    const ds = svg.dataset;
+    const W = +ds.w, H = +ds.h;
+    const padL = +ds.padl, padR = +ds.padr, padT = +ds.padt, padB = +ds.padb;
+    const innerW = W - padL - padR;
+    const maxY = +ds.maxy;
+    const innerH = H - padT - padB;
+    const N = data.actualSeries.length;
+    const yAt = v => padT + innerH * (1 - v / maxY);
+
+    const guide   = svg.querySelector('.chart-guide');
+    const markersG = svg.querySelector('.chart-markers');
+    const markers = [...markersG.querySelectorAll('circle')];
+    const tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    container.appendChild(tip);
+
+    function hide() {
+      guide.style.display = 'none';
+      markersG.style.display = 'none';
+      tip.style.display = 'none';
+    }
+    function onMove(e) {
+      const rect = container.getBoundingClientRect();
+      if (rect.width === 0) return hide();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      const sx = px * (W / rect.width);
+      const sy = py * (H / rect.height);
+      if (sx < padL || sx > W - padR || sy < padT || sy > H - padB) return hide();
+      const i = Math.max(0, Math.min(N - 1, Math.round((sx - padL) / innerW * (N - 1))));
+      const snapVbX = padL + innerW * (i / (N - 1));
+      guide.setAttribute('x1', snapVbX);
+      guide.setAttribute('x2', snapVbX);
+      guide.style.display = '';
+
+      const series = [
+        { name: 'Benchmark', color: '#9ca3af', value: data.benchmarkSeries[i] },
+        { name: 'This year', color: '#e8007d', value: data.actualSeries[i] },
+      ];
+      series.forEach((s, idx) => {
+        markers[idx].setAttribute('cx', snapVbX);
+        markers[idx].setAttribute('cy', yAt(s.value));
+        markers[idx].setAttribute('fill', s.color);
+      });
+      markersG.style.display = '';
+
+      let bestIdx = 0, bestDelta = Infinity;
+      series.forEach((s, idx) => {
+        const d = Math.abs(yAt(s.value) - sy);
+        if (d < bestDelta) { bestDelta = d; bestIdx = idx; }
+      });
+      const dayLabel = i === N - 1 ? 'Today' : 'T−' + (N - 1 - i);
+      tip.innerHTML =
+        '<div class="chart-tooltip-header">' + dayLabel + '</div>' +
+        series.map((s, idx) =>
+          '<div class="chart-tooltip-row' + (idx === bestIdx ? ' emphasized' : '') + '">' +
+            '<span class="swatch" style="background:' + s.color + '"></span>' +
+            '<span class="label">' + s.name + '</span>' +
+            '<span class="value">' + s.value.toLocaleString('en-GB') + '</span>' +
+          '</div>'
+        ).join('');
+      tip.style.display = 'block';
+
+      const tipR = tip.getBoundingClientRect();
+      let tx = px + 12, ty = py + 12;
+      if (tx + tipR.width  > rect.width)  tx = px - tipR.width  - 12;
+      if (ty + tipR.height > rect.height) ty = py - tipR.height - 12;
+      tip.style.left = Math.max(0, tx) + 'px';
+      tip.style.top  = Math.max(0, ty) + 'px';
+    }
+    container.addEventListener('mousemove', onMove);
+    container.addEventListener('mouseleave', hide);
+  }
+
+  function wireHourlyTooltip(svg, data) {
+    if (!svg) return;
+    const container = svg.parentElement;
+    const tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    container.appendChild(tip);
+    const bars = [...svg.querySelectorAll('rect.bar')];
+
+    function hide() { tip.style.display = 'none'; bars.forEach(b => b.setAttribute('fill-opacity', '0.85')); }
+
+    function show(i, e) {
+      const rect = container.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      bars.forEach((b, j) => b.setAttribute('fill-opacity', j === i ? '1' : '0.5'));
+      const v = data.hourly[i];
+      const lbl = data.dayLabels[i];
+      tip.innerHTML =
+        '<div class="chart-tooltip-header">' + lbl.short + ' ' + lbl.num + '</div>' +
+        '<div class="chart-tooltip-row"><span class="label">Avg units/hr</span><span class="value">' + v + '</span></div>';
+      tip.style.display = 'block';
+      const tipR = tip.getBoundingClientRect();
+      let tx = px + 12, ty = py + 12;
+      if (tx + tipR.width  > rect.width)  tx = px - tipR.width  - 12;
+      if (ty + tipR.height > rect.height) ty = py - tipR.height - 12;
+      tip.style.left = Math.max(0, tx) + 'px';
+      tip.style.top  = Math.max(0, ty) + 'px';
+    }
+    bars.forEach((b, i) => {
+      b.addEventListener('mousemove', e => show(i, e));
+      b.addEventListener('mouseleave', hide);
+    });
+    container.addEventListener('mouseleave', hide);
+  }
+
+  // ── Row click → open modal (leaf rows only, exclude interactive controls) ──
+  document.getElementById('srtBody').addEventListener('click', e => {
+    if (e.target.closest('[data-action]'))  return;
+    if (e.target.closest('td.rec-cell'))    return;
+    if (e.target.closest('input, select, textarea, button')) return;
+    if (e.target.closest('.accordion-name')) return;   // chevron click reserved for toggle
+    const tr = e.target.closest('tr.row-leaf');
+    if (!tr) return;
+    const key = tr.dataset.key;
+    if (key) openLeafModal(key);
+  });
+
   // ── View toggle (Table / Calendar) ──
   const srtWrap = document.querySelector('.srt-wrap');
   const calWrap = document.getElementById('calWrap');
@@ -2840,7 +3561,7 @@
   }
 
   // ── Calendar mode (daily / monthly) ──
-  let calMode = 'monthly';
+  let calMode = 'daily';
   function setCalMode(m) {
     calMode = m;
     document.querySelectorAll('#modeToggle button').forEach(b => {
