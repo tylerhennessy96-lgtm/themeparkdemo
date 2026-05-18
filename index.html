@@ -604,59 +604,198 @@
     }
 
     /* ── Calendar view ── */
+    /* Granularity segmented toggle */
+    .seg-toggle {
+      display: inline-flex;
+      background: #ececf2;
+      border-radius: 999px;
+      padding: 3px;
+      flex-shrink: 0;
+    }
+    .seg-toggle button {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border: none;
+      background: transparent;
+      padding: 6px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background .15s, color .15s, box-shadow .15s;
+      letter-spacing: 0.01em;
+    }
+    .seg-toggle button:hover:not(.active) { color: var(--text-primary); }
+    .seg-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 1px 2px rgba(232,0,125,0.25);
+    }
+    .seg-toggle.secondary { background: #f1f3f8; padding: 2px; }
+    .seg-toggle.secondary button { padding: 4px 12px; font-size: 11.5px; }
+
     .cal-wrap {
       flex: 1;
       overflow: hidden;
-      background: var(--body-bg);
+      background: var(--surface);
       display: flex;
       flex-direction: column;
+    }
+    .cal-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    .cal-toolbar-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
     .cal-scroll {
       flex: 1;
       overflow: auto;
-      padding: 14px 14px 20px;
+      background: var(--surface);
     }
-    .cal-row {
-      display: flex;
-      align-items: stretch;
+
+    table.cal-table {
+      border-collapse: separate;
+      border-spacing: 0;
       width: max-content;
       min-width: 100%;
-    }
-    .cal-row + .cal-row { margin-top: 10px; }
-
-    /* Sticky left park label */
-    .cal-park-label {
-      position: sticky;
-      left: 0;
-      z-index: 5;
-      width: 210px;
-      flex-shrink: 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      justify-content: center;
-      box-shadow: var(--shadow-sm);
-      margin-right: 10px;
     }
-    .cal-park-label .cal-park-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-      line-height: 1.2;
+    table.cal-table th, table.cal-table td {
+      box-sizing: border-box;
+      vertical-align: middle;
+      white-space: nowrap;
     }
-    .cal-park-label .cal-park-meta {
+    /* Column header row */
+    table.cal-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      height: 40px;
+      padding: 0 10px;
+      background: #fafbfc;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Inter', sans-serif;
       font-size: 11px;
+      font-weight: 600;
       color: var(--text-secondary);
+      text-align: center;
       letter-spacing: 0.02em;
+    }
+    table.cal-table thead th .col-dow {
+      display: block;
+      font-size: 9.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    table.cal-table thead th.is-weekend .col-dow { color: var(--accent); }
+    table.cal-table thead th.is-holiday::after {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-left: 4px;
+      vertical-align: middle;
+      transform: translateY(-5px);
+    }
+    /* Top-left corner (sticky in both axes) */
+    table.cal-table thead th.cal-corner {
+      left: 0;
+      z-index: 4;
+      text-align: left;
+      padding: 0 14px;
+      border-right: 1px solid var(--border);
+      background: #fafbfc;
+      min-width: 270px;
+      width: 270px;
+    }
+    table.cal-table thead th.cal-corner.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: background .12s, color .12s;
+    }
+    table.cal-table thead th.cal-corner.sortable:hover {
+      background: #eef0f5;
+      color: var(--text-primary);
+    }
+    table.cal-table thead th.cal-corner.sort-asc,
+    table.cal-table thead th.cal-corner.sort-desc {
+      background: #e8eaf1;
+      color: var(--text-primary);
+    }
+    .th-inner {
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      vertical-align: middle;
     }
-    .cal-park-label .cal-park-country {
+    .th-text {
+      display: inline-flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .sort-ind {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 7px;
+      line-height: 1;
+      color: var(--text-muted);
+      opacity: 0.45;
+      flex-shrink: 0;
+      width: 8px;
+    }
+    .sort-ind .sa-up,
+    .sort-ind .sa-down { display: block; }
+    .sort-ind .sa-down { margin-top: 1px; }
+    th.sort-asc .sort-ind,
+    th.sort-desc .sort-ind {
+      opacity: 1;
+      color: var(--accent);
+      font-size: 10px;
+    }
+    th.sort-asc .sort-ind .sa-down,
+    th.sort-desc .sort-ind .sa-up { display: none; }
+
+    /* Body row label (sticky left) */
+    table.cal-table tbody th.cal-route {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: left;
+      min-width: 270px;
+      width: 270px;
+      white-space: normal;
+      line-height: 1.35;
+    }
+    table.cal-table tbody th.cal-route .cal-park-name { font-weight: 600; }
+    table.cal-table tbody th.cal-route .cal-park-country {
       display: inline-block;
       font-size: 10px;
       font-weight: 600;
@@ -665,192 +804,147 @@
       padding: 1px 6px;
       border-radius: 999px;
       letter-spacing: 0.04em;
+      margin-left: 8px;
+      vertical-align: middle;
     }
-    .cal-corner {
-      background: transparent;
-      border: none;
-      box-shadow: none;
-      padding: 0;
-    }
-
-    /* Cells container */
-    .cal-cells {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    /* Header row date headers */
-    .cal-header-row { margin-bottom: 6px; }
-    .cal-header-row .cal-cells .cal-date-header {
-      width: 90px;
-      flex-shrink: 0;
-      padding: 6px 8px 8px;
-      text-align: center;
-      font-family: 'Inter', sans-serif;
-      color: var(--text-secondary);
-      border-radius: 6px 6px 0 0;
-    }
-    .cal-date-header .dow {
+    table.cal-table tbody th.cal-route .cal-park-meta {
       display: block;
       font-size: 10.5px;
-      font-weight: 600;
       color: var(--text-muted);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      margin-top: 3px;
+      font-weight: 400;
     }
-    .cal-date-header .dnum {
-      display: block;
+    /* Data cells */
+    table.cal-table tbody td {
+      padding: 7px 10px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-variant-numeric: tabular-nums;
+      min-width: 120px;
+      background: var(--surface);
+    }
+    table.cal-table tbody td .cell-rev {
       font-size: 12.5px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-top: 2px;
-      font-variant-numeric: tabular-nums;
-    }
-    .cal-date-header.is-weekend .dnum { color: var(--accent); }
-    .cal-date-header.is-holiday .dnum::after {
-      content: '';
-      display: inline-block;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-left: 4px;
-      transform: translateY(-3px);
-    }
-
-    /* Cells */
-    .cal-cell {
-      position: relative;
-      width: 90px;
-      height: 88px;
-      flex-shrink: 0;
-      border-radius: 7px;
-      cursor: pointer;
-      padding: 7px 9px 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
-      transition: transform .12s ease, box-shadow .12s ease;
-      font-family: 'Inter', sans-serif;
-    }
-    .cal-cell:hover {
-      transform: translateY(-1px);
-      box-shadow: inset 0 0 0 1.5px rgba(232,0,125,0.55), 0 4px 14px rgba(26,26,46,0.10);
-      z-index: 2;
-    }
-    .cal-cell.is-weekend { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
-    .cal-cell .cal-cell-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-    }
-    .cal-cell .cal-cell-dnum {
-      font-size: 14px;
       font-weight: 600;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+      letter-spacing: -0.005em;
+      line-height: 1.15;
     }
-    .cal-cell .cal-cell-cap {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      margin-top: 4px;
-      box-shadow: 0 0 0 1.5px rgba(255,255,255,0.6);
-    }
-    .cal-cell .cal-cell-cap.cap-open    { background: #16a34a; }
-    .cal-cell .cal-cell-cap.cap-limited { background: #f59e0b; }
-    .cal-cell .cal-cell-cap.cap-risk    { background: #dc2626; }
-    .cal-cell .cal-cell-ros {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-    .cal-cell .cal-cell-badge {
-      position: absolute;
-      bottom: 6px;
-      right: 6px;
-      min-width: 17px;
-      height: 17px;
-      padding: 0 5px;
-      border-radius: 999px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      display: inline-flex;
+    table.cal-table tbody td .cell-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 500;
+      line-height: 1.2;
+      display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 1px 4px rgba(232,0,125,0.35);
+      gap: 8px;
+    }
+    table.cal-table tbody td .cell-meta .pipe {
+      color: var(--text-muted);
+      opacity: 0.5;
+      font-weight: 400;
+    }
+    /* Heatmap tiers — ROS vs benchmark % */
+    table.cal-table tbody td.tier-pos2 { background: #bbf7d0; }
+    table.cal-table tbody td.tier-pos2 .cell-rev  { color: #14532d; }
+    table.cal-table tbody td.tier-pos2 .cell-meta { color: #166534; }
+    table.cal-table tbody td.tier-pos1 { background: #dcfce7; }
+    table.cal-table tbody td.tier-pos1 .cell-rev  { color: #166534; }
+    table.cal-table tbody td.tier-pos1 .cell-meta { color: #15803d; }
+    table.cal-table tbody td.tier-zero { background: var(--surface); }
+    table.cal-table tbody td.tier-neg1 { background: #fee2e2; }
+    table.cal-table tbody td.tier-neg1 .cell-rev  { color: #991b1b; }
+    table.cal-table tbody td.tier-neg1 .cell-meta { color: #b91c1c; }
+    table.cal-table tbody td.tier-neg2 { background: #fecaca; }
+    table.cal-table tbody td.tier-neg2 .cell-rev  { color: #7f1d1d; }
+    table.cal-table tbody td.tier-neg2 .cell-meta { color: #991b1b; }
+    /* Cell hover */
+    table.cal-table tbody td:hover {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+      position: relative;
+      z-index: 3;
+    }
+    /* Click affordance + decision markers */
+    table.cal-table tbody td[data-row] { cursor: pointer; }
+    table.cal-table tbody td.decided-accept,
+    table.cal-table tbody td.decided-reject { position: relative; }
+    table.cal-table tbody td.decided-accept::after,
+    table.cal-table tbody td.decided-reject::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      z-index: 1;
+      box-shadow: 0 0 0 1.5px var(--surface);
+    }
+    table.cal-table tbody td.decided-accept::after { background: #16a34a; }
+    table.cal-table tbody td.decided-reject::after { background: #dc2626; }
+
+    /* Empty-state row */
+    .cal-empty-th {
+      position: sticky;
+      left: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 18px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: left;
+      min-width: 270px;
+      width: 270px;
+      font-style: italic;
     }
 
-    /* ── Diverging ROS tier colour scale ── */
-    .cal-cell.tier-n3 { background: #dc2626; color: #fff; }
-    .cal-cell.tier-n2 { background: #fda4af; color: #7f1d1d; }
-    .cal-cell.tier-n1 { background: #fee2e2; color: #991b1b; }
-    .cal-cell.tier-0  { background: #fafafa; color: var(--text-primary); }
-    .cal-cell.tier-p1 { background: #dcfce7; color: #166534; }
-    .cal-cell.tier-p2 { background: #86efac; color: #0c4a25; }
-    .cal-cell.tier-p3 { background: #16a34a; color: #fff; }
-
-    /* ── Detail side panel ── */
-    .cal-detail-backdrop {
+    /* ── Detail modal (calendar cell click) ── */
+    .dm-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(26,26,46,0.45);
+      background: rgba(26,26,46,0.55);
       z-index: 1300;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity .15s ease, visibility 0s linear .15s;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
     }
-    .cal-detail-backdrop.is-open {
-      opacity: 1;
-      visibility: visible;
-      transition: opacity .15s ease;
-    }
-    .cal-detail-panel {
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 460px;
-      max-width: calc(100vw - 32px);
+    .dm-backdrop.is-open { display: flex; }
+    .dm-modal {
       background: var(--surface);
-      box-shadow: -8px 0 32px rgba(26,26,46,0.18);
-      z-index: 1310;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 640px;
+      max-width: calc(100vw - 48px);
+      max-height: calc(100vh - 48px);
       display: flex;
       flex-direction: column;
-      transform: translateX(100%);
-      transition: transform .2s ease;
+      font-family: 'Inter', sans-serif;
     }
-    .cal-detail-panel.is-open { transform: translateX(0); }
-    .cal-detail-header {
-      flex-shrink: 0;
-      padding: 16px 20px;
+    .dm-header {
+      padding: 18px 22px 14px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: flex-start;
       gap: 12px;
     }
-    .cal-detail-title {
-      font-family: 'Inter', sans-serif;
+    .dm-title {
       font-size: 15px;
       font-weight: 600;
       color: var(--text-primary);
       line-height: 1.3;
     }
-    .cal-detail-sub {
-      font-family: 'Inter', sans-serif;
+    .dm-sub {
       font-size: 12px;
       color: var(--text-secondary);
       margin-top: 4px;
     }
-    .cal-detail-close {
+    .dm-close {
       margin-left: auto;
       width: 28px;
       height: 28px;
@@ -864,41 +958,37 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .cal-detail-close:hover { background: #f3f4f8; color: var(--text-primary); }
-    .cal-detail-body {
-      flex: 1;
+    .dm-close:hover { background: #f3f4f8; color: var(--text-primary); }
+    .dm-body {
       overflow-y: auto;
-      padding: 4px 0 8px;
+      padding: 4px 0 12px;
     }
-    .cal-detail-cat-head {
-      padding: 14px 20px 6px;
-      font-family: 'Inter', sans-serif;
+    .dm-cat-head {
+      padding: 14px 22px 6px;
       font-size: 10.5px;
       font-weight: 700;
       color: var(--text-muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .cal-detail-row {
+    .dm-row {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto;
       align-items: center;
-      gap: 12px;
-      padding: 10px 20px;
+      gap: 14px;
+      padding: 10px 22px;
       border-bottom: 1px solid var(--border);
     }
-    .cal-detail-row:hover { background: var(--row-hover); }
-    .cal-detail-row.row-accepted   { background: #f1faf3; }
-    .cal-detail-row.row-rejected   { background: #fdf3f3; }
-    .cal-detail-row.row-overridden { background: #f3f4ff; }
-    .cal-detail-ticket {
-      font-family: 'Inter', sans-serif;
+    .dm-row:hover { background: var(--row-hover); }
+    .dm-row.row-accepted   { background: #f1faf3; }
+    .dm-row.row-rejected   { background: #fdf3f3; }
+    .dm-row.row-overridden { background: #f3f4ff; }
+    .dm-ticket {
       font-size: 13px;
       font-weight: 500;
       color: var(--text-primary);
     }
-    .cal-detail-prices {
-      font-family: 'Inter', sans-serif;
+    .dm-prices {
       font-size: 12px;
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
@@ -907,27 +997,35 @@
       align-items: center;
       gap: 6px;
     }
-    .cal-detail-prices .current { color: var(--text-secondary); }
-    .cal-detail-prices .arrow   { color: var(--text-muted); }
-    .cal-detail-prices .rec     { color: var(--text-primary); font-weight: 600; }
-    .cal-detail-prices .pct     { margin-left: 4px; font-weight: 600; font-size: 11.5px; padding: 1px 6px; border-radius: 999px; }
-    .cal-detail-prices .pct.cell-pos { background: #dcfce7; color: #166534; }
-    .cal-detail-prices .pct.cell-neg { background: #fee2e2; color: #991b1b; }
-    .cal-detail-prices .pct.cell-neutral { background: #f1f5f9; color: #475569; }
-    .cal-detail-actions { display: inline-flex; gap: 6px; align-items: center; }
-    .cal-detail-status {
-      font-family: 'Inter', sans-serif;
+    .dm-prices .current { color: var(--text-secondary); }
+    .dm-prices .arrow   { color: var(--text-muted); }
+    .dm-prices .rec     { color: var(--text-primary); font-weight: 600; }
+    .dm-prices .pct     { margin-left: 4px; font-weight: 600; font-size: 11.5px; padding: 1px 6px; border-radius: 999px; }
+    .dm-prices .pct.cell-pos { background: #dcfce7; color: #166534; }
+    .dm-prices .pct.cell-neg { background: #fee2e2; color: #991b1b; }
+    .dm-prices .pct.cell-neutral { background: #f1f5f9; color: #475569; }
+    .dm-status {
       font-size: 9.5px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       padding: 2px 7px;
       border-radius: 999px;
-      margin-right: 4px;
     }
-    .cal-detail-status.b-accepted   { background: #dcfce7; color: #166534; }
-    .cal-detail-status.b-rejected   { background: #fee2e2; color: #991b1b; }
-    .cal-detail-status.b-overridden { background: #e0e7ff; color: #3730a3; }
+    .dm-status.b-accepted   { background: #dcfce7; color: #166534; }
+    .dm-status.b-rejected   { background: #fee2e2; color: #991b1b; }
+    .dm-status.b-overridden { background: #e0e7ff; color: #3730a3; }
+    .dm-actions { display: inline-flex; gap: 6px; align-items: center; }
+    .dm-month-totals {
+      padding: 12px 22px 4px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+    .dm-month-totals .label { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; }
+    .dm-month-totals .value { color: var(--text-primary); font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -1011,32 +1109,40 @@
 
     <!-- ── Calendar view (hidden by default) ── -->
     <div class="cal-wrap" id="calWrap" hidden>
-      <div class="cal-scroll" id="calScroll">
-        <div class="cal-row cal-header-row">
-          <div class="cal-park-label cal-corner"></div>
-          <div class="cal-cells" id="calHeaderCells"></div>
+      <div class="cal-toolbar">
+        <span class="cal-toolbar-label">Granularity</span>
+        <div class="seg-toggle secondary" id="modeToggle" role="tablist" aria-label="Granularity">
+          <button type="button" class="active" data-mode="monthly" role="tab" aria-selected="true">Monthly</button>
+          <button type="button" data-mode="daily" role="tab" aria-selected="false">Daily</button>
         </div>
-        <div id="calRows"></div>
+      </div>
+      <div class="cal-scroll">
+        <table class="cal-table" id="calTable">
+          <thead><tr id="calHead"></tr></thead>
+          <tbody id="calBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- ── Detail side panel (calendar cell click) ── -->
-    <div class="cal-detail-backdrop" id="calDetailBackdrop" aria-hidden="true"></div>
-    <aside class="cal-detail-panel" id="calDetailPanel" aria-hidden="true" aria-labelledby="calDetailTitle">
-      <header class="cal-detail-header">
-        <div>
-          <div class="cal-detail-title" id="calDetailTitle">—</div>
-          <div class="cal-detail-sub"  id="calDetailSub"></div>
-        </div>
-        <button class="cal-detail-close" type="button" id="calDetailClose" aria-label="Close">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-            <line x1="4"  y1="4"  x2="12" y2="12"/>
-            <line x1="12" y1="4"  x2="4"  y2="12"/>
-          </svg>
-        </button>
-      </header>
-      <div class="cal-detail-body" id="calDetailBody"></div>
-    </aside>
+    <!-- ── Detail modal (calendar cell click) ── -->
+    <div class="dm-backdrop" id="dmBackdrop" aria-hidden="true">
+      <div class="dm-modal" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
+        <header class="dm-header">
+          <div>
+            <div class="dm-title" id="dmTitle">—</div>
+            <div class="dm-sub"   id="dmSub"></div>
+          </div>
+          <button class="dm-close" type="button" id="dmClose" aria-label="Close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <line x1="4"  y1="4"  x2="12" y2="12"/>
+              <line x1="12" y1="4"  x2="4"  y2="12"/>
+            </svg>
+          </button>
+        </header>
+        <div class="dm-month-totals" id="dmTotals" hidden></div>
+        <div class="dm-body" id="dmBody"></div>
+      </div>
+    </div>
 
   </main>
 </div>
@@ -1960,142 +2066,354 @@
     if (!btn) return;
     setView(btn.dataset.view);
   });
-  // Hash deep-link (e.g. #calendar, optionally #calendar:warner|2026-05-23)
+  // Hash deep-link (e.g. #calendar, optionally #calendar:warner|2026-05-23
+  //  or #calendar:warner|2026-05 for monthly view)
   const hashRaw = (location.hash || '').replace('#', '');
   if (hashRaw.startsWith('calendar')) {
     requestAnimationFrame(() => {
       setView('calendar');
-      const m = hashRaw.match(/^calendar:([^|]+)\|(\d{4}-\d{2}-\d{2})$/);
-      if (m) openDetail(m[1], m[2]);
+      const mDay = hashRaw.match(/^calendar:([^|]+)\|(\d{4}-\d{2}-\d{2})$/);
+      const mMon = hashRaw.match(/^calendar:([^|]+)\|(\d{4}-\d{2})$/);
+      if (mDay) { setCalMode('daily');   openDetail(mDay[1], mDay[2]); }
+      else if (mMon) { setCalMode('monthly'); openDetail(mMon[1], mMon[2]); }
     });
   }
 
-  // ── Diverging tier mapping on ROS vs benchmark ──
-  function rosTier(ros) {
-    if (ros <= -15) return 'tier-n3';
-    if (ros <=  -5) return 'tier-n2';
-    if (ros <=  -2) return 'tier-n1';
-    if (ros <    2) return 'tier-0';
-    if (ros <    5) return 'tier-p1';
-    if (ros <   15) return 'tier-p2';
-    return 'tier-p3';
+  // ── Tier function (verbatim from logistics) ──
+  function tier(rev) {
+    if (rev >=  10) return 'tier-pos2';
+    if (rev >=   3) return 'tier-pos1';
+    if (rev >   -3) return 'tier-zero';
+    if (rev >  -10) return 'tier-neg1';
+    return 'tier-neg2';
+  }
+  function fmtPct(n) {
+    const sign = n > 0 ? '+' : (n < 0 ? '' : '');
+    return sign + n.toFixed(1) + '%';
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, m => (
+      m === '&' ? '&amp;' : m === '<' ? '&lt;' : m === '>' ? '&gt;' :
+      m === '"' ? '&quot;' : '&#39;'
+    ));
   }
 
-  // Per-park × date snapshot: aggregate + pending count + cap mode
-  function parkDaySnapshot(park, date) {
+  // ── Filter stubs (Park / Day type / Alert status). Empty array = all-pass.
+  //    Other filter screens will write to this object in a later build step.
+  const filters = (window.__sgFilters = window.__sgFilters || { parks: [], dayType: [], alertStatus: [] });
+  function parkMatchesFilter(park) {
+    if (!filters.parks || !filters.parks.length) return true;
+    return filters.parks.indexOf(park.id) !== -1;
+  }
+  function dateMatchesDayType(date) {
+    if (!filters.dayType || !filters.dayType.length) return true;
+    const dt = filters.dayType;
+    if (date.isHoliday) return dt.indexOf('holiday') !== -1;
+    if (date.isWeekend) return dt.indexOf('weekend') !== -1;
+    return dt.indexOf('weekday') !== -1;
+  }
+
+  // ── Period model (Daily / Monthly) ──
+  const DAY_PERIODS = DATES.map(d => ({
+    key:   d.iso,
+    label: d.dowLabel + ' ' + (d.iso.slice(5, 7) + '/' + d.iso.slice(8, 10)),
+    dow:   d.dowLabel,
+    isWeekend: d.isWeekend,
+    isHoliday: d.isHoliday,
+    dates: [d],
+  }));
+  const MONTH_PERIODS = (function () {
+    const groups = {};
+    DATES.forEach(d => {
+      const ym = d.iso.slice(0, 7); // YYYY-MM
+      (groups[ym] = groups[ym] || []).push(d);
+    });
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return Object.keys(groups).sort().map(ym => {
+      const [y, m] = ym.split('-');
+      return {
+        key:   ym,
+        label: monthNames[parseInt(m, 10) - 1] + '-' + y.slice(2),
+        isWeekend: false,
+        isHoliday: false,
+        dates: groups[ym],
+      };
+    });
+  })();
+
+  // ── Per-leaf units-YoY (deterministic, separate from revenue YoY) ──
+  function leafUnitsYoY(leaf) {
+    if (typeof leaf._unitsYoY === 'number') return leaf._unitsYoY;
+    const r = rngFor('units-yoy|' + leaf.stateKey);
+    leaf._unitsYoY = Math.round(pick(r, -10, 18) * 10) / 10;
+    return leaf._unitsYoY;
+  }
+
+  // ── Park × Period aggregation ──
+  function aggregateParkPeriod(park, period) {
     const leafRows = [];
-    park.categories.forEach(cat => {
-      cat.tickets.forEach(t => leafRows.push(ALL_LEAVES[stateKey(park, cat, t, date)]));
+    period.dates.forEach(d => {
+      park.categories.forEach(cat => {
+        cat.tickets.forEach(t => leafRows.push(ALL_LEAVES[stateKey(park, cat, t, d)]));
+      });
     });
-    const agg = aggregate(leafRows);
-    const cap = capModeForParkDay(agg.fcst, park.capacity);
-    let pending = 0;
+    let sold = 0, fcst = 0, revenue = 0;
+    let rosNum = 0, rosDen = 0;
+    let priceNum = 0, priceDen = 0;
+    let unitsNum = 0, unitsDen = 0;
+    let anyAccepted = false, anyRejected = false;
     leafRows.forEach(leaf => {
+      sold    += leaf.sold;
+      fcst    += leaf.fcst;
+      revenue += leaf.revenue;
+      rosNum  += leaf.ros * leaf.revenue;
+      rosDen  += leaf.revenue;
+      // Price change = (rec or override) vs current, weighted by sold
       const st = rowStates[leaf.stateKey];
-      const decided = st && (st.state || typeof st.overrideValue === 'number');
-      if (!decided && leaf.rec !== leaf.current) pending++;
+      const rec = st && typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
+      const pct = ((rec - leaf.current) / leaf.current) * 100;
+      priceNum += pct * leaf.sold;
+      priceDen += leaf.sold;
+      // Units YoY weighted by sold
+      unitsNum += leafUnitsYoY(leaf) * leaf.sold;
+      unitsDen += leaf.sold;
+      if (st && st.state === 'accepted') anyAccepted = true;
+      if (st && st.state === 'rejected') anyRejected = true;
     });
-    return { leafRows, agg, cap, pending };
+    return {
+      leafRows,
+      sold, fcst, revenue,
+      ros:   rosDen   ? rosNum   / rosDen   : 0,
+      price: priceDen ? priceNum / priceDen : 0,
+      units: unitsDen ? unitsNum / unitsDen : 0,
+      anyAccepted, anyRejected,
+    };
   }
+
+  // ── Calendar sort state ──
+  const calSort = { dir: 'off' }; // 'asc' | 'desc' | 'off'
+  function cycleCalSort() {
+    calSort.dir = calSort.dir === 'off' ? 'asc' : calSort.dir === 'asc' ? 'desc' : 'off';
+  }
+  function applyCalSort(parks) {
+    if (calSort.dir === 'off') return parks;
+    const sorted = parks.slice().sort((a, b) => a.name.localeCompare(b.name));
+    return calSort.dir === 'desc' ? sorted.reverse() : sorted;
+  }
+
+  // ── Calendar mode (daily / monthly) ──
+  let calMode = 'monthly';
+  function setCalMode(m) {
+    calMode = m;
+    document.querySelectorAll('#modeToggle button').forEach(b => {
+      const active = b.dataset.mode === m;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    renderCalendar();
+  }
+  document.getElementById('modeToggle').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-mode]');
+    if (!btn) return;
+    setCalMode(btn.dataset.mode);
+  });
 
   // ── Calendar rendering ──
   function renderCalendar() {
-    // Header date row
-    const headerCells = DATES.map(d => {
-      const cls = (d.isWeekend ? ' is-weekend' : '') + (d.isHoliday ? ' is-holiday' : '');
-      return (
-        '<div class="cal-date-header' + cls + '" data-date="' + d.iso + '">' +
-          '<span class="dow">' + d.dowLabel + '</span>' +
-          '<span class="dnum">' + d.label + '</span>' +
-        '</div>'
-      );
-    }).join('');
-    document.getElementById('calHeaderCells').innerHTML = headerCells;
+    const periods = (calMode === 'daily' ? DAY_PERIODS : MONTH_PERIODS)
+      .filter(p => calMode === 'monthly' ? true : dateMatchesDayType(p.dates[0]));
 
-    // Park strips
-    const totalLeavesByPark = {};
-    PARKS.forEach(p => {
-      totalLeavesByPark[p.id] = p.categories.reduce((s, c) => s + c.tickets.length, 0);
-    });
+    const sortCls = calSort.dir === 'asc' ? ' sort-asc' : (calSort.dir === 'desc' ? ' sort-desc' : '');
+    const headCells =
+      '<th class="cal-corner sortable' + sortCls + '" data-sort-key="park">' +
+        '<span class="th-inner">' +
+          '<span class="th-text">Park</span>' +
+          '<span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span>' +
+        '</span>' +
+      '</th>' +
+      periods.map(p => {
+        const cls = (p.isWeekend ? ' is-weekend' : '') + (p.isHoliday ? ' is-holiday' : '');
+        if (calMode === 'daily') {
+          const d = p.dates[0];
+          return '<th class="' + cls.trim() + '">' +
+            '<span class="col-dow">' + d.dowLabel + '</span>' +
+            d.iso.slice(5, 7) + '/' + d.iso.slice(8, 10) +
+          '</th>';
+        }
+        return '<th>' + esc(p.label) + '</th>';
+      }).join('');
+    document.getElementById('calHead').innerHTML = headCells;
 
-    const rowsHtml = PARKS.map(park => {
-      const cells = DATES.map(date => {
-        const snap = parkDaySnapshot(park, date);
-        const tier = rosTier(snap.agg.ros);
-        const weekendCls = date.isWeekend ? ' is-weekend' : '';
-        const rosLabel = (snap.agg.ros > 0 ? '+' : '') + snap.agg.ros + '%';
-        const badge = snap.pending > 0
-          ? '<span class="cal-cell-badge" title="' + snap.pending + ' pending change' + (snap.pending === 1 ? '' : 's') + '">' + snap.pending + '</span>'
-          : '';
+    const body = document.getElementById('calBody');
+    const visibleParks = applyCalSort(PARKS.filter(parkMatchesFilter));
+
+    if (!visibleParks.length) {
+      body.innerHTML =
+        '<tr><th class="cal-empty-th">No matching parks for the current filters.</th>' +
+        periods.map(() => '<td></td>').join('') +
+        '</tr>';
+      return;
+    }
+    if (!periods.length) {
+      body.innerHTML =
+        '<tr><th class="cal-empty-th">No periods match the current filters.</th></tr>';
+      return;
+    }
+
+    body.innerHTML = visibleParks.map(park => {
+      const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
+      const cells = periods.map(period => {
+        const agg = aggregateParkPeriod(park, period);
+        const rosRound   = Math.round(agg.ros   * 10) / 10;
+        const unitsRound = Math.round(agg.units * 10) / 10;
+        const priceRound = Math.round(agg.price * 10) / 10;
+        const cls = tier(rosRound);
+        const decisionCls = agg.anyAccepted ? ' decided-accept'
+                          : agg.anyRejected ? ' decided-reject' : '';
         return (
-          '<div class="cal-cell ' + tier + weekendCls + '" data-park="' + park.id + '" data-date="' + date.iso + '" role="button" tabindex="0">' +
-            '<div class="cal-cell-top">' +
-              '<span class="cal-cell-dnum">' + parseInt(date.label, 10) + '</span>' +
-              '<span class="cal-cell-cap cap-' + snap.cap + '" title="Capacity: ' + snap.cap + '"></span>' +
+          '<td class="' + cls + decisionCls + '" data-park="' + park.id + '" data-period="' + period.key + '" data-row="' + park.id + '">' +
+            '<div class="cell-rev">' + fmtPct(rosRound) + '</div>' +
+            '<div class="cell-meta">' +
+              '<span>U ' + fmtPct(unitsRound) + '</span>' +
+              '<span class="pipe" aria-hidden="true">|</span>' +
+              '<span>P ' + fmtPct(priceRound) + '</span>' +
             '</div>' +
-            '<span class="cal-cell-ros">' + rosLabel + '</span>' +
-            badge +
-          '</div>'
+          '</td>'
         );
       }).join('');
       return (
-        '<div class="cal-row" data-park="' + park.id + '">' +
-          '<div class="cal-park-label">' +
-            '<span class="cal-park-name">' + park.name + '</span>' +
-            '<span class="cal-park-meta">' +
-              '<span class="cal-park-country">' + park.country + '</span>' +
-              totalLeavesByPark[park.id] + ' tickets · cap ' + park.capacity.toLocaleString('en-GB') +
-            '</span>' +
-          '</div>' +
-          '<div class="cal-cells">' + cells + '</div>' +
-        '</div>'
+        '<tr>' +
+          '<th class="cal-route">' +
+            '<span class="cal-park-name">' + esc(park.name) + '</span>' +
+            '<span class="cal-park-country">' + esc(park.country) + '</span>' +
+            '<span class="cal-park-meta">' + totalLeaves + ' tickets · capacity ' +
+              park.capacity.toLocaleString('en-GB') + '/day</span>' +
+          '</th>' +
+          cells +
+        '</tr>'
       );
     }).join('');
-    document.getElementById('calRows').innerHTML = rowsHtml;
   }
 
-  // ── Cell click → side panel ──
-  const calDetailPanel    = document.getElementById('calDetailPanel');
-  const calDetailBackdrop = document.getElementById('calDetailBackdrop');
-  const calDetailTitle    = document.getElementById('calDetailTitle');
-  const calDetailSub      = document.getElementById('calDetailSub');
-  const calDetailBody     = document.getElementById('calDetailBody');
-  let activeDetail = null; // { parkId, dateIso }
+  // ── Corner-cell sort cycle ──
+  document.getElementById('calHead').addEventListener('click', e => {
+    const corner = e.target.closest('th.cal-corner.sortable');
+    if (!corner) return;
+    cycleCalSort();
+    renderCalendar();
+  });
 
-  function openDetail(parkId, dateIso) {
-    activeDetail = { parkId, dateIso };
+  // ── Detail modal (calendar cell click) ──
+  const dmBackdrop = document.getElementById('dmBackdrop');
+  const dmTitle    = document.getElementById('dmTitle');
+  const dmSub      = document.getElementById('dmSub');
+  const dmTotals   = document.getElementById('dmTotals');
+  const dmBody     = document.getElementById('dmBody');
+  let activeDetail = null; // { parkId, periodKey }
+
+  function openDetail(parkId, periodKey) {
+    activeDetail = { parkId, periodKey };
     renderDetail();
-    calDetailBackdrop.classList.add('is-open');
-    calDetailBackdrop.setAttribute('aria-hidden', 'false');
-    calDetailPanel.classList.add('is-open');
-    calDetailPanel.setAttribute('aria-hidden', 'false');
+    dmBackdrop.classList.add('is-open');
+    dmBackdrop.setAttribute('aria-hidden', 'false');
   }
   function closeDetail() {
     activeDetail = null;
-    calDetailBackdrop.classList.remove('is-open');
-    calDetailBackdrop.setAttribute('aria-hidden', 'true');
-    calDetailPanel.classList.remove('is-open');
-    calDetailPanel.setAttribute('aria-hidden', 'true');
+    dmBackdrop.classList.remove('is-open');
+    dmBackdrop.setAttribute('aria-hidden', 'true');
   }
 
   function renderDetail() {
     if (!activeDetail) return;
     const park = PARKS.find(p => p.id === activeDetail.parkId);
-    const date = DATES.find(d => d.iso === activeDetail.dateIso);
-    if (!park || !date) return;
-    const snap = parkDaySnapshot(park, date);
+    if (!park) return;
+    const periodList = calMode === 'daily' ? DAY_PERIODS : MONTH_PERIODS;
+    const period = periodList.find(p => p.key === activeDetail.periodKey);
+    if (!period) return;
+    const agg = aggregateParkPeriod(park, period);
 
-    const wx = weatherFor(park.id, date.iso);
-    calDetailTitle.textContent = park.name + ' · ' + date.label + ' ' + date.dowLabel +
-      (date.isHoliday ? ' · Holiday' : '');
-    calDetailSub.innerHTML =
-      wx.icon + ' ' + wx.temp + '°  ·  ' +
-      'ROS ' + (snap.agg.ros > 0 ? '+' : '') + snap.agg.ros + '%  ·  ' +
-      snap.agg.sold.toLocaleString('en-GB') + ' / ' + snap.agg.fcst.toLocaleString('en-GB') + ' units';
+    let titleSuffix;
+    if (calMode === 'daily') {
+      const d = period.dates[0];
+      titleSuffix = d.label + ' ' + d.dowLabel + (d.isHoliday ? ' · Holiday' : '');
+    } else {
+      titleSuffix = period.label + ' · ' + period.dates.length + ' days';
+    }
+    dmTitle.textContent = park.name + ' · ' + titleSuffix;
 
+    if (calMode === 'daily') {
+      const d = period.dates[0];
+      const wx = weatherFor(park.id, d.iso);
+      dmSub.innerHTML =
+        wx.icon + ' ' + wx.temp + '°  ·  ROS ' + fmtPct(Math.round(agg.ros * 10) / 10) +
+        '  ·  ' + agg.sold.toLocaleString('en-GB') + ' / ' + agg.fcst.toLocaleString('en-GB') + ' units';
+      dmTotals.hidden = true;
+    } else {
+      dmSub.innerHTML =
+        period.dates.length + ' days · ROS ' + fmtPct(Math.round(agg.ros * 10) / 10) +
+        '  ·  Units YoY ' + fmtPct(Math.round(agg.units * 10) / 10);
+      dmTotals.hidden = false;
+      dmTotals.innerHTML =
+        '<div><div class="label">Units sold</div><div class="value">' + agg.sold.toLocaleString('en-GB') + '</div></div>' +
+        '<div><div class="label">Revenue</div><div class="value">' + fmtEurK(agg.revenue) + '</div></div>' +
+        '<div><div class="label">Avg price change</div><div class="value">' + fmtPct(Math.round(agg.price * 10) / 10) + '</div></div>';
+    }
+
+    if (calMode === 'monthly') {
+      // Monthly view: aggregate per Category × Ticket (not per date)
+      const sections = park.categories.map(cat => {
+        const rows = cat.tickets.map(t => {
+          let sold = 0, current = 0, recSum = 0, n = 0;
+          let anyAccepted = false, anyRejected = false, anyOverridden = false;
+          period.dates.forEach(d => {
+            const leaf = ALL_LEAVES[stateKey(park, cat, t, d)];
+            const st   = rowStates[leaf.stateKey] || {};
+            const rec  = typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
+            sold    += leaf.sold;
+            current += leaf.current;
+            recSum  += rec;
+            n++;
+            if (st.state === 'accepted')   anyAccepted = true;
+            if (st.state === 'rejected')   anyRejected = true;
+            if (st.state === 'overridden') anyOverridden = true;
+          });
+          const avgCur = current / n;
+          const avgRec = recSum / n;
+          const pct = ((avgRec - avgCur) / avgCur) * 100;
+          const pctR = Math.round(pct * 10) / 10;
+          const pctClass = pctR > 1 ? 'cell-pos' : (pctR < -1 ? 'cell-neg' : 'cell-neutral');
+          const statusBadge =
+            anyOverridden ? '<span class="dm-status b-overridden">Mixed override</span>' :
+            anyAccepted   ? '<span class="dm-status b-accepted">Some accepted</span>' :
+            anyRejected   ? '<span class="dm-status b-rejected">Some rejected</span>' : '';
+          return (
+            '<div class="dm-row">' +
+              '<div>' +
+                '<span class="dm-ticket">' + esc(t.label) + '</span>' +
+                '<div class="dm-prices">' +
+                  '<span class="current">' + fmtEur(avgCur) + '</span>' +
+                  '<span class="arrow">→</span>' +
+                  '<span class="rec">' + fmtEur(avgRec) + '</span>' +
+                  '<span class="pct ' + pctClass + '">' + fmtPct(pctR) + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div>' + statusBadge + '</div>' +
+              '<div class="dm-actions"><span style="font-size:10.5px;color:var(--text-muted);">' +
+                sold.toLocaleString('en-GB') + ' sold · ' + n + ' days</span></div>' +
+            '</div>'
+          );
+        }).join('');
+        return '<div class="dm-cat-head">' + esc(cat.label) + '</div>' + rows;
+      }).join('');
+      dmBody.innerHTML = sections;
+      return;
+    }
+
+    // Daily view: per-leaf rows with Accept/Reject
+    const d = period.dates[0];
     const sections = park.categories.map(cat => {
       const rows = cat.tickets.map(t => {
-        const leaf = ALL_LEAVES[stateKey(park, cat, t, date)];
+        const leaf = ALL_LEAVES[stateKey(park, cat, t, d)];
         const st = rowStates[leaf.stateKey] || {};
         const rec = (typeof st.overrideValue === 'number') ? st.overrideValue : leaf.rec;
         const pctChange = Math.round(((rec - leaf.current) / leaf.current) * 1000) / 10;
@@ -2107,66 +2425,58 @@
         const acceptSolid = (st.state === 'accepted') ? 'solid' : (st.state ? 'dim' : '');
         const rejectSolid = (st.state === 'rejected') ? 'solid' : (st.state ? 'dim' : '');
         const statusBadge =
-          st.state === 'accepted'   ? '<span class="cal-detail-status b-accepted">Accepted</span>' :
-          st.state === 'rejected'   ? '<span class="cal-detail-status b-rejected">Rejected</span>' :
-          st.state === 'overridden' ? '<span class="cal-detail-status b-overridden">Overridden</span>' : '';
-
+          st.state === 'accepted'   ? '<span class="dm-status b-accepted">Accepted</span>' :
+          st.state === 'rejected'   ? '<span class="dm-status b-rejected">Rejected</span>' :
+          st.state === 'overridden' ? '<span class="dm-status b-overridden">Overridden</span>' : '';
         return (
-          '<div class="cal-detail-row' + stateCls + '" data-key="' + leaf.stateKey + '">' +
+          '<div class="dm-row' + stateCls + '" data-key="' + leaf.stateKey + '">' +
             '<div>' +
-              statusBadge +
-              '<span class="cal-detail-ticket">' + leaf.ticket.label + '</span>' +
-              '<div class="cal-detail-prices">' +
+              '<span class="dm-ticket">' + esc(t.label) + '</span>' +
+              '<div class="dm-prices">' +
                 '<span class="current">' + fmtEur(leaf.current) + '</span>' +
                 '<span class="arrow">→</span>' +
                 '<span class="rec">' + fmtEur(rec) + '</span>' +
-                '<span class="pct ' + pctClass + '">' + (pctChange > 0 ? '+' : '') + pctChange + '%</span>' +
+                '<span class="pct ' + pctClass + '">' + fmtPct(pctChange) + '</span>' +
               '</div>' +
             '</div>' +
-            '<div class="cal-detail-actions">' +
+            '<div>' + statusBadge + '</div>' +
+            '<div class="dm-actions">' +
               '<button class="action-btn act-accept ' + acceptSolid + '" type="button" data-action="accept" data-key="' + leaf.stateKey + '" aria-label="Accept">' + ACCEPT_SVG + '</button>' +
               '<button class="action-btn act-reject ' + rejectSolid + '" type="button" data-action="reject" data-key="' + leaf.stateKey + '" aria-label="Reject">' + REJECT_SVG + '</button>' +
             '</div>' +
           '</div>'
         );
       }).join('');
-      return '<div class="cal-detail-cat-head">' + cat.label + '</div>' + rows;
+      return '<div class="dm-cat-head">' + esc(cat.label) + '</div>' + rows;
     }).join('');
-
-    calDetailBody.innerHTML = sections;
+    dmBody.innerHTML = sections;
   }
 
-  // Cell click / keyboard
-  document.getElementById('calRows').addEventListener('click', e => {
-    const cell = e.target.closest('.cal-cell');
+  // Cell click → modal (ignore header clicks; the head sortable handler is separate)
+  document.getElementById('calBody').addEventListener('click', e => {
+    const cell = e.target.closest('td[data-row]');
     if (!cell) return;
-    openDetail(cell.dataset.park, cell.dataset.date);
-  });
-  document.getElementById('calRows').addEventListener('keydown', e => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    const cell = e.target.closest('.cal-cell');
-    if (!cell) return;
-    e.preventDefault();
-    openDetail(cell.dataset.park, cell.dataset.date);
+    openDetail(cell.dataset.park, cell.dataset.period);
   });
 
-  // Side-panel Accept / Reject delegation
-  calDetailBody.addEventListener('click', e => {
+  // Modal Accept / Reject delegation (daily mode only)
+  dmBody.addEventListener('click', e => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
     const key = btn.dataset.key;
     if (btn.dataset.action === 'accept') toggleAccept(key);
     else if (btn.dataset.action === 'reject') toggleReject(key);
-    // toggleAccept/toggleReject call render(), which re-renders the side panel via the patch below
   });
 
-  document.getElementById('calDetailClose').addEventListener('click', closeDetail);
-  calDetailBackdrop.addEventListener('click', closeDetail);
+  document.getElementById('dmClose').addEventListener('click', closeDetail);
+  dmBackdrop.addEventListener('click', e => {
+    if (e.target === dmBackdrop) closeDetail();
+  });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && calDetailPanel.classList.contains('is-open')) closeDetail();
+    if (e.key === 'Escape' && dmBackdrop.classList.contains('is-open')) closeDetail();
   });
 
-  // Patch render() so the calendar refreshes when state changes
+  // Patch render() so the calendar + open modal refresh on state change
   const _origRender = render;
   render = function () {
     _origRender();
