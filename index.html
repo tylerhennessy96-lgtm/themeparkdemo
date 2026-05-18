@@ -172,6 +172,20 @@
     }
     table.srt tbody tr:hover td:not(.cell-pos):not(.cell-neg) { background: var(--row-hover); }
 
+    /* ── Row hover dim (opacity on td, not the row, so cell-pos/neg + heatmap tints survive) ── */
+    table.srt tbody[data-hover-active="true"] tr:not(.is-hovered) td {
+      opacity: 0.55;
+      transition: opacity .12s;
+    }
+    table.srt tbody tr.is-hovered td:not(.cell-pos):not(.cell-neg) {
+      background-color: var(--row-hover);
+    }
+    table.cal-table tbody[data-hover-active="true"] tr:not(.is-hovered) td,
+    table.cal-table tbody[data-hover-active="true"] tr:not(.is-hovered) th.cal-route {
+      opacity: 0.55;
+      transition: opacity .12s;
+    }
+
     /* Date column */
     table.srt tbody td.col-date {
       color: var(--text-secondary);
@@ -1246,6 +1260,25 @@
       position: relative;
       z-index: 3;
     }
+    /* ── Calendar 3-level accordion ── */
+    /* Indentation in the sticky left column — match the table's 14/36/60px steps.
+       Higher specificity than `table.cal-table tbody th.cal-route { padding: 10px 14px }`
+       so the shorthand doesn't outrank padding-left. */
+    table.cal-table tbody tr.row-park     th.cal-route { padding-left: 14px; }
+    table.cal-table tbody tr.row-category th.cal-route { padding-left: 36px; }
+    table.cal-table tbody tr.row-leaf     th.cal-route { padding-left: 60px; }
+
+    /* Per-level backgrounds.
+       Sticky left column always tinted regardless of tier.
+       Data cells only tinted when not in a heatmap tier — so tier colours
+       continue to read through where they apply. */
+    table.cal-table tbody tr.row-park     th.cal-route { background: #f6f8fc; }
+    table.cal-table tbody tr.row-category th.cal-route { background: #fbfcfe; }
+    table.cal-table tbody tr.row-leaf     th.cal-route { background: var(--surface); }
+    table.cal-table tbody tr.row-park     td:not(.tier-pos2):not(.tier-pos1):not(.tier-zero):not(.tier-neg1):not(.tier-neg2) { background: #f6f8fc; }
+    table.cal-table tbody tr.row-category td:not(.tier-pos2):not(.tier-pos1):not(.tier-zero):not(.tier-neg1):not(.tier-neg2) { background: #fbfcfe; }
+    table.cal-table tbody tr.row-leaf     td:not(.tier-pos2):not(.tier-pos1):not(.tier-zero):not(.tier-neg1):not(.tier-neg2) { background: var(--surface); }
+
     /* Click affordance + decision markers */
     table.cal-table tbody td[data-row] { cursor: pointer; }
     table.cal-table tbody td.decided-accept,
@@ -2858,34 +2891,101 @@
   });
 
   // ─────────────────────────────────────────────────────────────
-  //  Leaf detail modal — opens on leaf row click
+  //  Detail modal — opens on park / category / leaf row clicks
   // ─────────────────────────────────────────────────────────────
   const lmBackdrop = document.getElementById('lmBackdrop');
-  let activeLeafKey = null;
-  let lmOverrideValue = null;   // pending override (€), uncommitted
+  let activeModal = null;       // { level: 'park'|'category'|'leaf', park, category?, leaf?, date }
+  let lmOverrideValue = null;   // pending override (€), uncommitted — leaf level only
 
-  function openLeafModal(key) {
-    if (!ALL_LEAVES[key]) return;
-    activeLeafKey = key;
-    lmOverrideValue = null;     // start fresh — pick up existing override on render
-    renderLeafModal();
+  // openModal({ level, key })           ← leaf level (key = stateKey)
+  // openModal({ level, parkId, dateIso })          ← park level
+  // openModal({ level, parkId, catId, dateIso })   ← category level
+  function openModal(opts) {
+    let park = null, category = null, leaf = null, date = null;
+    if (opts.level === 'leaf') {
+      leaf = ALL_LEAVES[opts.key];
+      if (!leaf) return;
+      park = leaf.park; category = leaf.category; date = leaf.date;
+    } else {
+      park = PARKS.find(p => p.id === opts.parkId);
+      if (!park) return;
+      date = DATES.find(d => d.iso === opts.dateIso);
+      if (!date) return;
+      if (opts.level === 'category') {
+        category = park.categories.find(c => c.id === opts.catId);
+        if (!category) return;
+      }
+    }
+    activeModal  = { level: opts.level, park, category, leaf, date };
+    lmOverrideValue = null;
+    renderModal();
     lmBackdrop.classList.add('is-open');
     lmBackdrop.setAttribute('aria-hidden', 'false');
-    document.addEventListener('keydown', onLeafModalKey);
+    document.addEventListener('keydown', onLmKey);
   }
-  function closeLeafModal() {
-    activeLeafKey = null;
+  function closeModal() {
+    activeModal     = null;
     lmOverrideValue = null;
     lmBackdrop.classList.remove('is-open');
     lmBackdrop.setAttribute('aria-hidden', 'true');
-    document.removeEventListener('keydown', onLeafModalKey);
+    document.removeEventListener('keydown', onLmKey);
   }
-  function onLeafModalKey(e) {
-    if (e.key === 'Escape') { e.stopPropagation(); closeLeafModal(); }
+  function onLmKey(e) {
+    if (e.key === 'Escape') { e.stopPropagation(); closeModal(); }
   }
   lmBackdrop.addEventListener('click', e => {
-    if (e.target === lmBackdrop) closeLeafModal();
+    if (e.target === lmBackdrop) closeModal();
   });
+
+  // Resolve the leaves that participate in the modal for the active context.
+  function modalLeaves() {
+    if (!activeModal) return [];
+    const { level, park, category, leaf, date } = activeModal;
+    if (level === 'leaf') return [leaf];
+    if (level === 'category') {
+      return category.tickets.map(t => ALL_LEAVES[stateKey(park, category, t, date)]);
+    }
+    const out = [];
+    park.categories.forEach(c => c.tickets.forEach(t => out.push(ALL_LEAVES[stateKey(park, c, t, date)])));
+    return out;
+  }
+
+  // Aggregate modal data: sum child curves so the aggregate visibly equals
+  // the sum of its children at every point.
+  function aggregateModalData(leaves) {
+    if (leaves.length === 1) return leafModalData(leaves[0]);
+    const children = leaves.map(l => leafModalData(l));
+    const N = children[0].actualSeries.length;
+    const M = children[0].hourly.length;
+    const sumAt = (key, len) => Array.from({ length: len }, (_, i) =>
+      children.reduce((s, c) => s + c[key][i], 0));
+    let unitsCur = 0, unitsFcst = 0, unitsLY = 0;
+    let revCur = 0, revFcst = 0, revLY = 0;
+    let rosNum = 0, rosDen = 0;
+    children.forEach((c, idx) => {
+      unitsCur  += c.cmp.units.current;
+      unitsFcst += c.cmp.units.forecast;
+      unitsLY   += c.cmp.units.lastYear;
+      revCur    += c.cmp.revenue.current;
+      revFcst   += c.cmp.revenue.forecast;
+      revLY     += c.cmp.revenue.lastYear;
+      // Revenue-weighted ROS
+      const w = c.cmp.revenue.current;
+      rosNum += c.cmp.ros.current * w;
+      rosDen += w;
+    });
+    return {
+      actualSeries:    sumAt('actualSeries', N),
+      benchmarkSeries: sumAt('benchmarkSeries', N),
+      hourly:          sumAt('hourly', M),
+      dayLabels:       children[0].dayLabels,
+      cmp: {
+        units:   { current: unitsCur,  forecast: unitsFcst, lastYear: unitsLY  },
+        revenue: { current: revCur,    forecast: revFcst,   lastYear: revLY    },
+        ros:     { current: rosDen ? Math.round(rosNum / rosDen) : 0, forecast: 0, lastYear: 0 },
+      },
+    };
+  }
 
   // Synthetic data for the modal's charts + comparison table.
   function leafModalData(leaf) {
@@ -3043,45 +3143,90 @@
     );
   }
 
-  // ── Modal renderer ──
-  function renderLeafModal() {
-    if (!activeLeafKey) return;
-    const leaf = ALL_LEAVES[activeLeafKey];
-    if (!leaf) return;
-    const st  = rowStates[activeLeafKey] || {};
-    const wx  = leaf.wx;
-    const m   = leafModalData(leaf);
+  // ── Modal renderer (handles park / category / leaf levels) ──
+  function renderModal() {
+    if (!activeModal) return;
+    const { level, park, category, leaf, date } = activeModal;
+    const leaves = modalLeaves();
+    const m = aggregateModalData(leaves);
+    const wx = weatherFor(park.id, date.iso);
 
-    const recCurrent = (typeof st.overrideValue === 'number') ? st.overrideValue : leaf.rec;
-    const pendingOverride = lmOverrideValue;
-    const pctChange = ((recCurrent - leaf.current) / leaf.current) * 100;
-    const pctR = Math.round(pctChange * 10) / 10;
-    const pctClass = pctR > 1 ? 'cell-pos' : (pctR < -1 ? 'cell-neg' : 'cell-neutral');
+    let title, subtitle;
+    if (level === 'leaf') {
+      title = esc(park.name) + ' — ' + esc(category.label) + ' — ' + esc(leaf.ticket.label);
+      subtitle = esc(date.label) + ' ' + esc(date.dowLabel) +
+        (date.isHoliday ? ' · Holiday' : '') +
+        ' · Capacity ' + esc(leaf.cap === 'open' ? 'Open' : leaf.cap === 'limited' ? 'Limited' : 'Sold-out risk');
+    } else if (level === 'category') {
+      title = esc(park.name) + ' — ' + esc(category.label);
+      subtitle = esc(date.label) + ' ' + esc(date.dowLabel) +
+        (date.isHoliday ? ' · Holiday' : '') +
+        ' · ' + category.tickets.length + ' ticket types · aggregate';
+    } else {
+      title = esc(park.name);
+      const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
+      subtitle = esc(date.label) + ' ' + esc(date.dowLabel) +
+        (date.isHoliday ? ' · Holiday' : '') +
+        ' · ' + totalLeaves + ' ticket types · aggregate';
+    }
 
     const wxDesc = {
-      sun:   'Sunny', mixed: 'Partly cloudy', cloud: 'Cloudy', rain:  'Rain expected',
+      sun: 'Sunny', mixed: 'Partly cloudy', cloud: 'Cloudy', rain: 'Rain expected',
     }[wx.kind] || '';
 
-    const acceptSolid = st.state === 'accepted' ? 'solid' : '';
-    const rejectSolid = st.state === 'rejected' ? 'solid' : '';
-    const stateTag =
-      st.state === 'accepted'   ? '<span class="lm-state-tag b-accepted">Accepted</span>' :
-      st.state === 'rejected'   ? '<span class="lm-state-tag b-rejected">Rejected</span>' :
-      st.state === 'overridden' ? '<span class="lm-state-tag b-overridden">Overridden</span>' : '';
+    // Recommendation panel: leaf level only — read-only message at park/category levels.
+    let recPanelHtml;
+    if (level === 'leaf') {
+      const st = rowStates[leaf.stateKey] || {};
+      const recCurrent = (typeof st.overrideValue === 'number') ? st.overrideValue : leaf.rec;
+      const pendingOverride = lmOverrideValue;
+      const pctChange = ((recCurrent - leaf.current) / leaf.current) * 100;
+      const pctR = Math.round(pctChange * 10) / 10;
+      const pctClass = pctR > 1 ? 'cell-pos' : (pctR < -1 ? 'cell-neg' : 'cell-neutral');
+      const acceptSolid = st.state === 'accepted' ? 'solid' : '';
+      const rejectSolid = st.state === 'rejected' ? 'solid' : '';
+      const stateTag =
+        st.state === 'accepted'   ? '<span class="lm-state-tag b-accepted">Accepted</span>' :
+        st.state === 'rejected'   ? '<span class="lm-state-tag b-rejected">Rejected</span>' :
+        st.state === 'overridden' ? '<span class="lm-state-tag b-overridden">Overridden</span>' : '';
+      recPanelHtml =
+        '<div class="lm-panel">' +
+          '<div class="lm-panel-title">Recommendation</div>' +
+          stateTag +
+          '<div class="lm-rec-row"><span class="label">Current</span><span class="value">' + fmtEur(leaf.current) + '</span></div>' +
+          '<div class="lm-rec-row"><span class="label">Recommended</span><span class="value">' + fmtEur(recCurrent) + '</span></div>' +
+          '<div class="lm-rec-row"><span class="label">% change</span><span class="value pct ' + pctClass + '">' + (pctR > 0 ? '+' : '') + pctR + '%</span></div>' +
+          '<div class="lm-override-row">' +
+            '<label for="lmOverride">Override:</label>' +
+            '<input type="text" class="lm-override-input" id="lmOverride" inputmode="decimal" ' +
+              'value="' + (pendingOverride != null ? pendingOverride : (typeof st.overrideValue === 'number' ? st.overrideValue : '')) + '" ' +
+              'placeholder="' + fmtEur(leaf.rec) + '">' +
+          '</div>' +
+          '<div class="lm-actions">' +
+            '<button class="lm-btn lm-btn-reject ' + rejectSolid + '" type="button" id="lmReject">Reject</button>' +
+            '<button class="lm-btn lm-btn-accept ' + acceptSolid + '" type="button" id="lmAccept">Accept</button>' +
+          '</div>' +
+        '</div>';
+    } else {
+      recPanelHtml =
+        '<div class="lm-panel">' +
+          '<div class="lm-panel-title">Recommendation</div>' +
+          '<div style="color:var(--text-secondary);font-size:13px;line-height:1.5;padding:6px 0;">' +
+            'Multiple ticket types — review individually.' +
+            '<br><span style="color:var(--text-muted);font-size:12px;">' +
+              'Expand the row to act on each ticket type\'s recommendation.' +
+            '</span>' +
+          '</div>' +
+        '</div>';
+    }
 
     const c = m.cmp;
-    const yoyR = leaf.yoy;
-    const yoyClass = yoyR > 1 ? 'cell-pos' : (yoyR < -1 ? 'cell-neg' : 'cell-neutral');
-
     const html =
       '<div class="lm-modal" role="dialog" aria-modal="true">' +
         '<header class="lm-header">' +
           '<div>' +
-            '<div class="lm-title">' + esc(leaf.park.name) + ' — ' + esc(leaf.category.label) + ' — ' + esc(leaf.ticket.label) + '</div>' +
-            '<div class="lm-subtitle">' + esc(leaf.date.label) + ' ' + esc(leaf.date.dowLabel) +
-              (leaf.date.isHoliday ? ' · Holiday' : '') +
-              ' · Capacity ' + esc(leaf.cap === 'open' ? 'Open' : leaf.cap === 'limited' ? 'Limited' : 'Sold-out risk') +
-            '</div>' +
+            '<div class="lm-title">' + title + '</div>' +
+            '<div class="lm-subtitle">' + subtitle + '</div>' +
           '</div>' +
           '<button class="lm-close" type="button" id="lmCloseBtn" aria-label="Close">' +
             '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">' +
@@ -3097,11 +3242,11 @@
                 '<span><span class="swatch" style="background:#e8007d"></span>This year</span>' +
                 '<span><span class="swatch" style="background:#9ca3af;border:1px dashed #9ca3af"></span>Benchmark (last year)</span>' +
               '</div>' +
-              '<div class="lm-chart-area" id="lmChartDemand">' + demandPaceSvg(m.actualSeries, m.benchmarkSeries) + '</div>' +
+              '<div class="lm-chart-area">' + demandPaceSvg(m.actualSeries, m.benchmarkSeries) + '</div>' +
             '</div>' +
             '<div class="lm-panel">' +
               '<div class="lm-panel-title">Last 7 days · hourly sales rate</div>' +
-              '<div class="lm-chart-area" id="lmChartHourly">' + hourlyBarsSvg(m.hourly, m.dayLabels) + '</div>' +
+              '<div class="lm-chart-area">' + hourlyBarsSvg(m.hourly, m.dayLabels) + '</div>' +
             '</div>' +
           '</div>' +
 
@@ -3112,7 +3257,7 @@
                 '<div class="lm-wx-text">' +
                   '<div class="lm-wx-temp">' + wx.temp + '°C</div>' +
                   '<div class="lm-wx-desc">' + esc(wxDesc) +
-                    (leaf.park.id === 'tropical' ? ' · indoor venue, rain lifts demand' : '') +
+                    (park.id === 'tropical' ? ' · indoor venue, rain lifts demand' : '') +
                   '</div>' +
                 '</div>' +
               '</div>' +
@@ -3139,57 +3284,44 @@
               '</table>' +
             '</div>' +
 
-            '<div class="lm-panel">' +
-              '<div class="lm-panel-title">Recommendation</div>' +
-              stateTag +
-              '<div class="lm-rec-row"><span class="label">Current</span><span class="value">' + fmtEur(leaf.current) + '</span></div>' +
-              '<div class="lm-rec-row"><span class="label">Recommended</span><span class="value">' + fmtEur(recCurrent) + '</span></div>' +
-              '<div class="lm-rec-row"><span class="label">% change</span><span class="value pct ' + pctClass + '">' + (pctR > 0 ? '+' : '') + pctR + '%</span></div>' +
-              '<div class="lm-override-row">' +
-                '<label for="lmOverride">Override:</label>' +
-                '<input type="text" class="lm-override-input" id="lmOverride" inputmode="decimal" ' +
-                  'value="' + (pendingOverride != null ? pendingOverride : (typeof st.overrideValue === 'number' ? st.overrideValue : '')) + '" ' +
-                  'placeholder="' + fmtEur(leaf.rec) + '">' +
-              '</div>' +
-              '<div class="lm-actions">' +
-                '<button class="lm-btn lm-btn-reject ' + rejectSolid + '" type="button" id="lmReject">Reject</button>' +
-                '<button class="lm-btn lm-btn-accept ' + acceptSolid + '" type="button" id="lmAccept">Accept</button>' +
-              '</div>' +
-            '</div>' +
+            recPanelHtml +
           '</div>' +
         '</div>' +
       '</div>';
 
     lmBackdrop.innerHTML = html;
 
-    // Wire controls
-    document.getElementById('lmCloseBtn').addEventListener('click', closeLeafModal);
-    document.getElementById('lmAccept').addEventListener('click', () => {
-      // Commit any pending override first, then toggle accepted
-      if (lmOverrideValue != null && !isNaN(lmOverrideValue) && lmOverrideValue > 0 && Math.round(lmOverrideValue) !== leaf.current) {
-        const stRef = rowStates[activeLeafKey] || (rowStates[activeLeafKey] = {});
-        stRef.overrideValue = Math.round(lmOverrideValue);
-        stRef.state = 'overridden';
-      } else {
-        toggleAccept(activeLeafKey);   // toggles accepted state + clears override
-      }
-      lmOverrideValue = null;
-      renderLeafModal();
-    });
-    document.getElementById('lmReject').addEventListener('click', () => {
-      toggleReject(activeLeafKey);
-      lmOverrideValue = null;
-      renderLeafModal();
-    });
-    const ovIn = document.getElementById('lmOverride');
-    ovIn.addEventListener('input', () => {
-      const raw = ovIn.value.replace(/[^0-9.,]/g, '').replace(',', '.');
-      ovIn.value = ovIn.value.replace(/[^0-9.,]/g, '');
-      const n = parseFloat(raw);
-      lmOverrideValue = isNaN(n) ? null : n;
-    });
+    // Always wire close
+    document.getElementById('lmCloseBtn').addEventListener('click', closeModal);
 
-    // Wire chart tooltips
+    // Leaf-only controls: accept / reject / override
+    if (level === 'leaf') {
+      const key = leaf.stateKey;
+      document.getElementById('lmAccept').addEventListener('click', () => {
+        if (lmOverrideValue != null && !isNaN(lmOverrideValue) && lmOverrideValue > 0 && Math.round(lmOverrideValue) !== leaf.current) {
+          const stRef = rowStates[key] || (rowStates[key] = {});
+          stRef.overrideValue = Math.round(lmOverrideValue);
+          stRef.state = 'overridden';
+        } else {
+          toggleAccept(key);
+        }
+        lmOverrideValue = null;
+        renderModal();
+      });
+      document.getElementById('lmReject').addEventListener('click', () => {
+        toggleReject(key);
+        lmOverrideValue = null;
+        renderModal();
+      });
+      const ovIn = document.getElementById('lmOverride');
+      ovIn.addEventListener('input', () => {
+        ovIn.value = ovIn.value.replace(/[^0-9.,]/g, '');
+        const n = parseFloat(ovIn.value.replace(',', '.'));
+        lmOverrideValue = isNaN(n) ? null : n;
+      });
+    }
+
+    // Chart tooltips (always)
     wireDemandPaceTooltip(lmBackdrop.querySelector('.chart-demand'), m);
     wireHourlyTooltip(lmBackdrop.querySelector('.chart-hourly'),    m);
   }
@@ -3307,16 +3439,21 @@
     container.addEventListener('mouseleave', hide);
   }
 
-  // ── Row click → open modal (leaf rows only, exclude interactive controls) ──
+  // ── Row click → open modal (any level; chevron + interactive controls excluded) ──
   document.getElementById('srtBody').addEventListener('click', e => {
     if (e.target.closest('[data-action]'))  return;
     if (e.target.closest('td.rec-cell'))    return;
     if (e.target.closest('input, select, textarea, button')) return;
-    if (e.target.closest('.accordion-name')) return;   // chevron click reserved for toggle
-    const tr = e.target.closest('tr.row-leaf');
+    if (e.target.closest('.accordion-name')) return;   // chevron click reserved for accordion toggle
+    const tr = e.target.closest('tr.row-leaf, tr.row-category, tr.row-park');
     if (!tr) return;
-    const key = tr.dataset.key;
-    if (key) openLeafModal(key);
+    if (tr.classList.contains('row-leaf')) {
+      openModal({ level: 'leaf', key: tr.dataset.key });
+    } else if (tr.classList.contains('row-category')) {
+      openModal({ level: 'category', parkId: tr.dataset.park, catId: tr.dataset.cat, dateIso: tr.dataset.date });
+    } else {
+      openModal({ level: 'park', parkId: tr.dataset.park, dateIso: tr.dataset.date });
+    }
   });
 
   // ── View toggle (Table / Calendar) ──
@@ -3551,6 +3688,61 @@
 
   // ── Calendar sort state ──
   const calSort = { dir: null }; // 'asc' | 'desc' | null
+
+  // Calendar accordion expansion (global per park/category, independent of date).
+  // Default: Warner Madrid → Individual expanded, everything else collapsed — matches the table.
+  const calExpanded = {
+    parks: new Set(['warner']),                // parkId
+    cats:  new Set(['warner|individual']),     // parkId|catId
+  };
+
+  // Generalized aggregator: takes any list of leaf rows (potentially spanning
+  // multiple dates for monthly mode) and produces the same shape as
+  // aggregateParkPeriod.
+  function aggregateLeafList(leafObjs) {
+    let sold = 0, fcst = 0, revenue = 0;
+    let rosNum = 0, rosDen = 0;
+    let priceNum = 0, priceDen = 0;
+    let unitsNum = 0, unitsDen = 0;
+    let anyAccepted = false, anyRejected = false;
+    leafObjs.forEach(leaf => {
+      sold    += leaf.sold;
+      fcst    += leaf.fcst;
+      revenue += leaf.revenue;
+      rosNum  += leaf.ros * leaf.revenue;
+      rosDen  += leaf.revenue;
+      const st = rowStates[leaf.stateKey];
+      const rec = st && typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
+      const pct = ((rec - leaf.current) / leaf.current) * 100;
+      priceNum += pct * leaf.sold;
+      priceDen += leaf.sold;
+      unitsNum += leafUnitsYoY(leaf) * leaf.sold;
+      unitsDen += leaf.sold;
+      if (st && st.state === 'accepted') anyAccepted = true;
+      if (st && st.state === 'rejected') anyRejected = true;
+    });
+    return {
+      leafRows: leafObjs,
+      sold, fcst, revenue,
+      ros:   rosDen   ? rosNum   / rosDen   : 0,
+      price: priceDen ? priceNum / priceDen : 0,
+      units: unitsDen ? unitsNum / unitsDen : 0,
+      anyAccepted, anyRejected,
+    };
+  }
+  function leavesForScope(park, cat, ticket, period) {
+    const out = [];
+    period.dates.forEach(date => {
+      if (ticket && cat) {
+        out.push(ALL_LEAVES[stateKey(park, cat, ticket, date)]);
+      } else if (cat) {
+        cat.tickets.forEach(t => out.push(ALL_LEAVES[stateKey(park, cat, t, date)]));
+      } else {
+        park.categories.forEach(c => c.tickets.forEach(t => out.push(ALL_LEAVES[stateKey(park, c, t, date)])));
+      }
+    });
+    return out;
+  }
   function cycleCalSort() {
     calSort.dir = calSort.dir === null ? 'asc' : calSort.dir === 'asc' ? 'desc' : null;
   }
@@ -3619,39 +3811,90 @@
       return;
     }
 
-    body.innerHTML = visibleParks.map(park => {
-      const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
-      const cells = periods.map(period => {
-        const agg = aggregateParkPeriod(park, period);
-        const rosRound   = Math.round(agg.ros   * 10) / 10;
-        const unitsRound = Math.round(agg.units * 10) / 10;
-        const priceRound = Math.round(agg.price * 10) / 10;
-        const cls = tier(rosRound);
-        const decisionCls = agg.anyAccepted ? ' decided-accept'
-                          : agg.anyRejected ? ' decided-reject' : '';
-        return (
-          '<td class="' + cls + decisionCls + '" data-park="' + park.id + '" data-period="' + period.key + '" data-row="' + park.id + '">' +
-            '<div class="cell-rev">' + fmtPct(rosRound) + '</div>' +
-            '<div class="cell-meta">' +
-              '<span>U ' + fmtPct(unitsRound) + '</span>' +
-              '<span class="pipe" aria-hidden="true">|</span>' +
-              '<span>P ' + fmtPct(priceRound) + '</span>' +
-            '</div>' +
-          '</td>'
-        );
-      }).join('');
+    const buildCells = (park, cat, ticket, levelClass) => periods.map(period => {
+      const leaves = leavesForScope(park, cat, ticket, period);
+      const agg = aggregateLeafList(leaves);
+      const rosRound   = Math.round(agg.ros   * 10) / 10;
+      const unitsRound = Math.round(agg.units * 10) / 10;
+      const priceRound = Math.round(agg.price * 10) / 10;
+      const cls = tier(rosRound);
+      const decisionCls = agg.anyAccepted ? ' decided-accept'
+                        : agg.anyRejected ? ' decided-reject' : '';
+      const dataAttrs = ' data-park="' + park.id + '"' +
+        ' data-period="' + period.key + '"' +
+        ' data-level="' + levelClass.replace('row-', '') + '"' +
+        (cat    ? ' data-cat="'    + cat.id    + '"' : '') +
+        (ticket ? ' data-ticket="' + ticket.id + '"' : '') +
+        ' data-row="' + park.id + '"';
       return (
-        '<tr>' +
+        '<td class="' + cls + decisionCls + '"' + dataAttrs + '>' +
+          '<div class="cell-rev">' + fmtPct(rosRound) + '</div>' +
+          '<div class="cell-meta">' +
+            '<span>U ' + fmtPct(unitsRound) + '</span>' +
+            '<span class="pipe" aria-hidden="true">|</span>' +
+            '<span>P ' + fmtPct(priceRound) + '</span>' +
+          '</div>' +
+        '</td>'
+      );
+    }).join('');
+
+    const chevronSvg = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>';
+
+    const rowsHtml = visibleParks.map(park => {
+      const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
+      const parkExpanded = calExpanded.parks.has(park.id);
+
+      // Park row
+      let html =
+        '<tr class="row-park" data-park="' + park.id + '">' +
           '<th class="cal-route">' +
-            '<span class="cal-park-name">' + esc(park.name) + '</span>' +
-            '<span class="cal-park-country">' + esc(park.country) + '</span>' +
+            '<span class="accordion-name ' + (parkExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="park" aria-expanded="' + parkExpanded + '">' +
+              '<span class="accordion-chev">' + chevronSvg + '</span>' +
+              '<span class="cal-park-name lvl-park-name">' + esc(park.name) + '</span>' +
+              '<span class="cal-park-country">' + esc(park.country) + '</span>' +
+            '</span>' +
             '<span class="cal-park-meta">' + totalLeaves + ' tickets · capacity ' +
               park.capacity.toLocaleString('en-GB') + '/day</span>' +
           '</th>' +
-          cells +
-        '</tr>'
-      );
+          buildCells(park, null, null, 'row-park') +
+        '</tr>';
+
+      if (!parkExpanded) return html;
+
+      park.categories.forEach(cat => {
+        const catKey = park.id + '|' + cat.id;
+        const catExpanded = calExpanded.cats.has(catKey);
+
+        html +=
+          '<tr class="row-category" data-park="' + park.id + '" data-cat="' + cat.id + '">' +
+            '<th class="cal-route">' +
+              '<span class="accordion-name lvl-2 ' + (catExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="cat" aria-expanded="' + catExpanded + '">' +
+                '<span class="accordion-chev">' + chevronSvg + '</span>' +
+                '<span class="lvl-cat-name">' + esc(cat.label) + '</span>' +
+              '</span>' +
+              '<span class="cal-park-meta">' + cat.tickets.length + ' ticket types</span>' +
+            '</th>' +
+            buildCells(park, cat, null, 'row-category') +
+          '</tr>';
+
+        if (!catExpanded) return;
+
+        cat.tickets.forEach(ticket => {
+          html +=
+            '<tr class="row-leaf" data-park="' + park.id + '" data-cat="' + cat.id + '" data-ticket="' + ticket.id + '">' +
+              '<th class="cal-route">' +
+                '<span class="leaf-bullet" aria-hidden="true">•</span>' +
+                '<span class="lvl-ticket-name">' + esc(ticket.label) + '</span>' +
+              '</th>' +
+              buildCells(park, cat, ticket, 'row-leaf') +
+            '</tr>';
+        });
+      });
+
+      return html;
     }).join('');
+
+    body.innerHTML = rowsHtml;
   }
 
   // ── Corner-cell sort cycle ──
@@ -3660,6 +3903,31 @@
     if (!corner) return;
     cycleCalSort();
     renderCalendar();
+  });
+
+  // ── Calendar accordion (chevron click on sticky left column) ──
+  document.getElementById('calBody').addEventListener('click', e => {
+    const toggle = e.target.closest('[data-toggle]');
+    if (!toggle) return;
+    e.stopPropagation();           // don't open the detail modal
+    const tr = toggle.closest('tr');
+    if (toggle.dataset.toggle === 'park') {
+      const k = tr.dataset.park;
+      if (calExpanded.parks.has(k)) calExpanded.parks.delete(k);
+      else calExpanded.parks.add(k);
+    } else if (toggle.dataset.toggle === 'cat') {
+      const k = tr.dataset.park + '|' + tr.dataset.cat;
+      if (calExpanded.cats.has(k)) calExpanded.cats.delete(k);
+      else calExpanded.cats.add(k);
+    }
+    renderCalendar();
+  });
+  document.getElementById('calBody').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const toggle = e.target.closest('[data-toggle]');
+    if (!toggle) return;
+    e.preventDefault();
+    toggle.click();
   });
 
   // ── Detail modal (calendar cell click) ──
@@ -3811,11 +4079,35 @@
     dmBody.innerHTML = sections;
   }
 
-  // Cell click → modal (ignore header clicks; the head sortable handler is separate)
+  // Cell click → detail modal.
+  // Daily mode: cell represents one date; open the lm-modal at the cell's level
+  // (park / category / leaf). Monthly mode: cell represents a whole month;
+  // keep using the existing dm-modal (period rollup with ticket-type breakdown).
   document.getElementById('calBody').addEventListener('click', e => {
+    if (e.target.closest('[data-toggle]')) return;     // chevron-toggle handler runs first
     const cell = e.target.closest('td[data-row]');
     if (!cell) return;
-    openDetail(cell.dataset.park, cell.dataset.period);
+    if (calMode === 'daily') {
+      const level = cell.dataset.level;
+      const parkId = cell.dataset.park;
+      const dateIso = cell.dataset.period;
+      const catId   = cell.dataset.cat;
+      const tickId  = cell.dataset.ticket;
+      if (level === 'row-leaf') {
+        const park = PARKS.find(p => p.id === parkId);
+        const cat  = park && park.categories.find(c => c.id === catId);
+        const tk   = cat && cat.tickets.find(t => t.id === tickId);
+        const date = DATES.find(d => d.iso === dateIso);
+        if (park && cat && tk && date) openModal({ level: 'leaf', key: stateKey(park, cat, tk, date) });
+      } else if (level === 'row-category') {
+        openModal({ level: 'category', parkId, catId, dateIso });
+      } else {
+        openModal({ level: 'park', parkId, dateIso });
+      }
+    } else {
+      // Monthly mode → existing per-month dm-modal (period rollup)
+      openDetail(cell.dataset.park, cell.dataset.period);
+    }
   });
 
   // Modal Accept / Reject delegation (daily mode only)
@@ -3835,12 +4127,13 @@
     if (e.key === 'Escape' && dmBackdrop.classList.contains('is-open')) closeDetail();
   });
 
-  // Patch render() so the calendar + open modal refresh on state change
+  // Patch render() so the calendar + open modals refresh on state change
   const _origRender = render;
   render = function () {
     _origRender();
     if (currentView === 'calendar') renderCalendar();
     if (activeDetail) renderDetail();
+    if (activeModal)  renderModal();
   };
 
   document.getElementById('commitBtn').addEventListener('click', () => {
@@ -4290,6 +4583,40 @@
     filters.dateRange = { start: null, end: null };
     applyFilters();
   });
+
+  // ── Row hover dim (table + calendar) ──
+  function wireHoverDim(tbody) {
+    if (!tbody) return;
+    tbody.setAttribute('data-hover-active', 'false');
+    tbody.addEventListener('mouseover', e => {
+      const tr = e.target.closest('tr');
+      if (!tr || !tbody.contains(tr)) return;
+      if (tr.classList.contains('srt-empty')) return;
+      if (tr.classList.contains('is-hovered')) return;
+      tbody.querySelectorAll('tr.is-hovered').forEach(r => r.classList.remove('is-hovered'));
+      tr.classList.add('is-hovered');
+      tbody.setAttribute('data-hover-active', 'true');
+    });
+    tbody.addEventListener('mouseleave', () => {
+      tbody.setAttribute('data-hover-active', 'false');
+      tbody.querySelectorAll('tr.is-hovered').forEach(r => r.classList.remove('is-hovered'));
+    });
+  }
+  wireHoverDim(document.getElementById('srtBody'));
+  wireHoverDim(document.getElementById('calBody'));
+
+  // After every render, reset hover state so post-state-change re-renders
+  // don't leave stale dim on rows whose elements were replaced.
+  const _prevRender = render;
+  render = function () {
+    _prevRender();
+    ['srtBody', 'calBody'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('data-hover-active', 'false');
+      el.querySelectorAll('tr.is-hovered').forEach(r => r.classList.remove('is-hovered'));
+    });
+  };
 
   render();
   applyFilters();   // populate trigger labels + initial filter-clear hidden state
