@@ -1122,6 +1122,21 @@
       background: #e8eaf1;
       color: var(--text-primary);
     }
+    /* List-view (main Pricing table) sortable headers */
+    table.srt thead tr.cols th.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: background .12s, color .12s;
+    }
+    table.srt thead tr.cols th.sortable:hover {
+      background: #eef0f5;
+      color: var(--text-primary);
+    }
+    table.srt thead tr.cols th.sort-asc,
+    table.srt thead tr.cols th.sort-desc {
+      background: #e8eaf1;
+      color: var(--text-primary);
+    }
     .th-inner {
       display: inline-flex;
       align-items: center;
@@ -1499,23 +1514,23 @@
             <th class="band-price"   colspan="4">Price recommendation</th>
           </tr>
           <tr class="cols">
-            <th>Park / Category / Ticket</th>
-            <th>Date</th>
-            <th>Capacity</th>
+            <th class="sortable" data-sort-key="name" data-sort-type="text"><span class="th-inner"><span class="th-text">Park / Category / Ticket</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="date" data-sort-type="text"><span class="th-inner"><span class="th-text">Date</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="cap" data-sort-type="text"><span class="th-inner"><span class="th-text">Capacity</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num">Units sold</th>
-            <th class="num">ROS vs benchmark</th>
-            <th class="num">24h sales rate <span class="sub">units/hr</span></th>
-            <th class="num">% of forecast sold</th>
+            <th class="num sortable" data-sort-key="sold" data-sort-type="num"><span class="th-inner"><span class="th-text">Units sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="ros" data-sort-type="num"><span class="th-inner"><span class="th-text">ROS vs benchmark</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="salesRate" data-sort-type="num"><span class="th-inner"><span class="th-text">24h sales rate<span class="sub">units/hr</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="pctOfFcst" data-sort-type="num"><span class="th-inner"><span class="th-text">% of forecast sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num">Forecast units</th>
-            <th class="num">Demand score</th>
-            <th class="num">YoY revenue</th>
+            <th class="num sortable" data-sort-key="fcst" data-sort-type="num"><span class="th-inner"><span class="th-text">Forecast units</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="demand" data-sort-type="num"><span class="th-inner"><span class="th-text">Demand score</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="yoy" data-sort-type="num"><span class="th-inner"><span class="th-text">YoY revenue</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th>Weather</th>
 
-            <th class="num">Current price</th>
-            <th class="num">Rec. price</th>
-            <th class="num">% change</th>
+            <th class="num sortable" data-sort-key="current" data-sort-type="num"><span class="th-inner"><span class="th-text">Current price</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="rec" data-sort-type="num"><span class="th-inner"><span class="th-text">Rec. price</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="pctChange" data-sort-type="num"><span class="th-inner"><span class="th-text">% change</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th>Action</th>
           </tr>
         </thead>
@@ -2032,18 +2047,136 @@
     return st.noteExpiry < today;
   }
 
+  // ── Column sort (Pricing table) ──
+  const listSort = { key: null, dir: null };
+
+  function parseSortNum(raw) {
+    if (raw == null) return null;
+    const s = String(raw).trim();
+    if (s === '' || s === '—' || s === 'Closed') return null;
+    const cleaned = s.replace(/[€$,%\s+]/g, '');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? null : n;
+  }
+  function cycleSort(state, key) {
+    if (key !== undefined && state.key !== key) {
+      state.key = key;
+      state.dir = 'asc';
+      return;
+    }
+    state.dir = state.dir === 'asc' ? 'desc' : (state.dir === 'desc' ? null : 'asc');
+    if (key !== undefined && state.dir === null) state.key = null;
+  }
+  function getListSortType() {
+    if (!listSort.key) return 'text';
+    const th = document.querySelector('table.srt thead tr.cols th[data-sort-key="' + listSort.key + '"]');
+    return th ? th.dataset.sortType : 'text';
+  }
+  function updateListSortIndicators() {
+    document.querySelectorAll('table.srt thead tr.cols th[data-sort-key]').forEach(th => {
+      th.classList.remove('sort-asc', 'sort-desc');
+      if (th.dataset.sortKey === listSort.key && listSort.dir) {
+        th.classList.add(listSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+      }
+    });
+  }
+
+  // Sort-value for a leaf row, by sort key.
+  function leafSortValueForKey(leaf, key) {
+    if (key === 'name') return leaf.ticket.label.toLowerCase();
+    if (key === 'date') return leaf.date.iso;
+    if (key === 'cap')  return leaf.cap;
+    const st  = rowStates[leaf.stateKey];
+    const rec = st && typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
+    switch (key) {
+      case 'sold':      return leaf.sold;
+      case 'ros':       return leaf.ros;
+      case 'salesRate': return leaf.salesRate;
+      case 'pctOfFcst': return leaf.pctOfFcst;
+      case 'fcst':      return leaf.fcst;
+      case 'demand':    return leaf.demand;
+      case 'yoy':       return leaf.yoy;
+      case 'current':   return leaf.current;
+      case 'rec':       return rec;
+      case 'pctChange': return (rec - leaf.current) / leaf.current * 100;
+    }
+    return null;
+  }
+
+  // Sort-value for a Park or Park×Category aggregate row.
+  function aggSortValueForKey(park, cat /* optional */, date, key) {
+    if (key === 'name') return (cat ? cat.label : park.name).toLowerCase();
+    if (key === 'date') return date.iso;
+    const leaves = [];
+    if (cat) {
+      cat.tickets.forEach(t => leaves.push(ALL_LEAVES[stateKey(park, cat, t, date)]));
+    } else {
+      park.categories.forEach(c =>
+        c.tickets.forEach(t => leaves.push(ALL_LEAVES[stateKey(park, c, t, date)]))
+      );
+    }
+    const agg = aggregate(leaves);
+    if (key === 'cap') return capModeForParkDay(agg.fcst, park.capacity);
+    switch (key) {
+      case 'sold':      return agg.sold;
+      case 'ros':       return agg.ros;
+      case 'salesRate': return agg.salesRate;
+      case 'pctOfFcst': return agg.pctOfFcst;
+      case 'fcst':      return agg.fcst;
+      case 'demand':    return agg.demand;
+      case 'yoy':       return agg.yoy;
+      case 'current':   return agg.revenue;  // parent rows show revenue in the current-price slot
+      case 'rec':       return null;
+      case 'pctChange': return null;
+    }
+    return null;
+  }
+
+  // Stable sort that pushes nulls/NaNs to the bottom regardless of direction.
+  function sortByKey(arr, getValue, isText) {
+    if (!listSort.key || !listSort.dir) return arr;
+    const dir = listSort.dir === 'asc' ? 1 : -1;
+    return arr
+      .map((x, i) => ({ x, i, v: getValue(x) }))
+      .sort((a, b) => {
+        const av = a.v, bv = b.v;
+        const aNull = av == null || (typeof av === 'number' && isNaN(av));
+        const bNull = bv == null || (typeof bv === 'number' && isNaN(bv));
+        if (aNull && bNull) return a.i - b.i;
+        if (aNull) return 1;
+        if (bNull) return -1;
+        if (isText) {
+          const cmp = String(av).localeCompare(String(bv));
+          return cmp !== 0 ? cmp * dir : a.i - b.i;
+        }
+        if (av < bv) return -1 * dir;
+        if (av > bv) return  1 * dir;
+        return a.i - b.i;
+      })
+      .map(o => o.x);
+  }
+
   // ── Render ──
   function render() {
     const body = document.getElementById('srtBody');
     const out  = [];
 
-    const visibleDates = DATES.filter(dateInDateRange);
+    const sortKey = listSort.key;
+    const isText  = getListSortType() === 'text';
+    const useAggSort = sortKey && sortKey !== 'date' && listSort.dir;
+
+    let visibleDates = DATES.filter(dateInDateRange);
+    if (sortKey === 'date' && listSort.dir) {
+      visibleDates = sortByKey(visibleDates, d => d.iso, true);
+    }
 
     visibleDates.forEach(date => {
-      PARKS.filter(parkMatchesFilter).forEach(park => {
-        // Skip park-date pairs where no leaf passes the active filters
-        if (!anyLeafPassesIn(park, date)) return;
+      let parksToIter = PARKS.filter(parkMatchesFilter).filter(park => anyLeafPassesIn(park, date));
+      if (useAggSort) {
+        parksToIter = sortByKey(parksToIter, p => aggSortValueForKey(p, null, date, sortKey), isText);
+      }
 
+      parksToIter.forEach(park => {
         const parkExpanded = expanded.parks.has(park.id + '|' + date.iso);
 
         // Compute category aggregates + leaf rows
@@ -2065,18 +2198,24 @@
 
         if (!parkExpanded) return;
 
-        // ── Category + leaf rows ──
-        catAggs.forEach(({ cat, leafRows, agg, capMode }) => {
-          // Skip category if none of its leaves pass filters
-          if (!anyLeafPassesIn(park, date, cat)) return;
+        // ── Category rows (sorted within park) ──
+        let catsToIter = catAggs.filter(({ cat }) => anyLeafPassesIn(park, date, cat));
+        if (useAggSort) {
+          catsToIter = sortByKey(catsToIter, ca => aggSortValueForKey(park, ca.cat, date, sortKey), isText);
+        }
 
+        catsToIter.forEach(({ cat, leafRows, agg, capMode }) => {
           const catExpanded = expanded.cats.has(park.id + '|' + cat.id + '|' + date.iso);
           out.push(categoryRowHtml(park, cat, date, agg, capMode, catExpanded));
 
           if (!catExpanded) return;
-          leafRows.forEach(leaf => {
-            if (leafPasses(leaf)) out.push(leafRowHtml(leaf));
-          });
+
+          // ── Leaf rows (sorted within category) ──
+          let leavesToIter = leafRows.filter(leafPasses);
+          if (useAggSort) {
+            leavesToIter = sortByKey(leavesToIter, leaf => leafSortValueForKey(leaf, sortKey), isText);
+          }
+          leavesToIter.forEach(leaf => out.push(leafRowHtml(leaf)));
         });
       });
     });
@@ -2702,12 +2841,12 @@
   }
 
   // ── Calendar sort state ──
-  const calSort = { dir: 'off' }; // 'asc' | 'desc' | 'off'
+  const calSort = { dir: null }; // 'asc' | 'desc' | null
   function cycleCalSort() {
-    calSort.dir = calSort.dir === 'off' ? 'asc' : calSort.dir === 'asc' ? 'desc' : 'off';
+    calSort.dir = calSort.dir === null ? 'asc' : calSort.dir === 'asc' ? 'desc' : null;
   }
   function applyCalSort(parks) {
-    if (calSort.dir === 'off') return parks;
+    if (!calSort.dir) return parks;
     const sorted = parks.slice().sort((a, b) => a.name.localeCompare(b.name));
     return calSort.dir === 'desc' ? sorted.reverse() : sorted;
   }
@@ -3422,6 +3561,15 @@
     document.getElementById('filterClear').hidden = !anyActive;
     render();
   }
+
+  // Column sort click (delegated; cycles asc → desc → off, single column)
+  document.querySelector('table.srt thead tr.cols').addEventListener('click', e => {
+    const th = e.target.closest('th[data-sort-key]');
+    if (!th) return;
+    cycleSort(listSort, th.dataset.sortKey);
+    updateListSortIndicators();
+    render();
+  });
 
   // Clear button
   document.getElementById('filterClear').addEventListener('click', () => {
