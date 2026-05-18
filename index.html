@@ -668,6 +668,40 @@
     .commit-btn.is-loading .commit-spinner { display: inline-block; }
     @keyframes commitSpin { to { transform: rotate(360deg); } }
 
+    /* ── Accept all button (outlined, defers to primary Commit) ── */
+    .accept-all-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: background .15s, color .15s, opacity .15s;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .accept-all-btn:hover:not(:disabled) {
+      background: #fff5fb;
+    }
+    .accept-all-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .accept-all-btn .accept-all-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      color: #16a34a;
+    }
+
     .commit-cluster {
       display: inline-flex;
       align-items: center;
@@ -1639,6 +1673,12 @@
         <button class="filter-clear" id="filterClear" type="button" hidden>Clear filters</button>
       </div>
       <div class="commit-cluster">
+        <button class="accept-all-btn" id="acceptAllBtn" type="button" disabled aria-label="Accept all pending recommendations">
+          <svg class="accept-all-icon" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 7.5l2.7 2.5L11 4.5"/>
+          </svg>
+          <span class="accept-all-label">Accept all</span>
+        </button>
         <button class="commit-btn" id="commitBtn" type="button" disabled aria-label="Commit pending changes">
           <svg class="commit-icon" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3.6 10a2.5 2.5 0 0 1 .55-4.93 3.6 3.6 0 0 1 7.05.43A2.4 2.4 0 0 1 11 10"/>
@@ -1658,7 +1698,7 @@
       <table class="srt">
         <thead>
           <tr class="bands">
-            <th colspan="7" class="band-product">Product details</th>
+            <th colspan="5" class="band-product">Product details</th>
             <th colspan="7" class="band-bookings">Bookings to date</th>
             <th colspan="7" class="band-forecast">Forecast</th>
             <th colspan="4" class="band-price">Price recommendations</th>
@@ -1669,8 +1709,6 @@
             <th class="sortable" data-sort-key="day" data-sort-type="text"><span class="th-inner"><span class="th-text">Day</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="lane" data-sort-type="text"><span class="th-inner"><span class="th-text">Lane</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="unit" data-sort-type="text"><span class="th-inner"><span class="th-text">LDM <span class="sub">Pricing unit</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="sortable" data-sort-key="origin" data-sort-type="text"><span class="th-inner"><span class="th-text">Origin</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="sortable" data-sort-key="dest" data-sort-type="text"><span class="th-inner"><span class="th-text">Destination</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="cap" data-sort-type="num"><span class="th-inner"><span class="th-text">Capacity <span class="sub">LDM</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
             <th class="num sep sortable" data-sort-key="bk.u" data-sort-type="num"><span class="th-inner"><span class="th-text">Units booked <span class="sub">LDM</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
@@ -1855,8 +1893,6 @@
       `<td>${esc(row.day)}</td>`,
       `<td>${esc(row.lane)}</td>`,
       `<td class="muted">LDM</td>`,
-      `<td>${esc(row.origin)}</td>`,
-      `<td>${esc(row.dest)}</td>`,
       `<td class="num">${esc(row.cap)}</td>`,
 
       `<td class="num sep">${DASH}</td>`,
@@ -1914,10 +1950,8 @@
     const cells = [
       `<td>${esc(row.date)}</td>`,
       `<td>${esc(row.day)}</td>`,
-      `<td>${esc(row.lane)}</td>`,
+      `<td>${renderAlertChips(row)}${esc(row.lane)}</td>`,
       `<td class="muted">LDM</td>`,
-      `<td>${esc(row.origin)}</td>`,
-      `<td>${esc(row.dest)}</td>`,
       `<td class="num">${esc(row.cap)}</td>`,
 
       `<td class="num sep">${esc(bk.u)}</td>`,
@@ -1955,7 +1989,8 @@
     const expired     = isNoteExpired(st);
     const noteCls     = st.note ? ' has-note' + (expired ? ' is-expired' : '') : '';
     const badgeHtml   = st.state
-      ? `<span class="action-badge b-${st.state}">${st.state.charAt(0).toUpperCase() + st.state.slice(1)}</span>`
+      ? `<span class="action-badge b-${st.state}">${st.state.charAt(0).toUpperCase() + st.state.slice(1)}</span>` +
+        (st.autoAccepted ? `<span class="action-badge b-autopilot" title="Auto-accepted by Autopilot">Autopilot</span>` : '')
       : '';
     const expiredBadge = (st.note && expired)
       ? `<span class="action-badge b-expired">Expired</span>`
@@ -1984,7 +2019,7 @@
     const visible = applyListSort(filtered);
     const body = document.getElementById('srt-body');
     if (!visible.length) {
-      body.innerHTML = `<tr><td colspan="26" style="padding:32px;text-align:center;color:var(--text-muted);font-style:italic;">No matching rows for the current filters.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="24" style="padding:32px;text-align:center;color:var(--text-muted);font-style:italic;">No matching rows for the current filters.</td></tr>`;
     } else {
       body.innerHTML = visible.map(r => r.closed ? renderClosed(r) : renderOpen(r)).join('');
     }
@@ -2011,6 +2046,45 @@
     } else {
       btn.disabled = true;
       label.textContent = 'Commit';
+    }
+    updateAcceptAllButton();
+  }
+
+  /* ── Accept all: eligible = visible open rows currently Pending ── */
+  function getAcceptAllEligible() {
+    return ROWS.filter(rowMatches).filter(r => {
+      if (r.closed) return false;
+      const st = rowStates[rowKey(r)];
+      return !st || !st.state;
+    });
+  }
+  function updateAcceptAllButton() {
+    const btn = document.getElementById('acceptAllBtn');
+    if (!btn) return;
+    const eligible = getAcceptAllEligible();
+    const label = btn.querySelector('.accept-all-label');
+    if (eligible.length > 0) {
+      btn.disabled = false;
+      label.textContent = 'Accept all (' + eligible.length + ')';
+    } else {
+      btn.disabled = true;
+      label.textContent = 'Accept all';
+    }
+  }
+  function acceptAllVisible() {
+    const btn = document.getElementById('acceptAllBtn');
+    if (!btn || btn.disabled) return;
+    const eligible = getAcceptAllEligible();
+    let n = 0;
+    eligible.forEach(r => {
+      const k = rowKey(r);
+      const st = ensureState(k);
+      st.state = 'accepted';
+      n++;
+    });
+    if (n > 0) {
+      renderList();
+      showCommitToast('Accepted ' + n + (n === 1 ? ' change' : ' changes'));
     }
   }
 
@@ -2062,6 +2136,7 @@
     }, 1200);
   }
   document.getElementById('commitBtn').addEventListener('click', commitChanges);
+  document.getElementById('acceptAllBtn').addEventListener('click', acceptAllVisible);
 
   /* ════════════════════════════════════════════════════════════
      Sorting (List view + Calendar Route column)
@@ -2424,8 +2499,10 @@
 
     if (act === 'accept') {
       st.state = st.state === 'accepted' ? undefined : 'accepted';
+      delete st.autoAccepted;
     } else if (act === 'reject') {
       st.state = st.state === 'rejected' ? undefined : 'rejected';
+      delete st.autoAccepted;
     } else if (act === 'notes') {
       openNoteModal(key);
       return;
@@ -2464,6 +2541,7 @@
       const st = ensureState(key);
       st.overrideValue = n;
       st.state = 'overridden';
+      delete st.autoAccepted;
       renderList();
     }
     function onBlur() { commit(); }
@@ -2902,6 +2980,124 @@
   function ensureState(key) {
     if (!rowStates[key]) rowStates[key] = {};
     return rowStates[key];
+  }
+
+  /* ── Autopilot config (localStorage: dynamica.autopilot) ── */
+  const AP_KEY = 'dynamica.autopilot';
+  function loadAutopilotCfg() {
+    try {
+      const raw = localStorage.getItem(AP_KEY);
+      if (!raw) return { enabled: false, increaseTolerance: 5, decreaseTolerance: 5 };
+      const parsed = JSON.parse(raw);
+      return {
+        enabled: !!parsed.enabled,
+        increaseTolerance: typeof parsed.increaseTolerance === 'number' ? parsed.increaseTolerance : 5,
+        decreaseTolerance: typeof parsed.decreaseTolerance === 'number' ? parsed.decreaseTolerance : 5,
+      };
+    } catch (e) {
+      return { enabled: false, increaseTolerance: 5, decreaseTolerance: 5 };
+    }
+  }
+  function applyAutopilotOnLoad() {
+    const cfg = loadAutopilotCfg();
+    if (!cfg.enabled) return;
+    let n = 0;
+    ROWS.forEach(r => {
+      if (r.closed) return;
+      const k = rowKey(r);
+      const st = rowStates[k];
+      if (st && st.state) return; // never override existing state
+      const cur = parseSortNum(r.pr && r.pr.c);
+      const rec = parseSortNum(r.pr && r.pr.rec);
+      if (cur == null || rec == null || cur === 0) return;
+      const pct = ((rec - cur) / cur) * 100;
+      const within = pct >= 0
+        ? pct <= cfg.increaseTolerance
+        : Math.abs(pct) <= cfg.decreaseTolerance;
+      if (within) {
+        const ns = ensureState(k);
+        ns.state = 'accepted';
+        ns.autoAccepted = true;
+        n++;
+      }
+    });
+    if (n > 0) {
+      setTimeout(() => showCommitToast('Autopilot accepted ' + n + ' recommendation' + (n === 1 ? '' : 's')), 200);
+    }
+  }
+
+  /* ── Alerts config (localStorage: dynamica.alerts) ── */
+  const ALERT_TYPES = [
+    { id: 'lowUtil',     label: 'Low utilisation',  color: '#ea580c', letter: 'L', defaultThreshold: 60 },
+    { id: 'highUtil',    label: 'High utilisation', color: '#2563eb', letter: 'H', defaultThreshold: 95 },
+    { id: 'priceDrop',   label: 'Price drop',       color: '#dc2626', letter: 'P', defaultThreshold: 10 },
+    { id: 'demandSpike', label: 'Demand spike',     color: '#16a34a', letter: 'D', defaultThreshold: 25 },
+  ];
+  function alertsDefaultCfg() {
+    const out = {};
+    ALERT_TYPES.forEach(t => { out[t.id] = { enabled: true, threshold: t.defaultThreshold }; });
+    return out;
+  }
+  let _alertsCfg = null;
+  function getAlertsCfg() {
+    if (_alertsCfg) return _alertsCfg;
+    try {
+      const raw = localStorage.getItem('dynamica.alerts');
+      if (!raw) { _alertsCfg = alertsDefaultCfg(); return _alertsCfg; }
+      const parsed = JSON.parse(raw);
+      const def = alertsDefaultCfg();
+      Object.keys(def).forEach(k => {
+        if (parsed[k]) {
+          def[k].enabled = !!parsed[k].enabled;
+          if (typeof parsed[k].threshold === 'number') def[k].threshold = parsed[k].threshold;
+        }
+      });
+      _alertsCfg = def;
+      return _alertsCfg;
+    } catch (e) {
+      _alertsCfg = alertsDefaultCfg();
+      return _alertsCfg;
+    }
+  }
+  function computeRowAlerts(row) {
+    if (row.closed) return [];
+    const cfg = getAlertsCfg();
+    const fired = [];
+    const fcUt = parseSortNum(row.fc && row.fc.ut);
+    if (cfg.lowUtil.enabled && fcUt != null && fcUt < cfg.lowUtil.threshold) {
+      fired.push({ id: 'lowUtil', tooltip: `Low utilisation: forecast ${fcUt}% is below threshold of ${cfg.lowUtil.threshold}%` });
+    }
+    if (cfg.highUtil.enabled && fcUt != null && fcUt > cfg.highUtil.threshold) {
+      fired.push({ id: 'highUtil', tooltip: `High utilisation: forecast ${fcUt}% is above threshold of ${cfg.highUtil.threshold}%` });
+    }
+    const cur = parseSortNum(row.pr && row.pr.c);
+    const rec = parseSortNum(row.pr && row.pr.rec);
+    if (cfg.priceDrop.enabled && cur != null && rec != null && cur > 0) {
+      const dropPct = ((cur - rec) / cur) * 100;
+      if (dropPct > cfg.priceDrop.threshold) {
+        fired.push({ id: 'priceDrop', tooltip: `Price drop: rec. price is ${dropPct.toFixed(1)}% below current price (threshold ${cfg.priceDrop.threshold}%)` });
+      }
+    }
+    const bkU = parseSortNum(row.bk && row.bk.u);
+    const fcU = parseSortNum(row.fc && row.fc.u);
+    if (cfg.demandSpike.enabled && bkU != null && fcU != null && bkU > 0) {
+      const spike = ((fcU - bkU) / bkU) * 100;
+      if (spike > cfg.demandSpike.threshold) {
+        fired.push({ id: 'demandSpike', tooltip: `Demand spike: forecast units exceed booked by ${spike.toFixed(1)}% (threshold ${cfg.demandSpike.threshold}%)` });
+      }
+    }
+    return fired;
+  }
+  function renderAlertChips(row) {
+    const fired = computeRowAlerts(row);
+    if (!fired.length) return '';
+    const byId = {};
+    ALERT_TYPES.forEach(t => { byId[t.id] = t; });
+    const chips = fired.map(f => {
+      const t = byId[f.id];
+      return `<span class="alert-chip" style="background:${t.color}" title="${esc(f.tooltip)}" aria-label="${esc(f.tooltip)}">${t.letter}</span>`;
+    }).join('');
+    return `<span class="alert-chips">${chips}</span>`;
   }
 
   function hashStr(s) {
@@ -3735,6 +3931,7 @@
 
   // Initial render
   buildFilterOptions();
+  applyAutopilotOnLoad();
   applyFilters();
 </script>
 

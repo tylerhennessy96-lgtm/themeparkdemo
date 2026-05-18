@@ -34,14 +34,13 @@
     <div class="settings-body">
       <aside class="settings-sidebar" id="settingsSidebar">
         <button class="settings-sidebar-item active" type="button" data-section="account">Account</button>
-        <button class="settings-sidebar-item"        type="button" data-section="notifications">Notifications</button>
-        <button class="settings-sidebar-item"        type="button" data-section="integrations">Integrations</button>
-        <button class="settings-sidebar-item"        type="button" data-section="billing">Billing</button>
-        <button class="settings-sidebar-item"        type="button" data-section="security">Security</button>
+        <button class="settings-sidebar-item"        type="button" data-section="autopilot">Autopilot</button>
+        <button class="settings-sidebar-item"        type="button" data-section="alerts">Alerts</button>
       </aside>
 
       <section class="settings-content" id="settingsContent">
-        <div class="settings-card" id="accountSection">
+        <!-- Account (default visible) -->
+        <div class="settings-card" data-section-pane="account">
           <div class="settings-section-title">Account</div>
           <div class="settings-section-sub">Manage your personal profile and regional preferences.</div>
 
@@ -65,7 +64,56 @@
             </select>
           </div>
 
-          <button class="settings-save-btn" type="button" id="settingsSave">Save changes</button>
+          <button class="settings-save-btn" type="button" data-save="account">Save changes</button>
+        </div>
+
+        <!-- Autopilot -->
+        <div class="settings-card" data-section-pane="autopilot" hidden>
+          <div class="settings-section-title">Autopilot</div>
+          <div class="settings-section-sub">Automatically accept recommended price changes that fall within your tolerance windows.</div>
+
+          <div class="settings-toggle-row">
+            <label class="switch">
+              <input type="checkbox" id="apEnabled" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+            <span class="settings-toggle-label">Enable autopilot</span>
+          </div>
+
+          <div class="settings-two-col">
+            <div class="settings-field">
+              <label for="apInc">Increase tolerance</label>
+              <div class="settings-input-suffix">
+                <input id="apInc" class="settings-input" type="number" min="0" max="100" step="1" value="5" />
+                <span class="settings-input-suffix-text">%</span>
+              </div>
+            </div>
+            <div class="settings-field">
+              <label for="apDec">Decrease tolerance</label>
+              <div class="settings-input-suffix">
+                <input id="apDec" class="settings-input" type="number" min="0" max="100" step="1" value="5" />
+                <span class="settings-input-suffix-text">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-hint">Recommendations outside these windows will remain Pending and require manual review.</div>
+
+          <div class="settings-example">
+            <strong>Example:</strong> with +5% / −5% tolerance, a recommendation to change price from $200 to $208 (+4%) would auto-accept. A change to $220 (+10%) would not.
+          </div>
+
+          <button class="settings-save-btn" type="button" data-save="autopilot">Save changes</button>
+        </div>
+
+        <!-- Alerts -->
+        <div class="settings-card" data-section-pane="alerts" hidden>
+          <div class="settings-section-title">Alerts</div>
+          <div class="settings-section-sub">Configure inline alerts shown on rows in the Pricing table.</div>
+
+          <div class="alert-config-list" id="alertConfigList"></div>
+
+          <button class="settings-save-btn" type="button" data-save="alerts">Save changes</button>
         </div>
       </section>
     </div>
@@ -141,15 +189,52 @@
     const content = document.getElementById('settingsContent');
     const toast   = document.getElementById('appToast');
 
-    const SECTION_LABELS = {
-      account: 'Account',
-      notifications: 'Notifications',
-      integrations: 'Integrations',
-      billing: 'Billing',
-      security: 'Security',
-    };
+    /* ── Autopilot config (localStorage: dynamica.autopilot) ── */
+    const AP_KEY = 'dynamica.autopilot';
+    const AP_DEFAULT = { enabled: false, increaseTolerance: 5, decreaseTolerance: 5 };
+    function loadAutopilot() {
+      try {
+        const raw = localStorage.getItem(AP_KEY);
+        if (!raw) return Object.assign({}, AP_DEFAULT);
+        const parsed = JSON.parse(raw);
+        return Object.assign({}, AP_DEFAULT, parsed);
+      } catch (e) {
+        return Object.assign({}, AP_DEFAULT);
+      }
+    }
+    function saveAutopilot(cfg) { localStorage.setItem(AP_KEY, JSON.stringify(cfg)); }
 
-    const ACCOUNT_HTML = content.innerHTML;
+    /* ── Alerts config (localStorage: dynamica.alerts) ── */
+    const ALERTS_KEY = 'dynamica.alerts';
+    const ALERT_TYPES = [
+      { id: 'lowUtil',     label: 'Low utilisation',  desc: 'Forecast utilisation is below threshold',          color: '#ea580c', letter: 'L', defaultThreshold: 60 },
+      { id: 'highUtil',    label: 'High utilisation', desc: 'Forecast utilisation is above threshold',          color: '#2563eb', letter: 'H', defaultThreshold: 95 },
+      { id: 'priceDrop',   label: 'Price drop',       desc: 'Rec. price is more than threshold % below current', color: '#dc2626', letter: 'P', defaultThreshold: 10 },
+      { id: 'demandSpike', label: 'Demand spike',     desc: 'Forecast units exceed booked units by more than %', color: '#16a34a', letter: 'D', defaultThreshold: 25 },
+    ];
+    function alertsDefault() {
+      const out = {};
+      ALERT_TYPES.forEach(t => { out[t.id] = { enabled: true, threshold: t.defaultThreshold }; });
+      return out;
+    }
+    function loadAlerts() {
+      try {
+        const raw = localStorage.getItem(ALERTS_KEY);
+        if (!raw) return alertsDefault();
+        const parsed = JSON.parse(raw);
+        const def = alertsDefault();
+        Object.keys(def).forEach(k => {
+          if (parsed[k]) {
+            def[k].enabled = !!parsed[k].enabled;
+            if (typeof parsed[k].threshold === 'number') def[k].threshold = parsed[k].threshold;
+          }
+        });
+        return def;
+      } catch (e) {
+        return alertsDefault();
+      }
+    }
+    function saveAlerts(cfg) { localStorage.setItem(ALERTS_KEY, JSON.stringify(cfg)); }
 
     function showToast(msg) {
       toast.textContent = msg;
@@ -158,35 +243,106 @@
       showToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    function renderSection(key) {
-      if (key === 'account') {
-        content.innerHTML = ACCOUNT_HTML;
-        wireSave();
-        return;
-      }
-      const label = SECTION_LABELS[key] || 'Section';
-      content.innerHTML =
-        '<div class="settings-coming-soon">' +
-        '<div class="settings-coming-soon-title">' + label + '</div>' +
-        '<div class="settings-coming-soon-sub">Coming soon.</div>' +
-        '</div>';
+    function showPane(key) {
+      content.querySelectorAll('[data-section-pane]').forEach(p => {
+        p.hidden = (p.dataset.sectionPane !== key);
+      });
+      if (key === 'autopilot') populateAutopilot();
+      if (key === 'alerts')    populateAlerts();
     }
 
-    function wireSave() {
-      const btn = document.getElementById('settingsSave');
-      if (!btn) return;
-      btn.addEventListener('click', () => showToast('Settings saved'));
+    /* ── Autopilot UI ── */
+    function populateAutopilot() {
+      const cfg = loadAutopilot();
+      const en  = document.getElementById('apEnabled');
+      const inc = document.getElementById('apInc');
+      const dec = document.getElementById('apDec');
+      en.checked = !!cfg.enabled;
+      inc.value  = cfg.increaseTolerance;
+      dec.value  = cfg.decreaseTolerance;
+      const sync = () => {
+        inc.disabled = !en.checked;
+        dec.disabled = !en.checked;
+      };
+      sync();
+      en.onchange = sync;
     }
+    function readAutopilotForm() {
+      const en  = document.getElementById('apEnabled');
+      const inc = parseFloat(document.getElementById('apInc').value);
+      const dec = parseFloat(document.getElementById('apDec').value);
+      return {
+        enabled: !!en.checked,
+        increaseTolerance: clamp(isNaN(inc) ? 0 : inc, 0, 100),
+        decreaseTolerance: clamp(isNaN(dec) ? 0 : dec, 0, 100),
+      };
+    }
+    function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+    /* ── Alerts UI ── */
+    function populateAlerts() {
+      const cfg = loadAlerts();
+      const list = document.getElementById('alertConfigList');
+      list.innerHTML = ALERT_TYPES.map(t => {
+        const c = cfg[t.id];
+        return (
+          '<div class="alert-config-row" data-alert-id="' + t.id + '">' +
+            '<span class="alert-swatch" style="background:' + t.color + '">' + t.letter + '</span>' +
+            '<label class="switch alert-switch">' +
+              '<input type="checkbox" data-role="enabled"' + (c.enabled ? ' checked' : '') + ' />' +
+              '<span class="switch-track"><span class="switch-thumb"></span></span>' +
+            '</label>' +
+            '<div class="alert-config-text">' +
+              '<div class="alert-config-label">' + t.label + '</div>' +
+              '<div class="alert-config-desc">' + t.desc + '</div>' +
+            '</div>' +
+            '<div class="settings-input-suffix alert-thresh-input">' +
+              '<input type="number" min="0" max="100" step="1" value="' + c.threshold + '" data-role="threshold" class="settings-input" />' +
+              '<span class="settings-input-suffix-text">%</span>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+    }
+    function readAlertsForm() {
+      const out = {};
+      ALERT_TYPES.forEach(t => {
+        const row  = document.querySelector('[data-alert-id="' + t.id + '"]');
+        const enEl = row.querySelector('[data-role="enabled"]');
+        const thEl = row.querySelector('[data-role="threshold"]');
+        const th   = parseFloat(thEl.value);
+        out[t.id] = {
+          enabled:  !!enEl.checked,
+          threshold: clamp(isNaN(th) ? t.defaultThreshold : th, 0, 100),
+        };
+      });
+      return out;
+    }
+
+    /* ── Save handlers ── */
+    content.addEventListener('click', e => {
+      const btn = e.target.closest('[data-save]');
+      if (!btn) return;
+      const which = btn.dataset.save;
+      if (which === 'account')   { showToast('Settings saved'); return; }
+      if (which === 'autopilot') { saveAutopilot(readAutopilotForm()); showToast('Autopilot settings saved'); return; }
+      if (which === 'alerts')    { saveAlerts(readAlertsForm());       showToast('Alert settings saved');    return; }
+    });
 
     sidebar.addEventListener('click', e => {
       const btn = e.target.closest('.settings-sidebar-item');
       if (!btn || btn.classList.contains('active')) return;
       sidebar.querySelectorAll('.settings-sidebar-item').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      renderSection(btn.dataset.section);
+      showPane(btn.dataset.section);
     });
 
-    wireSave();
+    const initial = (location.hash || '').replace('#', '');
+    const validInitial = ['account', 'autopilot', 'alerts'].includes(initial) ? initial : 'account';
+    if (validInitial !== 'account') {
+      sidebar.querySelectorAll('.settings-sidebar-item').forEach(b => b.classList.toggle('active', b.dataset.section === validInitial));
+    }
+    showPane(validInitial);
   })();
 </script>
 
