@@ -205,10 +205,6 @@
 
     /* ── Leaf row (level 3) ── */
     table.srt tbody tr.row-leaf td { background: var(--surface); }
-    table.srt tbody tr.row-leaf td.col-ticket {
-      font-weight: 500;
-      color: var(--text-primary);
-    }
 
     /* hidden rows in collapsed accordion */
     table.srt tbody tr.is-hidden { display: none; }
@@ -234,10 +230,36 @@
     .accordion-name:hover .accordion-chev { background: rgba(232,0,125,0.08); color: var(--accent); }
     .accordion-name.expanded .accordion-chev { transform: rotate(90deg); color: var(--accent); }
 
-    /* indentation */
+    /* Indentation — chevron at start of indented padding, ~20px step per level */
     .indent-1 { padding-left: 14px; }
     .indent-2 { padding-left: 34px; }
-    .indent-3 { padding-left: 56px; }
+    .indent-3 { padding-left: 78px; }   /* aligns leaf name with where a level-3 chevron's name would start */
+
+    /* Leaf bullet — a tiny dot in place of a chevron so leaves visually anchor to the same column as parent names */
+    .leaf-bullet {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      margin-right: 12px;
+      vertical-align: middle;
+      transform: translateY(-1px);
+    }
+
+    /* Per-level name styling */
+    .lvl-park-name   { font-weight: 600; color: var(--text-primary); }
+    .lvl-cat-name    { font-weight: 500; color: var(--text-primary); }
+    .lvl-ticket-name { font-weight: 400; color: var(--text-primary); }
+
+    /* Nesting accent — coloured left border on category + leaf rows to make
+       the hierarchy obvious without restyling the surrounding bands. */
+    table.srt tbody tr.row-category td:first-child {
+      box-shadow: inset 3px 0 0 #d6dbe6;
+    }
+    table.srt tbody tr.row-leaf td:first-child {
+      box-shadow: inset 3px 0 0 #e4e6eb;
+    }
 
     .park-country {
       font-weight: 400;
@@ -550,6 +572,362 @@
     }
     .note-date:focus { border-color: var(--accent); }
     .note-hint { font-size: 11.5px; color: var(--text-muted); margin-left: auto; }
+
+    /* ── View toggle (Table / Calendar) ── */
+    .view-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      margin-left: 14px;
+      background: #f1f2f5;
+      border-radius: 8px;
+      padding: 3px;
+    }
+    .view-toggle-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background .12s, color .12s, box-shadow .12s;
+    }
+    .view-toggle-btn:hover { color: var(--text-primary); }
+    .view-toggle-btn.is-active {
+      background: var(--surface);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+      font-weight: 600;
+    }
+
+    /* ── Calendar view ── */
+    .cal-wrap {
+      flex: 1;
+      overflow: hidden;
+      background: var(--body-bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-scroll {
+      flex: 1;
+      overflow: auto;
+      padding: 14px 14px 20px;
+    }
+    .cal-row {
+      display: flex;
+      align-items: stretch;
+      width: max-content;
+      min-width: 100%;
+    }
+    .cal-row + .cal-row { margin-top: 10px; }
+
+    /* Sticky left park label */
+    .cal-park-label {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      width: 210px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      margin-right: 10px;
+    }
+    .cal-park-label .cal-park-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .cal-park-label .cal-park-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cal-park-label .cal-park-country {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: #eef0f5;
+      padding: 1px 6px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+    }
+    .cal-corner {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    /* Cells container */
+    .cal-cells {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    /* Header row date headers */
+    .cal-header-row { margin-bottom: 6px; }
+    .cal-header-row .cal-cells .cal-date-header {
+      width: 90px;
+      flex-shrink: 0;
+      padding: 6px 8px 8px;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      border-radius: 6px 6px 0 0;
+    }
+    .cal-date-header .dow {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .cal-date-header .dnum {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .cal-date-header.is-weekend .dnum { color: var(--accent); }
+    .cal-date-header.is-holiday .dnum::after {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-left: 4px;
+      transform: translateY(-3px);
+    }
+
+    /* Cells */
+    .cal-cell {
+      position: relative;
+      width: 90px;
+      height: 88px;
+      flex-shrink: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      padding: 7px 9px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+      transition: transform .12s ease, box-shadow .12s ease;
+      font-family: 'Inter', sans-serif;
+    }
+    .cal-cell:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 0 1.5px rgba(232,0,125,0.55), 0 4px 14px rgba(26,26,46,0.10);
+      z-index: 2;
+    }
+    .cal-cell.is-weekend { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+    .cal-cell .cal-cell-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .cal-cell .cal-cell-dnum {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .cal-cell .cal-cell-cap {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-top: 4px;
+      box-shadow: 0 0 0 1.5px rgba(255,255,255,0.6);
+    }
+    .cal-cell .cal-cell-cap.cap-open    { background: #16a34a; }
+    .cal-cell .cal-cell-cap.cap-limited { background: #f59e0b; }
+    .cal-cell .cal-cell-cap.cap-risk    { background: #dc2626; }
+    .cal-cell .cal-cell-ros {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .cal-cell .cal-cell-badge {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(232,0,125,0.35);
+    }
+
+    /* ── Diverging ROS tier colour scale ── */
+    .cal-cell.tier-n3 { background: #dc2626; color: #fff; }
+    .cal-cell.tier-n2 { background: #fda4af; color: #7f1d1d; }
+    .cal-cell.tier-n1 { background: #fee2e2; color: #991b1b; }
+    .cal-cell.tier-0  { background: #fafafa; color: var(--text-primary); }
+    .cal-cell.tier-p1 { background: #dcfce7; color: #166534; }
+    .cal-cell.tier-p2 { background: #86efac; color: #0c4a25; }
+    .cal-cell.tier-p3 { background: #16a34a; color: #fff; }
+
+    /* ── Detail side panel ── */
+    .cal-detail-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,0.45);
+      z-index: 1300;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .15s ease, visibility 0s linear .15s;
+    }
+    .cal-detail-backdrop.is-open {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .15s ease;
+    }
+    .cal-detail-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 460px;
+      max-width: calc(100vw - 32px);
+      background: var(--surface);
+      box-shadow: -8px 0 32px rgba(26,26,46,0.18);
+      z-index: 1310;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .2s ease;
+    }
+    .cal-detail-panel.is-open { transform: translateX(0); }
+    .cal-detail-header {
+      flex-shrink: 0;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .cal-detail-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .cal-detail-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .cal-detail-close {
+      margin-left: auto;
+      width: 28px;
+      height: 28px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cal-detail-close:hover { background: #f3f4f8; color: var(--text-primary); }
+    .cal-detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0 8px;
+    }
+    .cal-detail-cat-head {
+      padding: 14px 20px 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .cal-detail-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cal-detail-row:hover { background: var(--row-hover); }
+    .cal-detail-row.row-accepted   { background: #f1faf3; }
+    .cal-detail-row.row-rejected   { background: #fdf3f3; }
+    .cal-detail-row.row-overridden { background: #f3f4ff; }
+    .cal-detail-ticket {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .cal-detail-prices {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cal-detail-prices .current { color: var(--text-secondary); }
+    .cal-detail-prices .arrow   { color: var(--text-muted); }
+    .cal-detail-prices .rec     { color: var(--text-primary); font-weight: 600; }
+    .cal-detail-prices .pct     { margin-left: 4px; font-weight: 600; font-size: 11.5px; padding: 1px 6px; border-radius: 999px; }
+    .cal-detail-prices .pct.cell-pos { background: #dcfce7; color: #166534; }
+    .cal-detail-prices .pct.cell-neg { background: #fee2e2; color: #991b1b; }
+    .cal-detail-prices .pct.cell-neutral { background: #f1f5f9; color: #475569; }
+    .cal-detail-actions { display: inline-flex; gap: 6px; align-items: center; }
+    .cal-detail-status {
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 999px;
+      margin-right: 4px;
+    }
+    .cal-detail-status.b-accepted   { background: #dcfce7; color: #166534; }
+    .cal-detail-status.b-rejected   { background: #fee2e2; color: #991b1b; }
+    .cal-detail-status.b-overridden { background: #e0e7ff; color: #3730a3; }
   </style>
 </head>
 <body>
@@ -578,6 +956,10 @@
     <div class="pricing-header-row">
       <h1 class="pricing-heading">Pricing</h1>
       <span class="pricing-sub" id="pricingSub"></span>
+      <div class="view-toggle" role="tablist" aria-label="View">
+        <button class="view-toggle-btn is-active" type="button" data-view="table" role="tab" aria-selected="true">Table</button>
+        <button class="view-toggle-btn" type="button" data-view="calendar" role="tab" aria-selected="false">Calendar</button>
+      </div>
       <div class="pricing-spacer"></div>
       <div class="commit-cluster">
         <button class="accept-all-btn" id="acceptAllBtn" type="button" disabled>
@@ -597,14 +979,13 @@
       <table class="srt">
         <thead>
           <tr class="bands">
-            <th class="band-product" colspan="4">Ticket details</th>
+            <th class="band-product" colspan="3">Ticket details</th>
             <th class="band-sales"   colspan="4">Sales to date</th>
             <th class="band-demand"  colspan="4">Demand forecast</th>
             <th class="band-price"   colspan="4">Price recommendation</th>
           </tr>
           <tr class="cols">
-            <th>Park / Category</th>
-            <th>Ticket type</th>
+            <th>Park / Category / Ticket</th>
             <th>Date</th>
             <th>Capacity</th>
 
@@ -627,6 +1008,35 @@
         <tbody id="srtBody"><!-- rendered by JS --></tbody>
       </table>
     </div>
+
+    <!-- ── Calendar view (hidden by default) ── -->
+    <div class="cal-wrap" id="calWrap" hidden>
+      <div class="cal-scroll" id="calScroll">
+        <div class="cal-row cal-header-row">
+          <div class="cal-park-label cal-corner"></div>
+          <div class="cal-cells" id="calHeaderCells"></div>
+        </div>
+        <div id="calRows"></div>
+      </div>
+    </div>
+
+    <!-- ── Detail side panel (calendar cell click) ── -->
+    <div class="cal-detail-backdrop" id="calDetailBackdrop" aria-hidden="true"></div>
+    <aside class="cal-detail-panel" id="calDetailPanel" aria-hidden="true" aria-labelledby="calDetailTitle">
+      <header class="cal-detail-header">
+        <div>
+          <div class="cal-detail-title" id="calDetailTitle">—</div>
+          <div class="cal-detail-sub"  id="calDetailSub"></div>
+        </div>
+        <button class="cal-detail-close" type="button" id="calDetailClose" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <line x1="4"  y1="4"  x2="12" y2="12"/>
+            <line x1="12" y1="4"  x2="4"  y2="12"/>
+          </svg>
+        </button>
+      </header>
+      <div class="cal-detail-body" id="calDetailBody"></div>
+    </aside>
 
   </main>
 </div>
@@ -1159,12 +1569,11 @@
             '<span class="accordion-chev">' +
               '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>' +
             '</span>' +
-            '<span style="font-weight:600">' + park.name + '</span>' +
+            '<span class="lvl-park-name">' + park.name + '</span>' +
             '<span class="park-country">' + park.country + '</span>' +
             '<span class="row-meta">' + totalLeaves + ' tickets</span>' +
           '</span>' +
         '</td>' +
-        '<td></td>' +
         '<td class="col-date">' +
           '<span class="date-num">' + date.label + '</span>' +
           '<span class="date-dow">' + date.dowLabel + '</span>' +
@@ -1199,11 +1608,10 @@
             '<span class="accordion-chev">' +
               '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>' +
             '</span>' +
-            '<span>' + cat.label + '</span>' +
+            '<span class="lvl-cat-name">' + cat.label + '</span>' +
             '<span class="row-meta">' + cat.tickets.length + ' tickets</span>' +
           '</span>' +
         '</td>' +
-        '<td></td>' +
         '<td class="col-date">' +
           '<span class="date-num">' + date.label + '</span>' +
           '<span class="date-dow">' + date.dowLabel + '</span>' +
@@ -1263,8 +1671,10 @@
 
     return (
       '<tr class="row-leaf' + stateCls + '" data-key="' + leaf.stateKey + '" data-park="' + leaf.park.id + '" data-cat="' + leaf.category.id + '" data-date="' + leaf.date.iso + '">' +
-        '<td class="indent-3" style="color:var(--text-muted);font-size:10.5px;">' + leaf.category.label + '</td>' +
-        '<td class="col-ticket">' + leaf.ticket.label + '</td>' +
+        '<td class="indent-3 col-leafname">' +
+          '<span class="leaf-bullet" aria-hidden="true"></span>' +
+          '<span class="lvl-ticket-name">' + leaf.ticket.label + '</span>' +
+        '</td>' +
         '<td class="col-date">' +
           '<span class="date-num">' + leaf.date.label + '</span>' +
           '<span class="date-dow">' + leaf.date.dowLabel + '</span>' +
@@ -1524,6 +1934,245 @@
     render();
     showToast('Accepted ' + n + ' change' + (n === 1 ? '' : 's'));
   });
+
+  // ── View toggle (Table / Calendar) ──
+  const srtWrap = document.querySelector('.srt-wrap');
+  const calWrap = document.getElementById('calWrap');
+  let currentView = 'table';
+  function setView(v) {
+    currentView = v;
+    document.querySelectorAll('.view-toggle-btn').forEach(b => {
+      const active = b.dataset.view === v;
+      b.classList.toggle('is-active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    if (v === 'table') {
+      srtWrap.hidden = false;
+      calWrap.hidden = true;
+    } else {
+      srtWrap.hidden = true;
+      calWrap.hidden = false;
+      renderCalendar();
+    }
+  }
+  document.querySelector('.view-toggle').addEventListener('click', e => {
+    const btn = e.target.closest('.view-toggle-btn');
+    if (!btn) return;
+    setView(btn.dataset.view);
+  });
+  // Hash deep-link (e.g. #calendar, optionally #calendar:warner|2026-05-23)
+  const hashRaw = (location.hash || '').replace('#', '');
+  if (hashRaw.startsWith('calendar')) {
+    requestAnimationFrame(() => {
+      setView('calendar');
+      const m = hashRaw.match(/^calendar:([^|]+)\|(\d{4}-\d{2}-\d{2})$/);
+      if (m) openDetail(m[1], m[2]);
+    });
+  }
+
+  // ── Diverging tier mapping on ROS vs benchmark ──
+  function rosTier(ros) {
+    if (ros <= -15) return 'tier-n3';
+    if (ros <=  -5) return 'tier-n2';
+    if (ros <=  -2) return 'tier-n1';
+    if (ros <    2) return 'tier-0';
+    if (ros <    5) return 'tier-p1';
+    if (ros <   15) return 'tier-p2';
+    return 'tier-p3';
+  }
+
+  // Per-park × date snapshot: aggregate + pending count + cap mode
+  function parkDaySnapshot(park, date) {
+    const leafRows = [];
+    park.categories.forEach(cat => {
+      cat.tickets.forEach(t => leafRows.push(ALL_LEAVES[stateKey(park, cat, t, date)]));
+    });
+    const agg = aggregate(leafRows);
+    const cap = capModeForParkDay(agg.fcst, park.capacity);
+    let pending = 0;
+    leafRows.forEach(leaf => {
+      const st = rowStates[leaf.stateKey];
+      const decided = st && (st.state || typeof st.overrideValue === 'number');
+      if (!decided && leaf.rec !== leaf.current) pending++;
+    });
+    return { leafRows, agg, cap, pending };
+  }
+
+  // ── Calendar rendering ──
+  function renderCalendar() {
+    // Header date row
+    const headerCells = DATES.map(d => {
+      const cls = (d.isWeekend ? ' is-weekend' : '') + (d.isHoliday ? ' is-holiday' : '');
+      return (
+        '<div class="cal-date-header' + cls + '" data-date="' + d.iso + '">' +
+          '<span class="dow">' + d.dowLabel + '</span>' +
+          '<span class="dnum">' + d.label + '</span>' +
+        '</div>'
+      );
+    }).join('');
+    document.getElementById('calHeaderCells').innerHTML = headerCells;
+
+    // Park strips
+    const totalLeavesByPark = {};
+    PARKS.forEach(p => {
+      totalLeavesByPark[p.id] = p.categories.reduce((s, c) => s + c.tickets.length, 0);
+    });
+
+    const rowsHtml = PARKS.map(park => {
+      const cells = DATES.map(date => {
+        const snap = parkDaySnapshot(park, date);
+        const tier = rosTier(snap.agg.ros);
+        const weekendCls = date.isWeekend ? ' is-weekend' : '';
+        const rosLabel = (snap.agg.ros > 0 ? '+' : '') + snap.agg.ros + '%';
+        const badge = snap.pending > 0
+          ? '<span class="cal-cell-badge" title="' + snap.pending + ' pending change' + (snap.pending === 1 ? '' : 's') + '">' + snap.pending + '</span>'
+          : '';
+        return (
+          '<div class="cal-cell ' + tier + weekendCls + '" data-park="' + park.id + '" data-date="' + date.iso + '" role="button" tabindex="0">' +
+            '<div class="cal-cell-top">' +
+              '<span class="cal-cell-dnum">' + parseInt(date.label, 10) + '</span>' +
+              '<span class="cal-cell-cap cap-' + snap.cap + '" title="Capacity: ' + snap.cap + '"></span>' +
+            '</div>' +
+            '<span class="cal-cell-ros">' + rosLabel + '</span>' +
+            badge +
+          '</div>'
+        );
+      }).join('');
+      return (
+        '<div class="cal-row" data-park="' + park.id + '">' +
+          '<div class="cal-park-label">' +
+            '<span class="cal-park-name">' + park.name + '</span>' +
+            '<span class="cal-park-meta">' +
+              '<span class="cal-park-country">' + park.country + '</span>' +
+              totalLeavesByPark[park.id] + ' tickets · cap ' + park.capacity.toLocaleString('en-GB') +
+            '</span>' +
+          '</div>' +
+          '<div class="cal-cells">' + cells + '</div>' +
+        '</div>'
+      );
+    }).join('');
+    document.getElementById('calRows').innerHTML = rowsHtml;
+  }
+
+  // ── Cell click → side panel ──
+  const calDetailPanel    = document.getElementById('calDetailPanel');
+  const calDetailBackdrop = document.getElementById('calDetailBackdrop');
+  const calDetailTitle    = document.getElementById('calDetailTitle');
+  const calDetailSub      = document.getElementById('calDetailSub');
+  const calDetailBody     = document.getElementById('calDetailBody');
+  let activeDetail = null; // { parkId, dateIso }
+
+  function openDetail(parkId, dateIso) {
+    activeDetail = { parkId, dateIso };
+    renderDetail();
+    calDetailBackdrop.classList.add('is-open');
+    calDetailBackdrop.setAttribute('aria-hidden', 'false');
+    calDetailPanel.classList.add('is-open');
+    calDetailPanel.setAttribute('aria-hidden', 'false');
+  }
+  function closeDetail() {
+    activeDetail = null;
+    calDetailBackdrop.classList.remove('is-open');
+    calDetailBackdrop.setAttribute('aria-hidden', 'true');
+    calDetailPanel.classList.remove('is-open');
+    calDetailPanel.setAttribute('aria-hidden', 'true');
+  }
+
+  function renderDetail() {
+    if (!activeDetail) return;
+    const park = PARKS.find(p => p.id === activeDetail.parkId);
+    const date = DATES.find(d => d.iso === activeDetail.dateIso);
+    if (!park || !date) return;
+    const snap = parkDaySnapshot(park, date);
+
+    const wx = weatherFor(park.id, date.iso);
+    calDetailTitle.textContent = park.name + ' · ' + date.label + ' ' + date.dowLabel +
+      (date.isHoliday ? ' · Holiday' : '');
+    calDetailSub.innerHTML =
+      wx.icon + ' ' + wx.temp + '°  ·  ' +
+      'ROS ' + (snap.agg.ros > 0 ? '+' : '') + snap.agg.ros + '%  ·  ' +
+      snap.agg.sold.toLocaleString('en-GB') + ' / ' + snap.agg.fcst.toLocaleString('en-GB') + ' units';
+
+    const sections = park.categories.map(cat => {
+      const rows = cat.tickets.map(t => {
+        const leaf = ALL_LEAVES[stateKey(park, cat, t, date)];
+        const st = rowStates[leaf.stateKey] || {};
+        const rec = (typeof st.overrideValue === 'number') ? st.overrideValue : leaf.rec;
+        const pctChange = Math.round(((rec - leaf.current) / leaf.current) * 1000) / 10;
+        const pctClass = pctChange > 1 ? 'cell-pos' : (pctChange < -1 ? 'cell-neg' : 'cell-neutral');
+        const stateCls =
+          st.state === 'accepted'   ? ' row-accepted'   :
+          st.state === 'rejected'   ? ' row-rejected'   :
+          st.state === 'overridden' ? ' row-overridden' : '';
+        const acceptSolid = (st.state === 'accepted') ? 'solid' : (st.state ? 'dim' : '');
+        const rejectSolid = (st.state === 'rejected') ? 'solid' : (st.state ? 'dim' : '');
+        const statusBadge =
+          st.state === 'accepted'   ? '<span class="cal-detail-status b-accepted">Accepted</span>' :
+          st.state === 'rejected'   ? '<span class="cal-detail-status b-rejected">Rejected</span>' :
+          st.state === 'overridden' ? '<span class="cal-detail-status b-overridden">Overridden</span>' : '';
+
+        return (
+          '<div class="cal-detail-row' + stateCls + '" data-key="' + leaf.stateKey + '">' +
+            '<div>' +
+              statusBadge +
+              '<span class="cal-detail-ticket">' + leaf.ticket.label + '</span>' +
+              '<div class="cal-detail-prices">' +
+                '<span class="current">' + fmtEur(leaf.current) + '</span>' +
+                '<span class="arrow">→</span>' +
+                '<span class="rec">' + fmtEur(rec) + '</span>' +
+                '<span class="pct ' + pctClass + '">' + (pctChange > 0 ? '+' : '') + pctChange + '%</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="cal-detail-actions">' +
+              '<button class="action-btn act-accept ' + acceptSolid + '" type="button" data-action="accept" data-key="' + leaf.stateKey + '" aria-label="Accept">' + ACCEPT_SVG + '</button>' +
+              '<button class="action-btn act-reject ' + rejectSolid + '" type="button" data-action="reject" data-key="' + leaf.stateKey + '" aria-label="Reject">' + REJECT_SVG + '</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+      return '<div class="cal-detail-cat-head">' + cat.label + '</div>' + rows;
+    }).join('');
+
+    calDetailBody.innerHTML = sections;
+  }
+
+  // Cell click / keyboard
+  document.getElementById('calRows').addEventListener('click', e => {
+    const cell = e.target.closest('.cal-cell');
+    if (!cell) return;
+    openDetail(cell.dataset.park, cell.dataset.date);
+  });
+  document.getElementById('calRows').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const cell = e.target.closest('.cal-cell');
+    if (!cell) return;
+    e.preventDefault();
+    openDetail(cell.dataset.park, cell.dataset.date);
+  });
+
+  // Side-panel Accept / Reject delegation
+  calDetailBody.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const key = btn.dataset.key;
+    if (btn.dataset.action === 'accept') toggleAccept(key);
+    else if (btn.dataset.action === 'reject') toggleReject(key);
+    // toggleAccept/toggleReject call render(), which re-renders the side panel via the patch below
+  });
+
+  document.getElementById('calDetailClose').addEventListener('click', closeDetail);
+  calDetailBackdrop.addEventListener('click', closeDetail);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && calDetailPanel.classList.contains('is-open')) closeDetail();
+  });
+
+  // Patch render() so the calendar refreshes when state changes
+  const _origRender = render;
+  render = function () {
+    _origRender();
+    if (currentView === 'calendar') renderCalendar();
+    if (activeDetail) renderDetail();
+  };
 
   document.getElementById('commitBtn').addEventListener('click', () => {
     const btn = document.getElementById('commitBtn');
