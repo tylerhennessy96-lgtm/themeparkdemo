@@ -34,6 +34,7 @@
     <div class="settings-body">
       <aside class="settings-sidebar" id="settingsSidebar">
         <button class="settings-sidebar-item active" type="button" data-section="account">Account</button>
+        <button class="settings-sidebar-item"        type="button" data-section="alerts">Alerts</button>
       </aside>
 
       <section class="settings-content" id="settingsContent">
@@ -61,6 +62,13 @@
           </div>
 
           <button class="settings-save-btn" type="button" data-save="account">Save changes</button>
+        </div>
+
+        <div class="settings-card" data-section-pane="alerts" hidden>
+          <div class="settings-section-title">Alerts</div>
+          <div class="settings-section-sub">Configure inline alerts shown on rows in the Pricing table.</div>
+          <div class="alert-config-list" id="alertConfigList"></div>
+          <button class="settings-save-btn" type="button" data-save="alerts">Save changes</button>
         </div>
       </section>
     </div>
@@ -133,6 +141,7 @@
 <script>
   (function () {
     const content = document.getElementById('settingsContent');
+    const sidebar = document.getElementById('settingsSidebar');
     const toast   = document.getElementById('appToast');
     function showToast(msg) {
       toast.textContent = msg;
@@ -140,11 +149,116 @@
       clearTimeout(showToast._t);
       showToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
     }
+    function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+    // ── Alerts config (matches dynamica.alerts in index.html) ──
+    const ALERTS_KEY = 'dynamica.alerts';
+    const ALERT_TYPES = [
+      { id: 'lowPace',    label: 'Low pace',         desc: 'ROS vs benchmark falls below threshold',          color: '#ea580c', defaultThreshold: -15, thresholdMin: -50, thresholdMax: 50, hasThreshold: true,  unit: '%' },
+      { id: 'highDemand', label: 'High demand',      desc: 'Demand score exceeds threshold',                   color: '#2563eb', defaultThreshold:  80, thresholdMin:   0, thresholdMax: 100, hasThreshold: true, unit: '' },
+      { id: 'lowDemand',  label: 'Low demand',       desc: 'Demand score falls below threshold',               color: '#94a3b8', defaultThreshold:  25, thresholdMin:   0, thresholdMax: 100, hasThreshold: true, unit: '' },
+      { id: 'weather',    label: 'Weather warning',  desc: 'Adverse weather on a day with demand at or above', color: '#dc2626', defaultThreshold:  70, thresholdMin:   0, thresholdMax: 100, hasThreshold: true, unit: '' },
+      { id: 'capacity',   label: 'Capacity risk',    desc: 'Forecast units exceed % of park capacity',         color: '#16a34a', defaultThreshold:  95, thresholdMin:  50, thresholdMax: 100, hasThreshold: true, unit: '%' },
+      { id: 'priceInv',   label: 'Price inversion',  desc: 'Adult cheaper than another ticket in the park',   color: '#a855f7', hasThreshold: false },
+      { id: 'outOfLine',  label: 'Out-of-line move', desc: 'Leaf price change exceeds 3× sibling median',      color: '#f59e0b', hasThreshold: false },
+    ];
+    function alertsDefault() {
+      const out = {};
+      ALERT_TYPES.forEach(t => {
+        out[t.id] = { enabled: true };
+        if (t.hasThreshold) out[t.id].threshold = t.defaultThreshold;
+      });
+      return out;
+    }
+    function loadAlerts() {
+      try {
+        const raw = localStorage.getItem(ALERTS_KEY);
+        const def = alertsDefault();
+        if (!raw) return def;
+        const parsed = JSON.parse(raw);
+        Object.keys(def).forEach(k => {
+          if (parsed[k]) {
+            if ('enabled' in parsed[k]) def[k].enabled = !!parsed[k].enabled;
+            if ('threshold' in parsed[k] && 'threshold' in def[k]) def[k].threshold = parsed[k].threshold;
+          }
+        });
+        return def;
+      } catch (e) { return alertsDefault(); }
+    }
+    function saveAlerts(cfg) { localStorage.setItem(ALERTS_KEY, JSON.stringify(cfg)); }
+
+    function populateAlerts() {
+      const cfg = loadAlerts();
+      const list = document.getElementById('alertConfigList');
+      list.innerHTML = ALERT_TYPES.map(t => {
+        const c = cfg[t.id];
+        const thresholdInput = t.hasThreshold
+          ? '<div class="settings-input-suffix alert-thresh-input">' +
+              '<input type="number" min="' + t.thresholdMin + '" max="' + t.thresholdMax + '" step="1" value="' + c.threshold + '" data-role="threshold" class="settings-input" />' +
+              (t.unit ? '<span class="settings-input-suffix-text">' + t.unit + '</span>' : '') +
+            '</div>'
+          : '<div class="alert-thresh-input" style="visibility:hidden"></div>';
+        return (
+          '<div class="alert-config-row" data-alert-id="' + t.id + '">' +
+            '<span class="alert-swatch" style="background:' + t.color + '"></span>' +
+            '<label class="switch alert-switch">' +
+              '<input type="checkbox" data-role="enabled"' + (c.enabled ? ' checked' : '') + ' />' +
+              '<span class="switch-track"><span class="switch-thumb"></span></span>' +
+            '</label>' +
+            '<div class="alert-config-text">' +
+              '<div class="alert-config-label">' + t.label + '</div>' +
+              '<div class="alert-config-desc">' + t.desc + '</div>' +
+            '</div>' +
+            thresholdInput +
+          '</div>'
+        );
+      }).join('');
+    }
+    function readAlertsForm() {
+      const out = {};
+      ALERT_TYPES.forEach(t => {
+        const row  = document.querySelector('[data-alert-id="' + t.id + '"]');
+        if (!row) return;
+        const enEl = row.querySelector('[data-role="enabled"]');
+        out[t.id] = { enabled: !!enEl.checked };
+        if (t.hasThreshold) {
+          const thEl = row.querySelector('[data-role="threshold"]');
+          const th   = parseFloat(thEl.value);
+          out[t.id].threshold = clamp(isNaN(th) ? t.defaultThreshold : th, t.thresholdMin, t.thresholdMax);
+        }
+      });
+      return out;
+    }
+
+    function showPane(key) {
+      content.querySelectorAll('[data-section-pane]').forEach(p => {
+        p.hidden = (p.dataset.sectionPane !== key);
+      });
+      if (key === 'alerts') populateAlerts();
+    }
+    sidebar.addEventListener('click', e => {
+      const btn = e.target.closest('.settings-sidebar-item');
+      if (!btn || btn.classList.contains('active')) return;
+      sidebar.querySelectorAll('.settings-sidebar-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      showPane(btn.dataset.section);
+    });
+
     content.addEventListener('click', e => {
       const btn = e.target.closest('[data-save]');
       if (!btn) return;
-      if (btn.dataset.save === 'account') showToast('Settings saved');
+      const which = btn.dataset.save;
+      if (which === 'account') { showToast('Settings saved'); return; }
+      if (which === 'alerts')  { saveAlerts(readAlertsForm()); showToast('Alert settings saved'); return; }
     });
+
+    // Initial pane from URL hash if valid
+    const initial = (location.hash || '').replace('#', '');
+    const validInitial = ['account', 'alerts'].includes(initial) ? initial : 'account';
+    if (validInitial !== 'account') {
+      sidebar.querySelectorAll('.settings-sidebar-item').forEach(b => b.classList.toggle('active', b.dataset.section === validInitial));
+    }
+    showPane(validInitial);
   })();
 </script>
 

@@ -310,6 +310,61 @@
     }
     .weather-icon { font-size: 14px; }
 
+    /* ── Alerts cell + chips ── */
+    table.srt tbody td.alerts-cell {
+      padding: 4px 12px;
+      vertical-align: middle;
+      white-space: nowrap;
+      min-width: 90px;
+    }
+    .alert-chips {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .alert-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      color: #fff;
+      flex-shrink: 0;
+      cursor: default;
+    }
+    .alert-chip svg { display: block; }
+    .alert-chip-overflow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 999px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: #eef0f5;
+      flex-shrink: 0;
+      cursor: default;
+    }
+
+    /* ── Calendar cell alert dot (top-left, opposite the decision dot) ── */
+    table.cal-table tbody td.has-alert { position: relative; }
+    table.cal-table tbody td.has-alert::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 1.5px var(--surface);
+      z-index: 1;
+    }
+
     /* Demand score */
     .demand-cell {
       display: inline-flex;
@@ -1537,6 +1592,14 @@
       margin-right: 6px;
       vertical-align: middle;
     }
+    .lm-legend-tick {
+      display: inline-block;
+      width: 18px; height: 3px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: middle;
+      background: linear-gradient(to right, #2563eb 0%, #2563eb 50%, #dc2626 50%, #dc2626 100%);
+    }
 
     /* Weather panel */
     .lm-wx {
@@ -1767,7 +1830,7 @@
       <table class="srt">
         <thead>
           <tr class="bands">
-            <th class="band-product" colspan="4">Ticket details</th>
+            <th class="band-product" colspan="5">Ticket details</th>
             <th class="band-sales"   colspan="4">Sales to date</th>
             <th class="band-demand"  colspan="3">Demand forecast</th>
             <th class="band-price"   colspan="4">Price recommendation</th>
@@ -1777,6 +1840,7 @@
             <th class="sortable" data-sort-key="date" data-sort-type="text"><span class="th-inner"><span class="th-text">Date</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th>Weather</th>
             <th class="sortable" data-sort-key="cap" data-sort-type="text"><span class="th-inner"><span class="th-text">Capacity</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="alertCount" data-sort-type="num"><span class="th-inner"><span class="th-text">Alerts</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
             <th class="num sortable" data-sort-key="sold" data-sort-type="num"><span class="th-inner"><span class="th-text">Units sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="ros" data-sort-type="num"><span class="th-inner"><span class="th-text">ROS vs benchmark</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
@@ -2204,6 +2268,85 @@
   }
 
   // Revenue-weighted price aggregation across leaf rows (override-aware).
+  // Group A alerts on an aggregate row (park or category × date).
+  function aggregateGroupAAlerts(agg, capacity, wxKind, parkId) {
+    const out = [];
+    const cfg = alertCfg;
+    if (cfg.lowPace.enabled && agg.ros < cfg.lowPace.threshold) {
+      out.push(makeAlert('lowPace',
+        'Low pace: ROS ' + (agg.ros > 0 ? '+' : '') + agg.ros + '% (threshold ' + cfg.lowPace.threshold + '%)'));
+    }
+    if (cfg.highDemand.enabled && agg.demand > cfg.highDemand.threshold) {
+      out.push(makeAlert('highDemand',
+        'High demand: score ' + agg.demand + ' (threshold ' + cfg.highDemand.threshold + ')'));
+    }
+    if (cfg.lowDemand.enabled && agg.demand < cfg.lowDemand.threshold) {
+      out.push(makeAlert('lowDemand',
+        'Low demand: score ' + agg.demand + ' (threshold ' + cfg.lowDemand.threshold + ')'));
+    }
+    if (cfg.weather.enabled && agg.demand >= cfg.weather.threshold) {
+      const inverted = parkId === 'tropical';
+      if ((!inverted && wxKind === 'rain') || (inverted && wxKind === 'sun')) {
+        out.push(makeAlert('weather',
+          'Weather warning: ' + (inverted ? 'sunny day' : 'rain forecast') +
+          ', demand ' + agg.demand + ' (threshold ' + cfg.weather.threshold + ')'));
+      }
+    }
+    if (cfg.capacity.enabled) {
+      const pct = agg.fcst / capacity * 100;
+      if (pct > cfg.capacity.threshold) {
+        out.push(makeAlert('capacity',
+          'Capacity risk: ' + pct.toFixed(1) + '% of capacity (threshold ' + cfg.capacity.threshold + '%)'));
+      }
+    }
+    return out;
+  }
+
+  // Union of (this row's Group A alerts) and (descendant rollup),
+  // de-duplicated by type. Direct alerts win over rollups for tooltip text.
+  function unionAlertsWithRollup(directAlerts, leafRows) {
+    const byType = new Map();
+    directAlerts.forEach(a => byType.set(a.type, a));
+    // Count descendants per type for rollup tooltips
+    const descendantCount = {};
+    leafRows.forEach(l => {
+      if (!l.alerts) return;
+      l.alerts.forEach(a => {
+        descendantCount[a.type] = (descendantCount[a.type] || 0) + 1;
+      });
+    });
+    Object.keys(descendantCount).forEach(type => {
+      if (byType.has(type)) return;
+      byType.set(type, makeAlert(type,
+        ALERT_META[type].label + ': ' + descendantCount[type] +
+        ' descendant' + (descendantCount[type] === 1 ? '' : 's'),
+        true));
+    });
+    // Preserve a stable, predictable order
+    const out = [];
+    ALERT_ORDER.forEach(t => { if (byType.has(t)) out.push(byType.get(t)); });
+    return out;
+  }
+
+  function alertsCellHtml(alerts) {
+    if (!alerts || alerts.length === 0) return '<td class="alerts-cell"></td>';
+    const visible = alerts.slice(0, 3);
+    const overflow = alerts.length - 3;
+    let html = '<td class="alerts-cell"><span class="alert-chips">';
+    visible.forEach(a => {
+      html += '<span class="alert-chip" data-alert-type="' + a.type +
+        '" style="background:' + a.color + '" title="' + esc(a.tooltip) + '">' +
+        ALERT_ICONS[a.type] + '</span>';
+    });
+    if (overflow > 0) {
+      const labels = alerts.slice(3).map(a => a.label).join(', ');
+      html += '<span class="alert-chip-overflow" title="' + esc(labels) +
+        '" data-alert-type="overflow">+' + overflow + '</span>';
+    }
+    html += '</span></td>';
+    return html;
+  }
+
   function aggregatePrice(leafRows) {
     let soldSum = 0, currentNum = 0, recNum = 0;
     leafRows.forEach(l => {
@@ -2249,6 +2392,150 @@
       });
     });
   });
+
+  // ─────────────────────────────────────────────────────────────
+  //  Alerts — config, types, icons
+  // ─────────────────────────────────────────────────────────────
+  const ALERT_DEFAULTS = {
+    lowPace:    { enabled: true, threshold: -15 },
+    highDemand: { enabled: true, threshold:  80 },
+    lowDemand:  { enabled: true, threshold:  25 },
+    weather:    { enabled: true, threshold:  70 },
+    capacity:   { enabled: true, threshold:  95 },
+    priceInv:   { enabled: true },
+    outOfLine:  { enabled: true },
+  };
+  function loadAlertCfg() {
+    try {
+      const raw = localStorage.getItem('dynamica.alerts');
+      const out = JSON.parse(JSON.stringify(ALERT_DEFAULTS));
+      if (!raw) return out;
+      const parsed = JSON.parse(raw);
+      Object.keys(out).forEach(k => {
+        if (parsed[k]) {
+          if ('enabled' in parsed[k])  out[k].enabled  = !!parsed[k].enabled;
+          if ('threshold' in parsed[k] && 'threshold' in out[k]) out[k].threshold = parsed[k].threshold;
+        }
+      });
+      return out;
+    } catch (e) {
+      return JSON.parse(JSON.stringify(ALERT_DEFAULTS));
+    }
+  }
+  const alertCfg = loadAlertCfg();
+
+  const ALERT_META = {
+    lowPace:    { label: 'Low pace',         color: '#ea580c' },
+    highDemand: { label: 'High demand',      color: '#2563eb' },
+    lowDemand:  { label: 'Low demand',       color: '#94a3b8' },
+    weather:    { label: 'Weather warning',  color: '#dc2626' },
+    capacity:   { label: 'Capacity risk',    color: '#16a34a' },
+    priceInv:   { label: 'Price inversion',  color: '#a855f7' },
+    outOfLine:  { label: 'Out-of-line move', color: '#f59e0b' },
+  };
+  // Inline SVGs — 10x10 viewBox centred, stroke white via currentColor on the chip.
+  const ALERT_ICONS = {
+    lowPace:    '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,3 3.5,4.5 5.5,3.5 8,6.5"/><polyline points="6.2,6.5 8,6.5 8,4.7"/></svg>',
+    highDemand: '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="8.5" x2="5" y2="2.2"/><polyline points="2.8,4 5,1.8 7.2,4"/></svg>',
+    lowDemand:  '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="1.5" x2="5" y2="7.8"/><polyline points="2.8,6 5,8.2 7.2,6"/></svg>',
+    weather:    '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.3 5.5 a1.6 1.6 0 0 1 1.5 -1.7 a1.8 1.8 0 0 1 3.5 0.3 a1.2 1.2 0 0 1 0.5 2.3 h-5 a1.3 1.3 0 0 1 -0.5 -0.9 z"/><line x1="3.8" y1="7.6" x2="3.3" y2="8.8"/><line x1="6.2" y1="7.6" x2="5.7" y2="8.8"/></svg>',
+    capacity:   '<svg viewBox="0 0 10 10" width="10" height="10" fill="currentColor" stroke="none"><rect x="1"   y="5.8" width="2" height="3.2" rx="0.3"/><rect x="4"   y="3.4" width="2" height="5.6" rx="0.3"/><rect x="7"   y="1"   width="2" height="8"   rx="0.3"/></svg>',
+    priceInv:   '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="1.6" x2="3" y2="8.4"/><polyline points="1.5,7 3,8.5 4.5,7"/><line x1="7" y1="1.6" x2="7" y2="8.4"/><polyline points="5.5,3 7,1.5 8.5,3"/></svg>',
+    outOfLine:  '<svg viewBox="0 0 10 10" width="10" height="10" fill="currentColor" stroke="none"><polygon points="5.4,0.8 2.4,5.2 4.6,5.2 4,9.2 7.6,4.6 5.4,4.6 5.8,0.8"/></svg>',
+  };
+  // Stable order used for rendering chips (Group A first, then Group B).
+  const ALERT_ORDER = ['lowPace','highDemand','lowDemand','weather','capacity','priceInv','outOfLine'];
+
+  function makeAlert(type, tooltip, isRollup) {
+    const meta = ALERT_META[type];
+    return {
+      type, label: meta.label, color: meta.color,
+      tooltip: tooltip,
+      isRollup: !!isRollup,
+    };
+  }
+
+  function computeLeafAlertsAt(leaf) {
+    const out = [];
+    const cfg = alertCfg;
+    const fmtSigned = n => (n > 0 ? '+' : '') + n + '%';
+
+    if (cfg.lowPace.enabled && leaf.ros < cfg.lowPace.threshold) {
+      out.push(makeAlert('lowPace',
+        'Low pace: ROS ' + fmtSigned(leaf.ros) + ' (threshold ' + cfg.lowPace.threshold + '%)'));
+    }
+    if (cfg.highDemand.enabled && leaf.demand > cfg.highDemand.threshold) {
+      out.push(makeAlert('highDemand',
+        'High demand: score ' + leaf.demand + ' (threshold ' + cfg.highDemand.threshold + ')'));
+    }
+    if (cfg.lowDemand.enabled && leaf.demand < cfg.lowDemand.threshold) {
+      out.push(makeAlert('lowDemand',
+        'Low demand: score ' + leaf.demand + ' (threshold ' + cfg.lowDemand.threshold + ')'));
+    }
+    if (cfg.weather.enabled && leaf.demand >= cfg.weather.threshold) {
+      const inverted = leaf.park.id === 'tropical';
+      if ((!inverted && leaf.wx.kind === 'rain') || (inverted && leaf.wx.kind === 'sun')) {
+        out.push(makeAlert('weather',
+          'Weather warning: ' + (inverted ? 'sunny day' : 'rain forecast') +
+          ', demand ' + leaf.demand + ' (threshold ' + cfg.weather.threshold + ')'));
+      }
+    }
+    if (cfg.capacity.enabled) {
+      const pct = leaf.fcst / leaf.park.capacity * 100;
+      if (pct > cfg.capacity.threshold) {
+        out.push(makeAlert('capacity',
+          'Capacity risk: ' + pct.toFixed(1) + '% of capacity (threshold ' + cfg.capacity.threshold + '%)'));
+      }
+    }
+    return out;
+  }
+
+  function computeGroupBAlerts() {
+    if (!alertCfg.priceInv.enabled && !alertCfg.outOfLine.enabled) return;
+    PARKS.forEach(park => {
+      DATES.forEach(date => {
+        // Price inversion: Adult cheaper than any sibling within Individual.
+        if (alertCfg.priceInv.enabled) {
+          const cat = park.categories.find(c => c.id === 'individual');
+          if (cat) {
+            const adultTicket = cat.tickets.find(t => t.id === 'adult');
+            if (adultTicket) {
+              const adult = ALL_LEAVES[stateKey(park, cat, adultTicket, date)];
+              const higher = cat.tickets
+                .filter(t => t.id !== 'adult')
+                .map(t => ALL_LEAVES[stateKey(park, cat, t, date)])
+                .filter(s => s.current > adult.current);
+              if (higher.length) {
+                const worst = higher.reduce((m, s) => s.current > m.current ? s : m, higher[0]);
+                adult.alerts.push(makeAlert('priceInv',
+                  'Price inversion: Adult €' + adult.current + ' < ' + worst.ticket.label + ' €' + worst.current));
+              }
+            }
+          }
+        }
+        // Out-of-line move: leaf's |% change| > 3× sibling median.
+        if (alertCfg.outOfLine.enabled) {
+          park.categories.forEach(cat => {
+            const leaves = cat.tickets.map(t => ALL_LEAVES[stateKey(park, cat, t, date)]);
+            const pcts = leaves.map(l => Math.abs((l.rec - l.current) / l.current * 100));
+            const sorted = pcts.slice().sort((a, b) => a - b);
+            const median = sorted[Math.floor(sorted.length / 2)];
+            if (median < 1) return; // skip when siblings are flat
+            leaves.forEach((l, i) => {
+              if (pcts[i] > median * 3) {
+                l.alerts.push(makeAlert('outOfLine',
+                  'Out-of-line move: ' + pcts[i].toFixed(1) + '% vs sibling median ' + median.toFixed(1) + '%'));
+              }
+            });
+          });
+        }
+      });
+    });
+  }
+
+  // Run once at startup.
+  Object.values(ALL_LEAVES).forEach(leaf => { leaf.alerts = computeLeafAlertsAt(leaf); });
+  computeGroupBAlerts();
 
   // ── Pre-seed demo states for screenshot ──
   (function preseed() {
@@ -2376,7 +2663,8 @@
       case 'yoy':       return leaf.yoy;
       case 'current':   return leaf.current;
       case 'rec':       return rec;
-      case 'pctChange': return (rec - leaf.current) / leaf.current * 100;
+      case 'pctChange':  return (rec - leaf.current) / leaf.current * 100;
+      case 'alertCount': return (leaf.alerts && leaf.alerts.length) ? leaf.alerts.length : null;
     }
     return null;
   }
@@ -2400,6 +2688,12 @@
       if (key === 'current')   return price.avgCurrent;
       if (key === 'rec')       return price.avgRec;
       if (key === 'pctChange') return price.pctChange;
+    }
+    if (key === 'alertCount') {
+      const wx = weatherFor(park.id, date.iso);
+      const direct = aggregateGroupAAlerts(agg, park.capacity, wx.kind, park.id);
+      const unioned = unionAlertsWithRollup(direct, leaves);
+      return unioned.length ? unioned.length : null;
     }
     switch (key) {
       case 'sold':      return agg.sold;
@@ -2502,7 +2796,7 @@
     });
 
     if (!out.length) {
-      out.push('<tr class="srt-empty"><td colspan="15">No matching rows for the current filters.</td></tr>');
+      out.push('<tr class="srt-empty"><td colspan="16">No matching rows for the current filters.</td></tr>');
     }
 
     body.innerHTML = out.join('');
@@ -2514,6 +2808,8 @@
     const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
     const price = aggregatePrice(leafRows);
     const recTint = tintFor(Math.round(price.pctChange));
+    const direct = aggregateGroupAAlerts(agg, park.capacity, wx.kind, park.id);
+    const alerts = unionAlertsWithRollup(direct, leafRows);
     return (
       '<tr class="row-park" data-park="' + park.id + '" data-date="' + date.iso + '">' +
         '<td class="col-name">' +
@@ -2533,6 +2829,7 @@
         '</td>' +
         '<td>' + weatherCell(wx) + '</td>' +
         '<td>' + capChip(capMode) + '</td>' +
+        alertsCellHtml(alerts) +
 
         '<td class="num">' + fmtInt(agg.sold) + '</td>' +
         '<td class="num ' + tintFor(agg.ros) + '">' + signed(agg.ros, '%') + '</td>' +
@@ -2556,6 +2853,8 @@
     const price = aggregatePrice(leafRows);
     const recTint = tintFor(Math.round(price.pctChange));
     const wx = weatherFor(park.id, date.iso);
+    const direct = aggregateGroupAAlerts(agg, park.capacity, wx.kind, park.id);
+    const alerts = unionAlertsWithRollup(direct, leafRows);
     return (
       '<tr class="row-category" data-park="' + park.id + '" data-cat="' + cat.id + '" data-date="' + date.iso + '">' +
         '<td class="col-name">' +
@@ -2573,6 +2872,7 @@
         '</td>' +
         '<td>' + weatherCell(wx) + '</td>' +
         '<td>' + capChip(capMode) + '</td>' +
+        alertsCellHtml(alerts) +
 
         '<td class="num">' + fmtInt(agg.sold) + '</td>' +
         '<td class="num ' + tintFor(agg.ros) + '">' + signed(agg.ros, '%') + '</td>' +
@@ -2636,6 +2936,7 @@
         '</td>' +
         '<td>' + weatherCell(leaf.wx) + '</td>' +
         '<td>' + capChip(leaf.cap) + '</td>' +
+        alertsCellHtml(leaf.alerts) +
 
         '<td class="num">' + fmtInt(leaf.sold) + '</td>' +
         '<td class="num ' + rosTint + '">' + signed(leaf.ros, '%') + '</td>' +
@@ -2978,6 +3279,7 @@
       actualSeries:    sumAt('actualSeries', N),
       benchmarkSeries: sumAt('benchmarkSeries', N),
       hourly:          sumAt('hourly', M),
+      hourlyBenchmark: sumAt('hourlyBenchmark', M),
       dayLabels:       children[0].dayLabels,
       cmp: {
         units:   { current: unitsCur,  forecast: unitsFcst, lastYear: unitsLY  },
@@ -3039,6 +3341,15 @@
       const noise  = 0.85 + r() * 0.30;
       return Math.max(1, Math.round(leaf.salesRate * trend * wxMult * noise));
     });
+    // Benchmark hourly rate per day — what the demand-pace model would have expected,
+    // seeded separately so it's deterministic but uncorrelated with the actual-noise stream.
+    const benchRng = rngFor(leaf.park.id + '|' + leaf.ticket.id + '|' + leaf.date.iso + '|benchmark');
+    const hourlyBenchmark = dayLabels.map(d => {
+      const dow = isoToDate(d.iso).getDay();
+      const dowMult   = (dow === 0 || dow === 6) ? 1.20 : 1.0;
+      const benchNoise = 0.80 + benchRng() * 0.50;   // 0.80 → 1.30
+      return Math.max(1, Math.round(leaf.salesRate * dowMult * benchNoise));
+    });
 
     // ── Comparison table: Current / Forecast / Last year for Units, Revenue, ROS ──
     const cmp = {
@@ -3059,7 +3370,7 @@
       },
     };
 
-    return { actualSeries, benchmarkSeries, hourly, dayLabels, cmp };
+    return { actualSeries, benchmarkSeries, hourly, hourlyBenchmark, dayLabels, cmp };
   }
 
   // ── SVG charts (inline) ──
@@ -3108,13 +3419,14 @@
     );
   }
 
-  function hourlyBarsSvg(values, labels) {
+  function hourlyBarsSvg(values, labels, benchmarks) {
     const W = 520, H = 160;
     const padL = 36, padR = 12, padT = 14, padB = 30;
     const innerW = W - padL - padR;
     const innerH = H - padT - padB;
     const N = values.length;
-    const maxV = Math.max(...values, 1);
+    // Include benchmark in maxV so a tick above the bar stays inside the chart area.
+    const maxV = Math.max(...values, ...(benchmarks || []), 1);
     const gap = 8;
     const bw = (innerW - gap * (N - 1)) / N;
 
@@ -3130,7 +3442,18 @@
       const x = padL + i * (bw + gap);
       const h = innerH * (v / maxV);
       const y = padT + innerH - h;
+      let benchTick = '';
+      if (benchmarks && benchmarks.length === N) {
+        const b = benchmarks[i];
+        const benchY = padT + innerH * (1 - b / maxV);
+        const tx1 = x - 3, tx2 = x + bw + 3;
+        const tickColor = b <= v ? '#2563eb' : '#dc2626';   // blue = beat benchmark; red = fell short
+        benchTick = '<line class="bench-tick" data-i="' + i + '" x1="' + tx1 + '" y1="' + benchY +
+          '" x2="' + tx2 + '" y2="' + benchY + '" stroke="' + tickColor +
+          '" stroke-width="2" stroke-linecap="round"/>';
+      }
       return '<rect class="bar" data-i="' + i + '" x="' + x + '" y="' + y + '" width="' + bw + '" height="' + h + '" rx="2" fill="#e8007d" fill-opacity="0.85"/>' +
+             benchTick +
              '<text x="' + (x + bw / 2) + '" y="' + (H - 14) + '" font-size="10" fill="#1a1d23" text-anchor="middle" font-family="Inter" font-weight="500">' + labels[i].num + '</text>' +
              '<text x="' + (x + bw / 2) + '" y="' + (H - 4) + '" font-size="9" fill="#9ca3af" text-anchor="middle" font-family="Inter">' + labels[i].short + '</text>';
     }).join('');
@@ -3246,7 +3569,11 @@
             '</div>' +
             '<div class="lm-panel">' +
               '<div class="lm-panel-title">Last 7 days · hourly sales rate</div>' +
-              '<div class="lm-chart-area">' + hourlyBarsSvg(m.hourly, m.dayLabels) + '</div>' +
+              '<div class="lm-legend">' +
+                '<span><span class="swatch" style="background:#e8007d"></span>Actual hourly rate</span>' +
+                '<span><span class="lm-legend-tick" aria-hidden="true"></span>Benchmark (above/below)</span>' +
+              '</div>' +
+              '<div class="lm-chart-area">' + hourlyBarsSvg(m.hourly, m.dayLabels, m.hourlyBenchmark) + '</div>' +
             '</div>' +
           '</div>' +
 
@@ -3420,10 +3747,34 @@
       const py = e.clientY - rect.top;
       bars.forEach((b, j) => b.setAttribute('fill-opacity', j === i ? '1' : '0.5'));
       const v = data.hourly[i];
+      const bench = data.hourlyBenchmark ? data.hourlyBenchmark[i] : null;
       const lbl = data.dayLabels[i];
-      tip.innerHTML =
-        '<div class="chart-tooltip-header">' + lbl.short + ' ' + lbl.num + '</div>' +
-        '<div class="chart-tooltip-row"><span class="label">Avg units/hr</span><span class="value">' + v + '</span></div>';
+      const monthShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][isoToDate(lbl.iso).getMonth()];
+      const header = lbl.short + ' ' + lbl.num + ' ' + monthShort;
+      let body =
+        '<div class="chart-tooltip-row emphasized">' +
+          '<span class="swatch" style="background:#e8007d"></span>' +
+          '<span class="label">Actual</span>' +
+          '<span class="value">' + v + '/hr</span>' +
+        '</div>';
+      if (bench != null) {
+        const delta = ((v - bench) / bench) * 100;
+        const deltaR = Math.round(delta * 10) / 10;
+        const tickColor = bench <= v ? '#2563eb' : '#dc2626';
+        const deltaColor = deltaR >= 0 ? '#86efac' : '#fca5a5';
+        body +=
+          '<div class="chart-tooltip-row">' +
+            '<span class="swatch" style="background:' + tickColor + '"></span>' +
+            '<span class="label">Benchmark</span>' +
+            '<span class="value">' + bench + '/hr</span>' +
+          '</div>' +
+          '<div class="chart-tooltip-row">' +
+            '<span class="swatch" style="background:transparent"></span>' +
+            '<span class="label">Delta</span>' +
+            '<span class="value" style="color:' + deltaColor + '">' + (deltaR > 0 ? '+' : '') + deltaR + '%</span>' +
+          '</div>';
+      }
+      tip.innerHTML = '<div class="chart-tooltip-header">' + header + '</div>' + body;
       tip.style.display = 'block';
       const tipR = tip.getBoundingClientRect();
       let tx = px + 12, ty = py + 12;
@@ -3531,7 +3882,7 @@
     category: ['Individual', 'Group'],
     ticket:   ALL_TICKET_LABELS,
     daytype:  ['Weekday', 'Weekend', 'Holiday'],
-    alert:    ['Any alert', 'No alert', 'Low pace', 'High demand', 'Weather warning', 'Capacity risk'],
+    alert:    ['Any alert', 'No alert', 'Low pace', 'High demand', 'Low demand', 'Weather warning', 'Capacity risk', 'Price inversion', 'Out-of-line move'],
   };
   const FILTER_LABELS = {
     park: 'Parks', category: 'Categories', ticket: 'Ticket Types',
@@ -3558,10 +3909,9 @@
     return 'Weekday';
   }
 
-  // Leaf-level alerts. Real alert wiring lands in a later build step;
-  // for now leaves carry no alerts, so this returns an empty array.
+  // Leaf-level alerts → return their labels (matches filter pill option values).
   function leafActiveAlerts(leaf) {
-    return leaf.alerts || [];
+    return (leaf.alerts || []).map(a => a.label);
   }
 
   // Predicates
@@ -3820,6 +4170,13 @@
       const cls = tier(rosRound);
       const decisionCls = agg.anyAccepted ? ' decided-accept'
                         : agg.anyRejected ? ' decided-reject' : '';
+      // Alert indicator: top-left dot if any leaf in scope has any alert.
+      let alertCount = 0;
+      leaves.forEach(l => { if (l.alerts) alertCount += l.alerts.length; });
+      const alertCls = alertCount > 0 ? ' has-alert' : '';
+      const titleAttr = alertCount > 0
+        ? ' title="' + alertCount + ' alert' + (alertCount === 1 ? '' : 's') + ' across descendant rows"'
+        : '';
       const dataAttrs = ' data-park="' + park.id + '"' +
         ' data-period="' + period.key + '"' +
         ' data-level="' + levelClass.replace('row-', '') + '"' +
@@ -3827,7 +4184,7 @@
         (ticket ? ' data-ticket="' + ticket.id + '"' : '') +
         ' data-row="' + park.id + '"';
       return (
-        '<td class="' + cls + decisionCls + '"' + dataAttrs + '>' +
+        '<td class="' + cls + decisionCls + alertCls + '"' + dataAttrs + titleAttr + '>' +
           '<div class="cell-rev">' + fmtPct(rosRound) + '</div>' +
           '<div class="cell-meta">' +
             '<span>U ' + fmtPct(unitsRound) + '</span>' +
