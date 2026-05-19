@@ -2187,7 +2187,9 @@
     const baseFcst = park.capacity * baseShare;
     const fcst = Math.max(20, Math.round(baseFcst * dayMult * wxMult * pick(r, 0.78, 1.15)));
 
-    const sellThrough = pick(r, 0.45, 1.10);
+    // Sell-through shifted upward so ROS centres near zero (was mean -9% → mean +2%).
+    // The previous distribution made Low pace fire on ~22% of leaves and starved everything else.
+    const sellThrough = pick(r, 0.55, 1.25);
     const sold = Math.round(fcst * sellThrough);
 
     // ROS vs benchmark
@@ -2197,25 +2199,44 @@
     const salesRate = Math.max(1, Math.round((sold / 18) * pick(r, 0.85, 1.15)));
     const pctOfFcst = Math.round((sold / Math.max(1, fcst)) * 100);
 
-    const dsBase = 50
-      + (date.isWeekend ? 12 : 0)
-      + (date.isHoliday ? 18 : 0)
-      + (wx.kind === 'sun' ? (inverted ? -10 : 8) : 0)
-      + (wx.kind === 'rain' ? (inverted ? 15 : -10) : 0);
-    const demand = Math.max(8, Math.min(99, Math.round(dsBase + pick(r, -10, 10))));
+    // Demand widened so both Low demand (<25) and High demand (>80) hit. Weekday
+    // baseline drops, weekend rises, weather effects bigger. Previously demand
+    // stuck in [40, 75], so Low demand fired 0 times and High demand was rare.
+    let dsBase = date.isWeekend ? 65 : 38;
+    if (date.isHoliday) dsBase += 18;
+    if (wx.kind === 'sun')   dsBase += inverted ? -10 : 12;
+    if (wx.kind === 'rain')  dsBase += inverted ? 18 : -14;
+    if (wx.kind === 'cloud') dsBase -= 4;
+    const demand = Math.max(8, Math.min(99, Math.round(dsBase + pick(r, -8, 8))));
 
     const yoy = Math.round(pick(r, -12, 18));
 
-    const current = Math.max(8,
+    let current = Math.max(8,
       ticket.basePrice +
       (date.isWeekend ? Math.round(ticket.basePrice * 0.22) : 0) +
       (date.isHoliday ? Math.round(ticket.basePrice * 0.10) : 0) +
       pickInt(r, -2, 2)
     );
 
-    const recLean = ((demand - 60) / 30) + (ros / 60) + pick(r, -0.25, 0.25);
+    // Price-inversion seed: ~7% of (sibling, park × date) combos get an out-of-band
+    // promo-error boost, making the sibling sometimes more expensive than Adult.
+    // The Adult never gets this boost — keeps inversions firing on the right leaf.
+    if (ticket.id !== 'adult') {
+      const invRng = rngFor('priceInv|' + park.id + '|' + ticket.id + '|' + date.iso);
+      if (invRng() < 0.07) current += pickInt(invRng, 8, 16);
+    }
+
+    let recLean = ((demand - 60) / 30) + (ros / 60) + pick(r, -0.25, 0.25);
     let rec = current + Math.round(recLean * 4);
     if (rec === current && r() > 0.4) rec = current + (r() > 0.5 ? 1 : -1);
+
+    // Out-of-line move seed: ~4% of leaves get a wild rec swing, putting their
+    // % change far above sibling median so the alert can fire on a real outlier.
+    const olRng = rngFor('outOfLine|' + key);
+    if (olRng() < 0.04) {
+      rec += (olRng() > 0.5 ? 1 : -1) * pickInt(olRng, 9, 14);
+      rec = Math.max(5, rec);
+    }
     const pctChange = Math.round(((rec - current) / current) * 1000) / 10;
 
     // leaf-level cap is filled in by computeParkDayFill() below
@@ -2435,7 +2456,7 @@
   };
   // Inline SVGs — 10x10 viewBox centred, stroke white via currentColor on the chip.
   const ALERT_ICONS = {
-    lowPace:    '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,3 3.5,4.5 5.5,3.5 8,6.5"/><polyline points="6.2,6.5 8,6.5 8,4.7"/></svg>',
+    lowPace:    '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,3 4,5.5 6,4 8,6.5"/><polygon points="6.5,8.7 8.7,8.7 8.7,5.5" fill="currentColor" stroke="none"/></svg>',
     highDemand: '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="8.5" x2="5" y2="2.2"/><polyline points="2.8,4 5,1.8 7.2,4"/></svg>',
     lowDemand:  '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="1.5" x2="5" y2="7.8"/><polyline points="2.8,6 5,8.2 7.2,6"/></svg>',
     weather:    '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.3 5.5 a1.6 1.6 0 0 1 1.5 -1.7 a1.8 1.8 0 0 1 3.5 0.3 a1.2 1.2 0 0 1 0.5 2.3 h-5 a1.3 1.3 0 0 1 -0.5 -0.9 z"/><line x1="3.8" y1="7.6" x2="3.3" y2="8.8"/><line x1="6.2" y1="7.6" x2="5.7" y2="8.8"/></svg>',
