@@ -170,21 +170,12 @@
       text-align: right;
       font-variant-numeric: tabular-nums;
     }
-    table.srt tbody tr:hover td:not(.cell-pos):not(.cell-neg) { background: var(--row-hover); }
-
-    /* ── Row hover dim (opacity on td, not the row, so cell-pos/neg + heatmap tints survive) ── */
-    table.srt tbody[data-hover-active="true"] tr:not(.is-hovered) td {
-      opacity: 0.55;
-      transition: opacity .12s;
-    }
-    table.srt tbody tr.is-hovered td:not(.cell-pos):not(.cell-neg) {
+    /* ── Row hover — subtle background tint only, scoped so YoY tints survive ── */
+    table.srt tbody tr:hover td:not(.cell-pos):not(.cell-neg) { background-color: var(--row-hover); }
+    table.cal-table tbody tr:hover td:not(.tier-pos2):not(.tier-pos1):not(.tier-zero):not(.tier-neg1):not(.tier-neg2) {
       background-color: var(--row-hover);
     }
-    table.cal-table tbody[data-hover-active="true"] tr:not(.is-hovered) td,
-    table.cal-table tbody[data-hover-active="true"] tr:not(.is-hovered) th.cal-route {
-      opacity: 0.55;
-      transition: opacity .12s;
-    }
+    table.cal-table tbody tr:hover th.cal-route { background-color: var(--row-hover); }
 
     /* Date column */
     table.srt tbody td.col-date {
@@ -1672,6 +1663,54 @@
       font-variant-numeric: tabular-nums;
     }
     .lm-override-input:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+
+    /* Channel / Source mix panels — stacked horizontal bar + 2-col legend */
+    .lm-mix-bar {
+      width: 100%;
+      height: 14px;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      margin-top: 4px;
+      background: #eef0f5;
+    }
+    .lm-mix-seg {
+      height: 100%;
+      cursor: default;
+      transition: filter .12s;
+    }
+    .lm-mix-seg:hover { filter: brightness(1.08); }
+    .lm-mix-legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 14px;
+      margin-top: 12px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+    .lm-mix-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .lm-mix-legend-item .swatch {
+      width: 9px; height: 9px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .lm-mix-legend-item .lbl {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+    .lm-mix-legend-item .pct {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
     .lm-actions {
       display: flex;
       gap: 8px;
@@ -1746,6 +1785,293 @@
     .chart-tooltip-row .value { font-variant-numeric: tabular-nums; font-weight: 500; }
     .chart-tooltip-row.emphasized { font-weight: 700; color: #fff; }
     .chart-tooltip-row.emphasized .swatch { width: 12px; height: 12px; }
+    /* ─────────────────────────────────────────────────────────
+     *  RM Copilot — floating bubble + chat panels (general + row)
+     * ──────────────────────────────────────────────────────── */
+
+    /* Floating trigger bubble (always visible, bottom-right) */
+    .cp-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px 11px 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(232,0,125,0.32);
+      transition: background .15s, box-shadow .15s, transform .15s;
+    }
+    .cp-fab:hover { background: var(--accent-dim); box-shadow: 0 10px 28px rgba(232,0,125,0.42); }
+    .cp-fab:active { transform: translateY(1px); }
+    .cp-fab .cp-spark {
+      display: inline-block;
+      font-size: 15px;
+      line-height: 1;
+      animation: cpSpark 2.5s ease-in-out infinite;
+      transform-origin: center;
+    }
+    @keyframes cpSpark {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50%      { opacity: 1;    transform: scale(1.15); }
+    }
+
+    /* Shared chat-shell colours / fonts */
+    .cp-panel {
+      background: #1e2128;
+      border: 1px solid #2d313b;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.42);
+      color: #e5e7eb;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .cp-header {
+      background: #16181d;
+      border-bottom: 1px solid #2d313b;
+      padding: 12px 14px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .cp-header .cp-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+    .cp-header .cp-sub {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+    .cp-header .cp-metrics {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .cp-header .cp-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-top: 6px;
+    }
+    .cp-header-close {
+      margin-left: auto;
+      width: 26px; height: 26px;
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cp-header-close:hover { background: #2a2e38; color: #fff; }
+
+    /* Chat scroll area */
+    .cp-chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+    }
+    .cp-msg {
+      padding: 10px 13px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.45;
+      max-width: 88%;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .cp-msg.cp-asst {
+      background: #2a2e38;
+      border: 1px solid #353a46;
+      color: #e5e7eb;
+      align-self: flex-start;
+      border-top-left-radius: 2px;
+    }
+    .cp-msg.cp-asst::before {
+      content: '✦ ';
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .cp-msg.cp-user {
+      background: var(--accent);
+      color: #fff;
+      align-self: flex-end;
+      border-top-right-radius: 2px;
+    }
+    /* Typing indicator */
+    .cp-typing {
+      align-self: flex-start;
+      background: #2a2e38;
+      border: 1px solid #353a46;
+      border-radius: 10px;
+      border-top-left-radius: 2px;
+      padding: 10px 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .cp-typing span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: cpTyping 1.2s ease-in-out infinite;
+    }
+    .cp-typing span:nth-child(2) { animation-delay: 0.18s; }
+    .cp-typing span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes cpTyping {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50%      { opacity: 1;    transform: scale(1.1); }
+    }
+
+    /* Suggestion pills */
+    .cp-suggestions {
+      flex-shrink: 0;
+      padding: 8px 14px 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      border-top: 1px solid #2d313b;
+      background: #1a1c22;
+    }
+    .cp-pill {
+      background: #2a2e38;
+      border: 1px solid #353a46;
+      color: #e5e7eb;
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background .12s, border-color .12s, color .12s;
+    }
+    .cp-pill:hover { background: #353a46; border-color: var(--accent); color: #fff; }
+
+    /* Input row */
+    .cp-input-row {
+      flex-shrink: 0;
+      padding: 8px 12px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: #1a1c22;
+    }
+    .cp-input {
+      flex: 1;
+      background: #0f1116;
+      border: 1px solid #353a46;
+      border-radius: 18px;
+      padding: 8px 14px;
+      color: #e5e7eb;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      outline: none;
+      min-width: 0;
+    }
+    .cp-input::placeholder { color: #6b7280; }
+    .cp-input:focus { border-color: var(--accent); }
+    .cp-send {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .12s;
+    }
+    .cp-send:hover { background: var(--accent-dim); }
+    .cp-send:disabled { opacity: 0.5; cursor: default; background: #353a46; }
+    .cp-send svg { display: block; }
+
+    /* General copilot panel — bottom-right floating */
+    .cp-general-panel {
+      position: fixed;
+      bottom: 80px;
+      right: 24px;
+      width: 420px;
+      height: 480px;
+      z-index: 1001;
+      transform: scale(0.92) translateY(8px);
+      transform-origin: bottom right;
+      opacity: 0;
+      visibility: hidden;
+      transition: transform .2s cubic-bezier(.2,.7,.3,1.1), opacity .2s ease, visibility 0s linear .2s, right .25s cubic-bezier(.2,.7,.3,1);
+    }
+    .cp-general-panel.is-open {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      visibility: visible;
+      transition: transform .2s cubic-bezier(.2,.7,.3,1.1), opacity .2s ease, right .25s cubic-bezier(.2,.7,.3,1);
+    }
+    .cp-general-panel.row-open { right: 396px; }
+
+    /* Row copilot panel — right side */
+    .cp-row-panel {
+      position: fixed;
+      top: 90px;
+      right: 0;
+      bottom: 0;
+      height: calc(100vh - 90px);
+      width: 360px;
+      z-index: 1002;
+      border-radius: 12px 0 0 12px;
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(.2,.7,.3,1);
+    }
+    .cp-row-panel.is-open { transform: translateX(0); }
+
+    /* "✦ Ask" pill button on each leaf action cell + in modal header */
+    .cp-ask-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background .12s, color .12s;
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+    .cp-ask-btn:hover { background: var(--accent); color: #fff; }
+    .cp-ask-btn .spark { font-size: 10px; line-height: 1; }
+    .lm-header .cp-ask-btn { font-size: 12px; padding: 3px 10px; margin-left: 8px; margin-right: 4px; }
   </style>
 </head>
 <body>
@@ -1777,10 +2103,6 @@
       <div class="filter-group" id="filterGroup">
         <button class="filter-pill ms-pill" data-filter="park" type="button" aria-haspopup="listbox" aria-expanded="false">
           <span class="ms-trigger-text">All Parks</span>
-          <span class="ms-trigger-count" hidden></span>
-        </button>
-        <button class="filter-pill ms-pill" data-filter="category" type="button" aria-haspopup="listbox" aria-expanded="false">
-          <span class="ms-trigger-text">All Categories</span>
           <span class="ms-trigger-count" hidden></span>
         </button>
         <button class="filter-pill ms-pill" data-filter="ticket" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -1831,19 +2153,20 @@
         <thead>
           <tr class="bands">
             <th class="band-product" colspan="5">Ticket details</th>
-            <th class="band-sales"   colspan="4">Sales to date</th>
+            <th class="band-sales"   colspan="5">Sales to date</th>
             <th class="band-demand"  colspan="3">Demand forecast</th>
             <th class="band-price"   colspan="4">Price recommendation</th>
           </tr>
           <tr class="cols">
             <th class="sortable" data-sort-key="name" data-sort-type="text"><span class="th-inner"><span class="th-text">Park / Category / Ticket</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="date" data-sort-type="text"><span class="th-inner"><span class="th-text">Date</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th>Weather</th>
+            <th>Forecast weather</th>
             <th class="sortable" data-sort-key="cap" data-sort-type="text"><span class="th-inner"><span class="th-text">Capacity</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="alertCount" data-sort-type="num"><span class="th-inner"><span class="th-text">Alerts</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
             <th class="num sortable" data-sort-key="sold" data-sort-type="num"><span class="th-inner"><span class="th-text">Units sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="num sortable" data-sort-key="ros" data-sort-type="num"><span class="th-inner"><span class="th-text">ROS vs benchmark</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="perCap" data-sort-type="num"><span class="th-inner"><span class="th-text">Per Cap</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="ros" data-sort-type="num"><span class="th-inner"><span class="th-text">Pickup vs Historic</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="salesRate" data-sort-type="num"><span class="th-inner"><span class="th-text">24h sales rate<span class="sub">units/hr</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="pctOfFcst" data-sort-type="num"><span class="th-inner"><span class="th-text">% of forecast sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
@@ -1900,6 +2223,53 @@
 
     <!-- ── Leaf detail modal (row click) ── -->
     <div class="lm-backdrop" id="lmBackdrop" aria-hidden="true"></div>
+
+    <!-- ── RM Copilot: floating bubble + general panel + row panel ── -->
+    <button class="cp-fab" id="cpFab" type="button" aria-label="Open RM Copilot">
+      <span class="cp-spark" aria-hidden="true">✦</span>
+      <span>RM Copilot</span>
+    </button>
+
+    <div class="cp-panel cp-general-panel" id="cpGeneralPanel" role="dialog" aria-modal="false" aria-label="RM Copilot">
+      <div class="cp-header">
+        <div style="min-width:0">
+          <div class="cp-title">RM Copilot</div>
+          <div class="cp-sub">Portfolio — all parks</div>
+        </div>
+        <button class="cp-header-close" type="button" id="cpGeneralClose" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <line x1="3.5" y1="3.5" x2="10.5" y2="10.5"/>
+            <line x1="10.5" y1="3.5" x2="3.5" y2="10.5"/>
+          </svg>
+        </button>
+      </div>
+      <div class="cp-chat"        id="cpGeneralChat"></div>
+      <div class="cp-suggestions" id="cpGeneralSuggestions"></div>
+      <div class="cp-input-row">
+        <input type="text" class="cp-input" id="cpGeneralInput" placeholder="Ask about the portfolio…">
+        <button class="cp-send" type="button" id="cpGeneralSend" aria-label="Send">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="2.5" y1="7" x2="11.5" y2="7"/>
+            <polyline points="8,3.5 11.5,7 8,10.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="cp-panel cp-row-panel" id="cpRowPanel" role="dialog" aria-modal="false" aria-label="Row Copilot">
+      <div class="cp-header" id="cpRowHeader"></div>
+      <div class="cp-chat"        id="cpRowChat"></div>
+      <div class="cp-suggestions" id="cpRowSuggestions"></div>
+      <div class="cp-input-row">
+        <input type="text" class="cp-input" id="cpRowInput" placeholder="Ask about this row…">
+        <button class="cp-send" type="button" id="cpRowSend" aria-label="Send">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="2.5" y1="7" x2="11.5" y2="7"/>
+            <polyline points="8,3.5 11.5,7 8,10.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
 
   </main>
 </div>
@@ -2026,104 +2396,48 @@
       name: 'Parque Warner Madrid',
       country: 'ES',
       capacity: 22000,
-      categories: [
-        {
-          id: 'individual', label: 'Individual',
-          tickets: [
-            { id: 'adult',   label: 'Adult',   basePrice: 34 },
-            { id: 'junior',  label: 'Junior',  basePrice: 27 },
-            { id: 'evening', label: 'Evening', basePrice: 22 },
-            { id: 'reduced', label: 'Reduced', basePrice: 30 },
-          ]
-        },
-        {
-          id: 'group', label: 'Group',
-          tickets: [
-            { id: 'school',    label: 'School groups',    basePrice: 24 },
-            { id: 'adultgrp',  label: 'Adult groups 20+', basePrice: 31 },
-            { id: 'family',    label: 'Family pack',      basePrice: 28 },
-            { id: 'corporate', label: 'Corporate',        basePrice: 36 },
-          ]
-        }
-      ]
+      tickets: [
+        { id: 'adult',   label: 'Adult',   basePrice: 34 },
+        { id: 'junior',  label: 'Junior',  basePrice: 27 },
+        { id: 'evening', label: 'Evening', basePrice: 22 },
+        { id: 'reduced', label: 'Reduced', basePrice: 30 },
+      ],
     },
     {
       id: 'moviepark',
       name: 'Movie Park Germany',
       country: 'DE',
       capacity: 18000,
-      categories: [
-        {
-          id: 'individual', label: 'Individual',
-          tickets: [
-            { id: 'adult',   label: 'Adult',   basePrice: 33 },
-            { id: 'junior',  label: 'Junior',  basePrice: 28 },
-            { id: 'evening', label: 'Evening', basePrice: 22 },
-            { id: 'senior',  label: 'Senior',  basePrice: 28 },
-          ]
-        },
-        {
-          id: 'group', label: 'Group',
-          tickets: [
-            { id: 'school',    label: 'School groups',    basePrice: 23 },
-            { id: 'adultgrp',  label: 'Adult groups 20+', basePrice: 30 },
-            { id: 'family',    label: 'Family pack',      basePrice: 27 },
-            { id: 'corporate', label: 'Corporate',        basePrice: 35 },
-          ]
-        }
-      ]
+      tickets: [
+        { id: 'adult',   label: 'Adult',   basePrice: 33 },
+        { id: 'junior',  label: 'Junior',  basePrice: 28 },
+        { id: 'evening', label: 'Evening', basePrice: 22 },
+        { id: 'senior',  label: 'Senior',  basePrice: 28 },
+      ],
     },
     {
       id: 'mirabilandia',
       name: 'Mirabilandia',
       country: 'IT',
       capacity: 20000,
-      categories: [
-        {
-          id: 'individual', label: 'Individual',
-          tickets: [
-            { id: 'adult',   label: 'Adult',   basePrice: 33 },
-            { id: 'junior',  label: 'Junior',  basePrice: 27 },
-            { id: 'evening', label: 'Evening', basePrice: 22 },
-            { id: 'reduced', label: 'Reduced', basePrice: 27 },
-          ]
-        },
-        {
-          id: 'group', label: 'Group',
-          tickets: [
-            { id: 'school',    label: 'School groups',    basePrice: 22 },
-            { id: 'adultgrp',  label: 'Adult groups 20+', basePrice: 29 },
-            { id: 'family',    label: 'Family pack',      basePrice: 26 },
-            { id: 'corporate', label: 'Corporate',        basePrice: 34 },
-          ]
-        }
-      ]
+      tickets: [
+        { id: 'adult',   label: 'Adult',   basePrice: 33 },
+        { id: 'junior',  label: 'Junior',  basePrice: 27 },
+        { id: 'evening', label: 'Evening', basePrice: 22 },
+        { id: 'reduced', label: 'Reduced', basePrice: 27 },
+      ],
     },
     {
       id: 'tropical',
       name: 'Tropical Islands',
       country: 'DE',
       capacity: 6000,
-      categories: [
-        {
-          id: 'individual', label: 'Individual',
-          tickets: [
-            { id: 'adult',   label: 'Adult',   basePrice: 45 },
-            { id: 'junior',  label: 'Junior',  basePrice: 36 },
-            { id: 'evening', label: 'Evening', basePrice: 30 },
-            { id: 'senior',  label: 'Senior',  basePrice: 40 },
-          ]
-        },
-        {
-          id: 'group', label: 'Group',
-          tickets: [
-            { id: 'school',    label: 'School groups',    basePrice: 32 },
-            { id: 'adultgrp',  label: 'Adult groups 20+', basePrice: 41 },
-            { id: 'family',    label: 'Family pack',      basePrice: 38 },
-            { id: 'corporate', label: 'Corporate',        basePrice: 46 },
-          ]
-        }
-      ]
+      tickets: [
+        { id: 'adult',   label: 'Adult',   basePrice: 45 },
+        { id: 'junior',  label: 'Junior',  basePrice: 36 },
+        { id: 'evening', label: 'Evening', basePrice: 30 },
+        { id: 'senior',  label: 'Senior',  basePrice: 40 },
+      ],
     },
   ];
 
@@ -2163,8 +2477,8 @@
     return { icon, kind, temp };
   }
 
-  function leafRowFor(park, category, ticket, date) {
-    const key = park.id + '|' + category.id + '|' + ticket.id + '|' + date.iso;
+  function leafRowFor(park, ticket, date) {
+    const key = park.id + '|' + ticket.id + '|' + date.iso;
     const r = rngFor(key);
 
     let dayMult = 1.0;
@@ -2179,10 +2493,10 @@
     if (wx.kind === 'cloud') wxMult = inverted ? 1.10 : 0.94;
     if (wx.kind === 'rain')  wxMult = inverted ? 1.35 : 0.65;
 
-    // Share of capacity per ticket type — totals ~0.61 across all 8 leaves
-    const indivShare = { adult: 0.22, junior: 0.13, evening: 0.06, reduced: 0.07, senior: 0.07 }[ticket.id] || 0.08;
-    const grpShare   = { school: 0.04, adultgrp: 0.03, family: 0.04, corporate: 0.02 }[ticket.id] || 0.03;
-    const baseShare  = category.id === 'individual' ? indivShare : grpShare;
+    // Per-ticket share of park capacity. Boosted vs the pre-collapse values to
+    // backfill the removed Group category — totals ~0.69 so a busy day can still
+    // cross the capacity-risk threshold.
+    const baseShare = { adult: 0.32, junior: 0.18, evening: 0.09, reduced: 0.10, senior: 0.10 }[ticket.id] || 0.12;
 
     const baseFcst = park.capacity * baseShare;
     const fcst = Math.max(20, Math.round(baseFcst * dayMult * wxMult * pick(r, 0.78, 1.15)));
@@ -2242,7 +2556,7 @@
     // leaf-level cap is filled in by computeParkDayFill() below
     return {
       key,
-      park, category, ticket, date,
+      park, ticket, date,
       sold, fcst, ros, salesRate, pctOfFcst,
       demand, yoy, wx,
       current, rec, pctChange,
@@ -2295,7 +2609,7 @@
     const cfg = alertCfg;
     if (cfg.lowPace.enabled && agg.ros < cfg.lowPace.threshold) {
       out.push(makeAlert('lowPace',
-        'Low pace: ROS ' + (agg.ros > 0 ? '+' : '') + agg.ros + '% (threshold ' + cfg.lowPace.threshold + '%)'));
+        'Low pace: Pickup ' + (agg.ros > 0 ? '+' : '') + agg.ros + '% vs historic (threshold ' + cfg.lowPace.threshold + '%)'));
     }
     if (cfg.highDemand.enabled && agg.demand > cfg.highDemand.threshold) {
       out.push(makeAlert('highDemand',
@@ -2384,32 +2698,28 @@
   }
 
   // ── State key (per brief) ──
-  function stateKey(park, category, ticket, date) {
-    return park.name + ' — ' + category.label + ' — ' + ticket.label + '|' + date.iso;
+  function stateKey(park, ticket, date) {
+    return park.name + ' — ' + ticket.label + '|' + date.iso;
   }
 
   // ── State stores ──
   const rowStates = {};   // keyed by stateKey
   const expanded = {
-    parks: new Set(),   // `${parkId}|${dateISO}`
-    cats:  new Set(),   // `${parkId}|${categoryId}|${dateISO}`
+    parks: new Set(),   // `${parkId}|${dateISO}` — expanded park rows show their ticket children
   };
-  // Default expansion: Warner Madrid → Individual, across all dates
+  // Default expansion: Warner Madrid expanded across all dates.
   DATES.forEach(d => {
     expanded.parks.add('warner|' + d.iso);
-    expanded.cats.add('warner|individual|' + d.iso);
   });
 
   // ── Compute all rows once, keyed for state lookups ──
   const ALL_LEAVES = {};   // stateKey → leaf
   PARKS.forEach(park => {
-    park.categories.forEach(cat => {
-      cat.tickets.forEach(t => {
-        DATES.forEach(d => {
-          const leaf = leafRowFor(park, cat, t, d);
-          leaf.stateKey = stateKey(park, cat, t, d);
-          ALL_LEAVES[leaf.stateKey] = leaf;
-        });
+    park.tickets.forEach(t => {
+      DATES.forEach(d => {
+        const leaf = leafRowFor(park, t, d);
+        leaf.stateKey = stateKey(park, t, d);
+        ALL_LEAVES[leaf.stateKey] = leaf;
       });
     });
   });
@@ -2483,7 +2793,7 @@
 
     if (cfg.lowPace.enabled && leaf.ros < cfg.lowPace.threshold) {
       out.push(makeAlert('lowPace',
-        'Low pace: ROS ' + fmtSigned(leaf.ros) + ' (threshold ' + cfg.lowPace.threshold + '%)'));
+        'Low pace: Pickup ' + fmtSigned(leaf.ros) + ' vs historic (threshold ' + cfg.lowPace.threshold + '%)'));
     }
     if (cfg.highDemand.enabled && leaf.demand > cfg.highDemand.threshold) {
       out.push(makeAlert('highDemand',
@@ -2515,39 +2825,34 @@
     if (!alertCfg.priceInv.enabled && !alertCfg.outOfLine.enabled) return;
     PARKS.forEach(park => {
       DATES.forEach(date => {
-        // Price inversion: Adult cheaper than any sibling within Individual.
+        // Price inversion: Adult cheaper than any sibling ticket type within the park.
         if (alertCfg.priceInv.enabled) {
-          const cat = park.categories.find(c => c.id === 'individual');
-          if (cat) {
-            const adultTicket = cat.tickets.find(t => t.id === 'adult');
-            if (adultTicket) {
-              const adult = ALL_LEAVES[stateKey(park, cat, adultTicket, date)];
-              const higher = cat.tickets
-                .filter(t => t.id !== 'adult')
-                .map(t => ALL_LEAVES[stateKey(park, cat, t, date)])
-                .filter(s => s.current > adult.current);
-              if (higher.length) {
-                const worst = higher.reduce((m, s) => s.current > m.current ? s : m, higher[0]);
-                adult.alerts.push(makeAlert('priceInv',
-                  'Price inversion: Adult €' + adult.current + ' < ' + worst.ticket.label + ' €' + worst.current));
-              }
+          const adultTicket = park.tickets.find(t => t.id === 'adult');
+          if (adultTicket) {
+            const adult = ALL_LEAVES[stateKey(park, adultTicket, date)];
+            const higher = park.tickets
+              .filter(t => t.id !== 'adult')
+              .map(t => ALL_LEAVES[stateKey(park, t, date)])
+              .filter(s => s.current > adult.current);
+            if (higher.length) {
+              const worst = higher.reduce((m, s) => s.current > m.current ? s : m, higher[0]);
+              adult.alerts.push(makeAlert('priceInv',
+                'Price inversion: Adult €' + adult.current + ' < ' + worst.ticket.label + ' €' + worst.current));
             }
           }
         }
-        // Out-of-line move: leaf's |% change| > 3× sibling median.
+        // Out-of-line move: leaf's |% change| > 3× sibling median (siblings = same park × date).
         if (alertCfg.outOfLine.enabled) {
-          park.categories.forEach(cat => {
-            const leaves = cat.tickets.map(t => ALL_LEAVES[stateKey(park, cat, t, date)]);
-            const pcts = leaves.map(l => Math.abs((l.rec - l.current) / l.current * 100));
-            const sorted = pcts.slice().sort((a, b) => a - b);
-            const median = sorted[Math.floor(sorted.length / 2)];
-            if (median < 1) return; // skip when siblings are flat
-            leaves.forEach((l, i) => {
-              if (pcts[i] > median * 3) {
-                l.alerts.push(makeAlert('outOfLine',
-                  'Out-of-line move: ' + pcts[i].toFixed(1) + '% vs sibling median ' + median.toFixed(1) + '%'));
-              }
-            });
+          const leaves = park.tickets.map(t => ALL_LEAVES[stateKey(park, t, date)]);
+          const pcts = leaves.map(l => Math.abs((l.rec - l.current) / l.current * 100));
+          const sorted = pcts.slice().sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)];
+          if (median < 1) return; // skip when siblings are flat
+          leaves.forEach((l, i) => {
+            if (pcts[i] > median * 3) {
+              l.alerts.push(makeAlert('outOfLine',
+                'Out-of-line move: ' + pcts[i].toFixed(1) + '% vs sibling median ' + median.toFixed(1) + '%'));
+            }
           });
         }
       });
@@ -2561,11 +2866,10 @@
   // ── Pre-seed demo states for screenshot ──
   (function preseed() {
     const warner = PARKS[0];
-    const indiv  = warner.categories[0];
     const d0     = DATES[0];
-    const adultKey   = stateKey(warner, indiv, indiv.tickets[0], d0);
-    const juniorKey  = stateKey(warner, indiv, indiv.tickets[1], d0);
-    const eveningKey = stateKey(warner, indiv, indiv.tickets[2], d0);
+    const adultKey   = stateKey(warner, warner.tickets[0], d0);
+    const juniorKey  = stateKey(warner, warner.tickets[1], d0);
+    const eveningKey = stateKey(warner, warner.tickets[2], d0);
     rowStates[adultKey]   = { state: 'accepted' };
     rowStates[juniorKey]  = { state: 'rejected' };
     const evLeaf = ALL_LEAVES[eveningKey];
@@ -2676,6 +2980,7 @@
     const rec = st && typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
     switch (key) {
       case 'sold':      return leaf.sold;
+      case 'perCap':    return leaf.current;   // leaf has one price → Per Cap == price
       case 'ros':       return leaf.ros;
       case 'salesRate': return leaf.salesRate;
       case 'pctOfFcst': return leaf.pctOfFcst;
@@ -2690,18 +2995,11 @@
     return null;
   }
 
-  // Sort-value for a Park or Park×Category aggregate row.
-  function aggSortValueForKey(park, cat /* optional */, date, key) {
-    if (key === 'name') return (cat ? cat.label : park.name).toLowerCase();
+  // Sort-value for a Park aggregate row.
+  function aggSortValueForKey(park, date, key) {
+    if (key === 'name') return park.name.toLowerCase();
     if (key === 'date') return date.iso;
-    const leaves = [];
-    if (cat) {
-      cat.tickets.forEach(t => leaves.push(ALL_LEAVES[stateKey(park, cat, t, date)]));
-    } else {
-      park.categories.forEach(c =>
-        c.tickets.forEach(t => leaves.push(ALL_LEAVES[stateKey(park, c, t, date)]))
-      );
-    }
+    const leaves = park.tickets.map(t => ALL_LEAVES[stateKey(park, t, date)]);
     const agg = aggregate(leaves);
     if (key === 'cap') return capModeForParkDay(agg.fcst, park.capacity);
     if (key === 'current' || key === 'rec' || key === 'pctChange') {
@@ -2718,6 +3016,7 @@
     }
     switch (key) {
       case 'sold':      return agg.sold;
+      case 'perCap':    return agg.sold > 0 ? agg.revenue / agg.sold : null;
       case 'ros':       return agg.ros;
       case 'salesRate': return agg.salesRate;
       case 'pctOfFcst': return agg.pctOfFcst;
@@ -2769,24 +3068,18 @@
     visibleDates.forEach(date => {
       let parksToIter = PARKS.filter(parkMatchesFilter).filter(park => anyLeafPassesIn(park, date));
       if (useAggSort) {
-        parksToIter = sortByKey(parksToIter, p => aggSortValueForKey(p, null, date, sortKey), isText);
+        parksToIter = sortByKey(parksToIter, p => aggSortValueForKey(p, date, sortKey), isText);
       }
 
       parksToIter.forEach(park => {
         const parkExpanded = expanded.parks.has(park.id + '|' + date.iso);
 
-        // Compute category aggregates + leaf rows
-        const catAggs = park.categories.map(cat => {
-          const leafRows = cat.tickets.map(t => ALL_LEAVES[stateKey(park, cat, t, date)]);
-          const agg = aggregate(leafRows);
-          return { cat, leafRows, agg };
-        });
-        const allLeafRows = [].concat(...catAggs.map(c => c.leafRows));
+        // Compute all leaf rows for this park × date
+        const allLeafRows = park.tickets.map(t => ALL_LEAVES[stateKey(park, t, date)]);
         const parkAgg  = aggregate(allLeafRows);
         const parkCap  = capModeForParkDay(parkAgg.fcst, park.capacity);
         // Propagate park-day capacity mode to every leaf for consistent chip display
         allLeafRows.forEach(l => { l.cap = parkCap; });
-        catAggs.forEach(c => { c.capMode = parkCap; });
         const parkWx   = weatherFor(park.id, date.iso);
 
         // ── Park row ──
@@ -2794,30 +3087,17 @@
 
         if (!parkExpanded) return;
 
-        // ── Category rows (sorted within park) ──
-        let catsToIter = catAggs.filter(({ cat }) => anyLeafPassesIn(park, date, cat));
+        // ── Leaf rows (sorted within park) ──
+        let leavesToIter = allLeafRows.filter(leafPasses);
         if (useAggSort) {
-          catsToIter = sortByKey(catsToIter, ca => aggSortValueForKey(park, ca.cat, date, sortKey), isText);
+          leavesToIter = sortByKey(leavesToIter, leaf => leafSortValueForKey(leaf, sortKey), isText);
         }
-
-        catsToIter.forEach(({ cat, leafRows, agg, capMode }) => {
-          const catExpanded = expanded.cats.has(park.id + '|' + cat.id + '|' + date.iso);
-          out.push(categoryRowHtml(park, cat, date, agg, capMode, catExpanded, leafRows));
-
-          if (!catExpanded) return;
-
-          // ── Leaf rows (sorted within category) ──
-          let leavesToIter = leafRows.filter(leafPasses);
-          if (useAggSort) {
-            leavesToIter = sortByKey(leavesToIter, leaf => leafSortValueForKey(leaf, sortKey), isText);
-          }
-          leavesToIter.forEach(leaf => out.push(leafRowHtml(leaf)));
-        });
+        leavesToIter.forEach(leaf => out.push(leafRowHtml(leaf)));
       });
     });
 
     if (!out.length) {
-      out.push('<tr class="srt-empty"><td colspan="16">No matching rows for the current filters.</td></tr>');
+      out.push('<tr class="srt-empty"><td colspan="17">No matching rows for the current filters.</td></tr>');
     }
 
     body.innerHTML = out.join('');
@@ -2826,7 +3106,7 @@
   }
 
   function parkRowHtml(park, date, agg, capMode, wx, isExpanded, leafRows) {
-    const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
+    const totalLeaves = park.tickets.length;
     const price = aggregatePrice(leafRows);
     const recTint = tintFor(Math.round(price.pctChange));
     const direct = aggregateGroupAAlerts(agg, park.capacity, wx.kind, park.id);
@@ -2853,6 +3133,7 @@
         alertsCellHtml(alerts) +
 
         '<td class="num">' + fmtInt(agg.sold) + '</td>' +
+        '<td class="num">' + fmtEur(agg.sold > 0 ? agg.revenue / agg.sold : 0) + '</td>' +
         '<td class="num ' + tintFor(agg.ros) + '">' + signed(agg.ros, '%') + '</td>' +
         '<td class="num">' + fmtInt(agg.salesRate) + '</td>' +
         '<td class="num">' + agg.pctOfFcst + '%</td>' +
@@ -2866,48 +3147,6 @@
         '<td class="num ' + recTint + '">' + fmtEur(price.avgRec) + '</td>' +
         '<td class="num ' + recTint + '">' + signed(Math.round(price.pctChange * 10) / 10, '%') + '</td>' +
         '<td class="action-cell"><span class="row-action-meta">' + totalLeaves + ' rows</span></td>' +
-      '</tr>'
-    );
-  }
-
-  function categoryRowHtml(park, cat, date, agg, capMode, isExpanded, leafRows) {
-    const price = aggregatePrice(leafRows);
-    const recTint = tintFor(Math.round(price.pctChange));
-    const wx = weatherFor(park.id, date.iso);
-    const direct = aggregateGroupAAlerts(agg, park.capacity, wx.kind, park.id);
-    const alerts = unionAlertsWithRollup(direct, leafRows);
-    return (
-      '<tr class="row-category" data-park="' + park.id + '" data-cat="' + cat.id + '" data-date="' + date.iso + '">' +
-        '<td class="col-name">' +
-          '<span class="accordion-name lvl-2 ' + (isExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="cat" aria-expanded="' + isExpanded + '">' +
-            '<span class="accordion-chev">' +
-              '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>' +
-            '</span>' +
-            '<span class="lvl-cat-name">' + cat.label + '</span>' +
-            '<span class="row-meta">' + cat.tickets.length + ' tickets</span>' +
-          '</span>' +
-        '</td>' +
-        '<td class="col-date">' +
-          '<span class="date-num">' + date.label + '</span>' +
-          '<span class="date-dow">' + date.dowLabel + '</span>' +
-        '</td>' +
-        '<td>' + weatherCell(wx) + '</td>' +
-        '<td>' + capChip(capMode) + '</td>' +
-        alertsCellHtml(alerts) +
-
-        '<td class="num">' + fmtInt(agg.sold) + '</td>' +
-        '<td class="num ' + tintFor(agg.ros) + '">' + signed(agg.ros, '%') + '</td>' +
-        '<td class="num">' + fmtInt(agg.salesRate) + '</td>' +
-        '<td class="num">' + agg.pctOfFcst + '%</td>' +
-
-        '<td class="num">' + fmtInt(agg.fcst) + '</td>' +
-        '<td class="num">' + demandCell(agg.demand) + '</td>' +
-        '<td class="num ' + tintFor(agg.yoy) + '">' + signed(agg.yoy, '%') + '</td>' +
-
-        '<td class="num">' + fmtEur(price.avgCurrent) + '</td>' +
-        '<td class="num ' + recTint + '">' + fmtEur(price.avgRec) + '</td>' +
-        '<td class="num ' + recTint + '">' + signed(Math.round(price.pctChange * 10) / 10, '%') + '</td>' +
-        '<td class="action-cell"><span class="row-action-meta">' + cat.tickets.length + ' rows</span></td>' +
       '</tr>'
     );
   }
@@ -2946,7 +3185,7 @@
     }
 
     return (
-      '<tr class="row-leaf' + stateCls + '" data-key="' + leaf.stateKey + '" data-park="' + leaf.park.id + '" data-cat="' + leaf.category.id + '" data-date="' + leaf.date.iso + '">' +
+      '<tr class="row-leaf' + stateCls + '" data-key="' + leaf.stateKey + '" data-park="' + leaf.park.id + '" data-date="' + leaf.date.iso + '">' +
         '<td class="col-name">' +
           '<span class="leaf-bullet" aria-hidden="true">•</span>' +
           '<span class="lvl-ticket-name">' + leaf.ticket.label + '</span>' +
@@ -2960,6 +3199,7 @@
         alertsCellHtml(leaf.alerts) +
 
         '<td class="num">' + fmtInt(leaf.sold) + '</td>' +
+        '<td class="num">' + fmtEur(leaf.current) + '</td>' +
         '<td class="num ' + rosTint + '">' + signed(leaf.ros, '%') + '</td>' +
         '<td class="num">' + fmtInt(leaf.salesRate) + '</td>' +
         '<td class="num">' + leaf.pctOfFcst + '%</td>' +
@@ -2986,7 +3226,8 @@
     return (
       '<button class="action-btn act-accept ' + acceptClass + '" type="button" data-action="accept" aria-label="Accept">' + ACCEPT_SVG + '</button>' +
       '<button class="action-btn act-reject ' + rejectClass + '" type="button" data-action="reject" aria-label="Reject">' + REJECT_SVG + '</button>' +
-      '<button class="act-notes ' + (hasNote ? 'has-note' : '') + '" type="button" data-action="note" aria-label="Note">' + NOTE_SVG + '<span class="note-dot"></span></button>'
+      '<button class="act-notes ' + (hasNote ? 'has-note' : '') + '" type="button" data-action="note" aria-label="Note">' + NOTE_SVG + '<span class="note-dot"></span></button>' +
+      '<button class="cp-ask-btn" type="button" data-action="ask" aria-label="Ask copilot about this row"><span class="spark">✦</span> Ask</button>'
     );
   }
 
@@ -2998,15 +3239,12 @@
     DATES.forEach(date => {
       PARKS.forEach(park => {
         if (!expanded.parks.has(park.id + '|' + date.iso)) return;
-        park.categories.forEach(cat => {
-          if (!expanded.cats.has(park.id + '|' + cat.id + '|' + date.iso)) return;
-          cat.tickets.forEach(t => {
-            const key = stateKey(park, cat, t, date);
-            visibleLeaves++;
-            visibleLeafKeys.push(key);
-            const st = rowStates[key];
-            if (!st || (!st.state && typeof st.overrideValue !== 'number')) pendingLeaves++;
-          });
+        park.tickets.forEach(t => {
+          const key = stateKey(park, t, date);
+          visibleLeaves++;
+          visibleLeafKeys.push(key);
+          const st = rowStates[key];
+          if (!st || (!st.state && typeof st.overrideValue !== 'number')) pendingLeaves++;
         });
       });
     });
@@ -3037,19 +3275,13 @@
   const bodyEl = document.getElementById('srtBody');
 
   bodyEl.addEventListener('click', e => {
-    // Accordion toggle (park / category)
-    const toggle = e.target.closest('[data-toggle]');
+    // Accordion toggle (park only — 2-level accordion)
+    const toggle = e.target.closest('[data-toggle="park"]');
     if (toggle) {
       const tr = toggle.closest('tr');
-      if (toggle.dataset.toggle === 'park') {
-        const k = tr.dataset.park + '|' + tr.dataset.date;
-        if (expanded.parks.has(k)) expanded.parks.delete(k);
-        else expanded.parks.add(k);
-      } else if (toggle.dataset.toggle === 'cat') {
-        const k = tr.dataset.park + '|' + tr.dataset.cat + '|' + tr.dataset.date;
-        if (expanded.cats.has(k)) expanded.cats.delete(k);
-        else expanded.cats.add(k);
-      }
+      const k = tr.dataset.park + '|' + tr.dataset.date;
+      if (expanded.parks.has(k)) expanded.parks.delete(k);
+      else expanded.parks.add(k);
       render();
       return;
     }
@@ -3071,6 +3303,7 @@
       if (action === 'accept') toggleAccept(key);
       else if (action === 'reject') toggleReject(key);
       else if (action === 'note')   openNoteModal(key);
+      else if (action === 'ask')    openRowCopilot(key);
     }
   });
 
@@ -3155,7 +3388,7 @@
     activeNoteKey = key;
     const st = rowStates[key] || {};
     const leaf = ALL_LEAVES[key];
-    noteSub.textContent = leaf.park.name + ' · ' + leaf.category.label + ' · ' + leaf.ticket.label + ' · ' + leaf.date.label + ' ' + leaf.date.dowLabel;
+    noteSub.textContent = leaf.park.name + ' · ' + leaf.ticket.label + ' · ' + leaf.date.label + ' ' + leaf.date.dowLabel;
     noteTextarea.value = st.note || '';
     noteExpiry.value = st.noteExpiry || '';
     noteBackdrop.classList.add('is-open');
@@ -3195,16 +3428,13 @@
     DATES.forEach(date => {
       PARKS.forEach(park => {
         if (!expanded.parks.has(park.id + '|' + date.iso)) return;
-        park.categories.forEach(cat => {
-          if (!expanded.cats.has(park.id + '|' + cat.id + '|' + date.iso)) return;
-          cat.tickets.forEach(t => {
-            const key = stateKey(park, cat, t, date);
-            const st = rowStates[key];
-            if (!st || (!st.state && typeof st.overrideValue !== 'number')) {
-              rowStates[key] = Object.assign({}, st || {}, { state: 'accepted' });
-              n++;
-            }
-          });
+        park.tickets.forEach(t => {
+          const key = stateKey(park, t, date);
+          const st = rowStates[key];
+          if (!st || (!st.state && typeof st.overrideValue !== 'number')) {
+            rowStates[key] = Object.assign({}, st || {}, { state: 'accepted' });
+            n++;
+          }
         });
       });
     });
@@ -3213,32 +3443,27 @@
   });
 
   // ─────────────────────────────────────────────────────────────
-  //  Detail modal — opens on park / category / leaf row clicks
+  //  Detail modal — opens on park / leaf row clicks
   // ─────────────────────────────────────────────────────────────
   const lmBackdrop = document.getElementById('lmBackdrop');
-  let activeModal = null;       // { level: 'park'|'category'|'leaf', park, category?, leaf?, date }
+  let activeModal = null;       // { level: 'park'|'leaf', park, leaf?, date }
   let lmOverrideValue = null;   // pending override (€), uncommitted — leaf level only
 
-  // openModal({ level, key })           ← leaf level (key = stateKey)
-  // openModal({ level, parkId, dateIso })          ← park level
-  // openModal({ level, parkId, catId, dateIso })   ← category level
+  // openModal({ level, key })              ← leaf level (key = stateKey)
+  // openModal({ level, parkId, dateIso })  ← park level
   function openModal(opts) {
-    let park = null, category = null, leaf = null, date = null;
+    let park = null, leaf = null, date = null;
     if (opts.level === 'leaf') {
       leaf = ALL_LEAVES[opts.key];
       if (!leaf) return;
-      park = leaf.park; category = leaf.category; date = leaf.date;
+      park = leaf.park; date = leaf.date;
     } else {
       park = PARKS.find(p => p.id === opts.parkId);
       if (!park) return;
       date = DATES.find(d => d.iso === opts.dateIso);
       if (!date) return;
-      if (opts.level === 'category') {
-        category = park.categories.find(c => c.id === opts.catId);
-        if (!category) return;
-      }
     }
-    activeModal  = { level: opts.level, park, category, leaf, date };
+    activeModal  = { level: opts.level, park, leaf, date };
     lmOverrideValue = null;
     renderModal();
     lmBackdrop.classList.add('is-open');
@@ -3262,14 +3487,9 @@
   // Resolve the leaves that participate in the modal for the active context.
   function modalLeaves() {
     if (!activeModal) return [];
-    const { level, park, category, leaf, date } = activeModal;
+    const { level, park, leaf, date } = activeModal;
     if (level === 'leaf') return [leaf];
-    if (level === 'category') {
-      return category.tickets.map(t => ALL_LEAVES[stateKey(park, category, t, date)]);
-    }
-    const out = [];
-    park.categories.forEach(c => c.tickets.forEach(t => out.push(ALL_LEAVES[stateKey(park, c, t, date)])));
-    return out;
+    return park.tickets.map(t => ALL_LEAVES[stateKey(park, t, date)]);
   }
 
   // Aggregate modal data: sum child curves so the aggregate visibly equals
@@ -3487,28 +3707,97 @@
     );
   }
 
-  // ── Modal renderer (handles park / category / leaf levels) ──
+  // ── Channel / Source market mix data ──
+  const CHANNEL_MIX = [
+    { id: 'web',  label: 'Direct web',   base: 42, color: '#e8007d' },
+    { id: 'app',  label: 'Direct app',   base: 18, color: '#a855f7' },
+    { id: 'ota',  label: 'OTA',          base: 22, color: '#2563eb' },
+    { id: 'ta',   label: 'Travel agent', base: 10, color: '#16a34a' },
+    { id: 'walk', label: 'Walk-up',      base:  8, color: '#94a3b8' },
+  ];
+  const SOURCE_MIX_BY_PARK = {
+    warner: [
+      { code: 'ES', label: 'Spain',       base: 58 },
+      { code: 'FR', label: 'France',      base: 12 },
+      { code: 'UK', label: 'UK',          base: 10 },
+      { code: 'PT', label: 'Portugal',    base:  8 },
+      { code: 'DE', label: 'Germany',     base:  6 },
+      { code: 'XX', label: 'Other',       base:  6 },
+    ],
+    moviepark: [
+      { code: 'DE', label: 'Germany',     base: 72 },
+      { code: 'NL', label: 'Netherlands', base: 11 },
+      { code: 'BE', label: 'Belgium',     base:  6 },
+      { code: 'PL', label: 'Poland',      base:  5 },
+      { code: 'UK', label: 'UK',          base:  3 },
+      { code: 'XX', label: 'Other',       base:  3 },
+    ],
+    mirabilandia: [
+      { code: 'IT', label: 'Italy',       base: 64 },
+      { code: 'DE', label: 'Germany',     base: 12 },
+      { code: 'AT', label: 'Austria',     base:  7 },
+      { code: 'CH', label: 'Switzerland', base:  6 },
+      { code: 'FR', label: 'France',      base:  5 },
+      { code: 'XX', label: 'Other',       base:  6 },
+    ],
+    tropical: [
+      { code: 'DE', label: 'Germany',     base: 68 },
+      { code: 'PL', label: 'Poland',      base: 12 },
+      { code: 'CZ', label: 'Czechia',     base:  7 },
+      { code: 'NL', label: 'Netherlands', base:  5 },
+      { code: 'DK', label: 'Denmark',     base:  4 },
+      { code: 'XX', label: 'Other',       base:  4 },
+    ],
+  };
+  // Palette for source markets, indexed by position (home market first, "Other" last).
+  const SOURCE_COLORS = ['#e8007d', '#a855f7', '#2563eb', '#16a34a', '#f59e0b', '#94a3b8'];
+
+  function computeMixPcts(items, modalKey, suffix, noiseAmp) {
+    const rng = rngFor('mix|' + suffix + '|' + modalKey);
+    const noisy = items.map(it => Math.max(0.5, it.base + (rng() - 0.5) * 2 * noiseAmp));
+    const sum = noisy.reduce((s, n) => s + n, 0);
+    return noisy.map(n => (n / sum) * 100);
+  }
+
+  function mixPanelHtml(title, items, pcts, colorFor) {
+    const segs = items.map((it, i) => {
+      const color = colorFor(it, i);
+      return '<span class="lm-mix-seg" data-mix-id="' + (it.id || it.code) +
+        '" style="width:' + pcts[i].toFixed(2) + '%;background:' + color +
+        '" title="' + esc(it.label) + ': ' + pcts[i].toFixed(1) + '%"></span>';
+    }).join('');
+    const legend = items.map((it, i) => {
+      const color = colorFor(it, i);
+      return '<span class="lm-mix-legend-item">' +
+        '<span class="swatch" style="background:' + color + '"></span>' +
+        '<span class="lbl">' + esc(it.label) + '</span>' +
+        '<span class="pct">' + pcts[i].toFixed(1) + '%</span>' +
+      '</span>';
+    }).join('');
+    return '<div class="lm-panel">' +
+      '<div class="lm-panel-title">' + title + '</div>' +
+      '<div class="lm-mix-bar">' + segs + '</div>' +
+      '<div class="lm-mix-legend">' + legend + '</div>' +
+    '</div>';
+  }
+
+  // ── Modal renderer (handles park / leaf levels) ──
   function renderModal() {
     if (!activeModal) return;
-    const { level, park, category, leaf, date } = activeModal;
+    const { level, park, leaf, date } = activeModal;
     const leaves = modalLeaves();
     const m = aggregateModalData(leaves);
     const wx = weatherFor(park.id, date.iso);
 
     let title, subtitle;
     if (level === 'leaf') {
-      title = esc(park.name) + ' — ' + esc(category.label) + ' — ' + esc(leaf.ticket.label);
+      title = esc(park.name) + ' — ' + esc(leaf.ticket.label);
       subtitle = esc(date.label) + ' ' + esc(date.dowLabel) +
         (date.isHoliday ? ' · Holiday' : '') +
         ' · Capacity ' + esc(leaf.cap === 'open' ? 'Open' : leaf.cap === 'limited' ? 'Limited' : 'Sold-out risk');
-    } else if (level === 'category') {
-      title = esc(park.name) + ' — ' + esc(category.label);
-      subtitle = esc(date.label) + ' ' + esc(date.dowLabel) +
-        (date.isHoliday ? ' · Holiday' : '') +
-        ' · ' + category.tickets.length + ' ticket types · aggregate';
     } else {
       title = esc(park.name);
-      const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
+      const totalLeaves = park.tickets.length;
       subtitle = esc(date.label) + ' ' + esc(date.dowLabel) +
         (date.isHoliday ? ' · Holiday' : '') +
         ' · ' + totalLeaves + ' ticket types · aggregate';
@@ -3572,6 +3861,9 @@
             '<div class="lm-title">' + title + '</div>' +
             '<div class="lm-subtitle">' + subtitle + '</div>' +
           '</div>' +
+          (level === 'leaf'
+            ? '<button class="cp-ask-btn" type="button" id="lmAskBtn"><span class="spark">✦</span> Ask</button>'
+            : '') +
           '<button class="lm-close" type="button" id="lmCloseBtn" aria-label="Close">' +
             '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">' +
               '<line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/>' +
@@ -3600,6 +3892,7 @@
 
           '<div class="lm-col-right">' +
             '<div class="lm-panel">' +
+              '<div class="lm-panel-title">Forecast weather</div>' +
               '<div class="lm-wx">' +
                 '<div class="lm-wx-icon">' + wx.icon + '</div>' +
                 '<div class="lm-wx-text">' +
@@ -3624,7 +3917,7 @@
                     '<td>' + fmtEurK(c.revenue.current)  + '</td>' +
                     '<td>' + fmtEurK(c.revenue.forecast) + '</td>' +
                     '<td>' + fmtEurK(c.revenue.lastYear) + '</td></tr>' +
-                  '<tr><td>ROS</td>' +
+                  '<tr><td>Pickup</td>' +
                     '<td>' + (c.ros.current > 0 ? '+' : '') + c.ros.current + '%</td>' +
                     '<td>0%</td>' +
                     '<td>—</td></tr>' +
@@ -3633,6 +3926,28 @@
             '</div>' +
 
             recPanelHtml +
+
+            // Channel mix + Source market mix — seeded from the modal's active key.
+            (function () {
+              const modalKey = level === 'leaf' ? leaf.stateKey : (park.id + '|' + date.iso);
+              const channelPcts = computeMixPcts(CHANNEL_MIX, modalKey, 'chan', 5);
+              const channelHtml = mixPanelHtml(
+                'Channel mix',
+                CHANNEL_MIX,
+                channelPcts,
+                (it) => it.color
+              );
+              const markets = SOURCE_MIX_BY_PARK[park.id] || SOURCE_MIX_BY_PARK.warner;
+              const srcPcts = computeMixPcts(markets, modalKey, 'src', 4);
+              const srcHtml = mixPanelHtml(
+                'Source market mix',
+                markets,
+                srcPcts,
+                (it, i) => SOURCE_COLORS[i] || '#94a3b8'
+              );
+              return channelHtml + srcHtml;
+            })() +
+
           '</div>' +
         '</div>' +
       '</div>';
@@ -3641,6 +3956,10 @@
 
     // Always wire close
     document.getElementById('lmCloseBtn').addEventListener('click', closeModal);
+    const askBtn = document.getElementById('lmAskBtn');
+    if (askBtn) askBtn.addEventListener('click', () => {
+      if (activeModal && activeModal.leaf) openRowCopilot(activeModal.leaf.stateKey);
+    });
 
     // Leaf-only controls: accept / reject / override
     if (level === 'leaf') {
@@ -3817,12 +4136,10 @@
     if (e.target.closest('td.rec-cell'))    return;
     if (e.target.closest('input, select, textarea, button')) return;
     if (e.target.closest('.accordion-name')) return;   // chevron click reserved for accordion toggle
-    const tr = e.target.closest('tr.row-leaf, tr.row-category, tr.row-park');
+    const tr = e.target.closest('tr.row-leaf, tr.row-park');
     if (!tr) return;
     if (tr.classList.contains('row-leaf')) {
       openModal({ level: 'leaf', key: tr.dataset.key });
-    } else if (tr.classList.contains('row-category')) {
-      openModal({ level: 'category', parkId: tr.dataset.park, catId: tr.dataset.cat, dateIso: tr.dataset.date });
     } else {
       openModal({ level: 'park', parkId: tr.dataset.park, dateIso: tr.dataset.date });
     }
@@ -3887,7 +4204,7 @@
 
   // ── Filter state ──
   const filters = {
-    park: [], category: [], ticket: [], daytype: [], alert: [],
+    park: [], ticket: [], daytype: [], alert: [],
     dateRange: { start: null, end: null },
   };
 
@@ -3895,18 +4212,17 @@
   function uniqueSorted(arr) { return [...new Set(arr)].sort((a, b) => a.localeCompare(b)); }
   const ALL_TICKET_LABELS = (function () {
     const out = [];
-    PARKS.forEach(p => p.categories.forEach(c => c.tickets.forEach(t => out.push(t.label))));
+    PARKS.forEach(p => p.tickets.forEach(t => out.push(t.label)));
     return uniqueSorted(out);
   })();
   const filterItems = {
     park:     PARKS.map(p => p.name),
-    category: ['Individual', 'Group'],
     ticket:   ALL_TICKET_LABELS,
     daytype:  ['Weekday', 'Weekend', 'Holiday'],
     alert:    ['Any alert', 'No alert', 'Low pace', 'High demand', 'Low demand', 'Weather warning', 'Capacity risk', 'Price inversion', 'Out-of-line move'],
   };
   const FILTER_LABELS = {
-    park: 'Parks', category: 'Categories', ticket: 'Ticket Types',
+    park: 'Parks', ticket: 'Ticket Types',
     daytype: 'Day Types', alert: 'Alerts',
   };
 
@@ -3965,19 +4281,15 @@
     });
   }
   function leafPasses(leaf) {
-    if (filters.park.length     && !filters.park.includes(leaf.park.name)) return false;
-    if (filters.category.length && !filters.category.includes(leaf.category.label)) return false;
-    if (filters.ticket.length   && !filters.ticket.includes(leaf.ticket.label)) return false;
+    if (filters.park.length   && !filters.park.includes(leaf.park.name)) return false;
+    if (filters.ticket.length && !filters.ticket.includes(leaf.ticket.label)) return false;
     if (filters.daytype.length  && !filters.daytype.includes(dateDayType(leaf.date))) return false;
     if (!dateInDateRange(leaf.date)) return false;
     if (!leafMatchesAlertFilter(leaf)) return false;
     return true;
   }
-  function anyLeafPassesIn(park, date, cat /* optional */) {
-    if (cat) {
-      return cat.tickets.some(t => leafPasses(ALL_LEAVES[stateKey(park, cat, t, date)]));
-    }
-    return park.categories.some(c => anyLeafPassesIn(park, date, c));
+  function anyLeafPassesIn(park, date) {
+    return park.tickets.some(t => leafPasses(ALL_LEAVES[stateKey(park, t, date)]));
   }
 
   // ── Period model (Daily / Monthly) ──
@@ -4020,9 +4332,7 @@
   function aggregateParkPeriod(park, period) {
     const leafRows = [];
     period.dates.forEach(d => {
-      park.categories.forEach(cat => {
-        cat.tickets.forEach(t => leafRows.push(ALL_LEAVES[stateKey(park, cat, t, d)]));
-      });
+      park.tickets.forEach(t => leafRows.push(ALL_LEAVES[stateKey(park, t, d)]));
     });
     let sold = 0, fcst = 0, revenue = 0;
     let rosNum = 0, rosDen = 0;
@@ -4060,11 +4370,10 @@
   // ── Calendar sort state ──
   const calSort = { dir: null }; // 'asc' | 'desc' | null
 
-  // Calendar accordion expansion (global per park/category, independent of date).
-  // Default: Warner Madrid → Individual expanded, everything else collapsed — matches the table.
+  // Calendar accordion expansion (global per park, independent of date).
+  // Default: Warner Madrid expanded, everything else collapsed.
   const calExpanded = {
-    parks: new Set(['warner']),                // parkId
-    cats:  new Set(['warner|individual']),     // parkId|catId
+    parks: new Set(['warner']),  // parkId
   };
 
   // Generalized aggregator: takes any list of leaf rows (potentially spanning
@@ -4101,15 +4410,13 @@
       anyAccepted, anyRejected,
     };
   }
-  function leavesForScope(park, cat, ticket, period) {
+  function leavesForScope(park, ticket, period) {
     const out = [];
     period.dates.forEach(date => {
-      if (ticket && cat) {
-        out.push(ALL_LEAVES[stateKey(park, cat, ticket, date)]);
-      } else if (cat) {
-        cat.tickets.forEach(t => out.push(ALL_LEAVES[stateKey(park, cat, t, date)]));
+      if (ticket) {
+        out.push(ALL_LEAVES[stateKey(park, ticket, date)]);
       } else {
-        park.categories.forEach(c => c.tickets.forEach(t => out.push(ALL_LEAVES[stateKey(park, c, t, date)])));
+        park.tickets.forEach(t => out.push(ALL_LEAVES[stateKey(park, t, date)]));
       }
     });
     return out;
@@ -4182,8 +4489,8 @@
       return;
     }
 
-    const buildCells = (park, cat, ticket, levelClass) => periods.map(period => {
-      const leaves = leavesForScope(park, cat, ticket, period);
+    const buildCells = (park, ticket, levelClass) => periods.map(period => {
+      const leaves = leavesForScope(park, ticket, period);
       const agg = aggregateLeafList(leaves);
       const rosRound   = Math.round(agg.ros   * 10) / 10;
       const unitsRound = Math.round(agg.units * 10) / 10;
@@ -4201,7 +4508,6 @@
       const dataAttrs = ' data-park="' + park.id + '"' +
         ' data-period="' + period.key + '"' +
         ' data-level="' + levelClass.replace('row-', '') + '"' +
-        (cat    ? ' data-cat="'    + cat.id    + '"' : '') +
         (ticket ? ' data-ticket="' + ticket.id + '"' : '') +
         ' data-row="' + park.id + '"';
       return (
@@ -4219,7 +4525,7 @@
     const chevronSvg = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>';
 
     const rowsHtml = visibleParks.map(park => {
-      const totalLeaves = park.categories.reduce((s, c) => s + c.tickets.length, 0);
+      const totalLeaves = park.tickets.length;
       const parkExpanded = calExpanded.parks.has(park.id);
 
       // Park row
@@ -4234,39 +4540,20 @@
             '<span class="cal-park-meta">' + totalLeaves + ' tickets · capacity ' +
               park.capacity.toLocaleString('en-GB') + '/day</span>' +
           '</th>' +
-          buildCells(park, null, null, 'row-park') +
+          buildCells(park, null, 'row-park') +
         '</tr>';
 
       if (!parkExpanded) return html;
 
-      park.categories.forEach(cat => {
-        const catKey = park.id + '|' + cat.id;
-        const catExpanded = calExpanded.cats.has(catKey);
-
+      park.tickets.forEach(ticket => {
         html +=
-          '<tr class="row-category" data-park="' + park.id + '" data-cat="' + cat.id + '">' +
+          '<tr class="row-leaf" data-park="' + park.id + '" data-ticket="' + ticket.id + '">' +
             '<th class="cal-route">' +
-              '<span class="accordion-name lvl-2 ' + (catExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="cat" aria-expanded="' + catExpanded + '">' +
-                '<span class="accordion-chev">' + chevronSvg + '</span>' +
-                '<span class="lvl-cat-name">' + esc(cat.label) + '</span>' +
-              '</span>' +
-              '<span class="cal-park-meta">' + cat.tickets.length + ' ticket types</span>' +
+              '<span class="leaf-bullet" aria-hidden="true">•</span>' +
+              '<span class="lvl-ticket-name">' + esc(ticket.label) + '</span>' +
             '</th>' +
-            buildCells(park, cat, null, 'row-category') +
+            buildCells(park, ticket, 'row-leaf') +
           '</tr>';
-
-        if (!catExpanded) return;
-
-        cat.tickets.forEach(ticket => {
-          html +=
-            '<tr class="row-leaf" data-park="' + park.id + '" data-cat="' + cat.id + '" data-ticket="' + ticket.id + '">' +
-              '<th class="cal-route">' +
-                '<span class="leaf-bullet" aria-hidden="true">•</span>' +
-                '<span class="lvl-ticket-name">' + esc(ticket.label) + '</span>' +
-              '</th>' +
-              buildCells(park, cat, ticket, 'row-leaf') +
-            '</tr>';
-        });
       });
 
       return html;
@@ -4285,19 +4572,13 @@
 
   // ── Calendar accordion (chevron click on sticky left column) ──
   document.getElementById('calBody').addEventListener('click', e => {
-    const toggle = e.target.closest('[data-toggle]');
+    const toggle = e.target.closest('[data-toggle="park"]');
     if (!toggle) return;
     e.stopPropagation();           // don't open the detail modal
     const tr = toggle.closest('tr');
-    if (toggle.dataset.toggle === 'park') {
-      const k = tr.dataset.park;
-      if (calExpanded.parks.has(k)) calExpanded.parks.delete(k);
-      else calExpanded.parks.add(k);
-    } else if (toggle.dataset.toggle === 'cat') {
-      const k = tr.dataset.park + '|' + tr.dataset.cat;
-      if (calExpanded.cats.has(k)) calExpanded.cats.delete(k);
-      else calExpanded.cats.add(k);
-    }
+    const k = tr.dataset.park;
+    if (calExpanded.parks.has(k)) calExpanded.parks.delete(k);
+    else calExpanded.parks.add(k);
     renderCalendar();
   });
   document.getElementById('calBody').addEventListener('keydown', e => {
@@ -4350,12 +4631,12 @@
       const d = period.dates[0];
       const wx = weatherFor(park.id, d.iso);
       dmSub.innerHTML =
-        wx.icon + ' ' + wx.temp + '°  ·  ROS ' + fmtPct(Math.round(agg.ros * 10) / 10) +
+        wx.icon + ' ' + wx.temp + '°  ·  Pickup ' + fmtPct(Math.round(agg.ros * 10) / 10) +
         '  ·  ' + agg.sold.toLocaleString('en-GB') + ' / ' + agg.fcst.toLocaleString('en-GB') + ' units';
       dmTotals.hidden = true;
     } else {
       dmSub.innerHTML =
-        period.dates.length + ' days · ROS ' + fmtPct(Math.round(agg.ros * 10) / 10) +
+        period.dates.length + ' days · Pickup ' + fmtPct(Math.round(agg.ros * 10) / 10) +
         '  ·  Units YoY ' + fmtPct(Math.round(agg.units * 10) / 10);
       dmTotals.hidden = false;
       dmTotals.innerHTML =
@@ -4365,96 +4646,90 @@
     }
 
     if (calMode === 'monthly') {
-      // Monthly view: aggregate per Category × Ticket (not per date)
-      const sections = park.categories.map(cat => {
-        const rows = cat.tickets.map(t => {
-          let sold = 0, current = 0, recSum = 0, n = 0;
-          let anyAccepted = false, anyRejected = false, anyOverridden = false;
-          period.dates.forEach(d => {
-            const leaf = ALL_LEAVES[stateKey(park, cat, t, d)];
-            const st   = rowStates[leaf.stateKey] || {};
-            const rec  = typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
-            sold    += leaf.sold;
-            current += leaf.current;
-            recSum  += rec;
-            n++;
-            if (st.state === 'accepted')   anyAccepted = true;
-            if (st.state === 'rejected')   anyRejected = true;
-            if (st.state === 'overridden') anyOverridden = true;
-          });
-          const avgCur = current / n;
-          const avgRec = recSum / n;
-          const pct = ((avgRec - avgCur) / avgCur) * 100;
-          const pctR = Math.round(pct * 10) / 10;
-          const pctClass = pctR > 1 ? 'cell-pos' : (pctR < -1 ? 'cell-neg' : 'cell-neutral');
-          const statusBadge =
-            anyOverridden ? '<span class="dm-status b-overridden">Mixed override</span>' :
-            anyAccepted   ? '<span class="dm-status b-accepted">Some accepted</span>' :
-            anyRejected   ? '<span class="dm-status b-rejected">Some rejected</span>' : '';
-          return (
-            '<div class="dm-row">' +
-              '<div>' +
-                '<span class="dm-ticket">' + esc(t.label) + '</span>' +
-                '<div class="dm-prices">' +
-                  '<span class="current">' + fmtEur(avgCur) + '</span>' +
-                  '<span class="arrow">→</span>' +
-                  '<span class="rec">' + fmtEur(avgRec) + '</span>' +
-                  '<span class="pct ' + pctClass + '">' + fmtPct(pctR) + '</span>' +
-                '</div>' +
+      // Monthly view: aggregate per Ticket (not per date)
+      const rows = park.tickets.map(t => {
+        let sold = 0, current = 0, recSum = 0, n = 0;
+        let anyAccepted = false, anyRejected = false, anyOverridden = false;
+        period.dates.forEach(d => {
+          const leaf = ALL_LEAVES[stateKey(park, t, d)];
+          const st   = rowStates[leaf.stateKey] || {};
+          const rec  = typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
+          sold    += leaf.sold;
+          current += leaf.current;
+          recSum  += rec;
+          n++;
+          if (st.state === 'accepted')   anyAccepted = true;
+          if (st.state === 'rejected')   anyRejected = true;
+          if (st.state === 'overridden') anyOverridden = true;
+        });
+        const avgCur = current / n;
+        const avgRec = recSum / n;
+        const pct = ((avgRec - avgCur) / avgCur) * 100;
+        const pctR = Math.round(pct * 10) / 10;
+        const pctClass = pctR > 1 ? 'cell-pos' : (pctR < -1 ? 'cell-neg' : 'cell-neutral');
+        const statusBadge =
+          anyOverridden ? '<span class="dm-status b-overridden">Mixed override</span>' :
+          anyAccepted   ? '<span class="dm-status b-accepted">Some accepted</span>' :
+          anyRejected   ? '<span class="dm-status b-rejected">Some rejected</span>' : '';
+        return (
+          '<div class="dm-row">' +
+            '<div>' +
+              '<span class="dm-ticket">' + esc(t.label) + '</span>' +
+              '<div class="dm-prices">' +
+                '<span class="current">' + fmtEur(avgCur) + '</span>' +
+                '<span class="arrow">→</span>' +
+                '<span class="rec">' + fmtEur(avgRec) + '</span>' +
+                '<span class="pct ' + pctClass + '">' + fmtPct(pctR) + '</span>' +
               '</div>' +
-              '<div>' + statusBadge + '</div>' +
-              '<div class="dm-actions"><span style="font-size:10.5px;color:var(--text-muted);">' +
-                sold.toLocaleString('en-GB') + ' sold · ' + n + ' days</span></div>' +
-            '</div>'
-          );
-        }).join('');
-        return '<div class="dm-cat-head">' + esc(cat.label) + '</div>' + rows;
+            '</div>' +
+            '<div>' + statusBadge + '</div>' +
+            '<div class="dm-actions"><span style="font-size:10.5px;color:var(--text-muted);">' +
+              sold.toLocaleString('en-GB') + ' sold · ' + n + ' days</span></div>' +
+          '</div>'
+        );
       }).join('');
-      dmBody.innerHTML = sections;
+      dmBody.innerHTML = rows;
       return;
     }
 
     // Daily view: per-leaf rows with Accept/Reject
     const d = period.dates[0];
-    const sections = park.categories.map(cat => {
-      const rows = cat.tickets.map(t => {
-        const leaf = ALL_LEAVES[stateKey(park, cat, t, d)];
-        const st = rowStates[leaf.stateKey] || {};
-        const rec = (typeof st.overrideValue === 'number') ? st.overrideValue : leaf.rec;
-        const pctChange = Math.round(((rec - leaf.current) / leaf.current) * 1000) / 10;
-        const pctClass = pctChange > 1 ? 'cell-pos' : (pctChange < -1 ? 'cell-neg' : 'cell-neutral');
-        const stateCls =
-          st.state === 'accepted'   ? ' row-accepted'   :
-          st.state === 'rejected'   ? ' row-rejected'   :
-          st.state === 'overridden' ? ' row-overridden' : '';
-        const acceptSolid = (st.state === 'accepted') ? 'solid' : (st.state ? 'dim' : '');
-        const rejectSolid = (st.state === 'rejected') ? 'solid' : (st.state ? 'dim' : '');
-        const statusBadge =
-          st.state === 'accepted'   ? '<span class="dm-status b-accepted">Accepted</span>' :
-          st.state === 'rejected'   ? '<span class="dm-status b-rejected">Rejected</span>' :
-          st.state === 'overridden' ? '<span class="dm-status b-overridden">Overridden</span>' : '';
-        return (
-          '<div class="dm-row' + stateCls + '" data-key="' + leaf.stateKey + '">' +
-            '<div>' +
-              '<span class="dm-ticket">' + esc(t.label) + '</span>' +
-              '<div class="dm-prices">' +
-                '<span class="current">' + fmtEur(leaf.current) + '</span>' +
-                '<span class="arrow">→</span>' +
-                '<span class="rec">' + fmtEur(rec) + '</span>' +
-                '<span class="pct ' + pctClass + '">' + fmtPct(pctChange) + '</span>' +
-              '</div>' +
+    const dailyRows = park.tickets.map(t => {
+      const leaf = ALL_LEAVES[stateKey(park, t, d)];
+      const st = rowStates[leaf.stateKey] || {};
+      const rec = (typeof st.overrideValue === 'number') ? st.overrideValue : leaf.rec;
+      const pctChange = Math.round(((rec - leaf.current) / leaf.current) * 1000) / 10;
+      const pctClass = pctChange > 1 ? 'cell-pos' : (pctChange < -1 ? 'cell-neg' : 'cell-neutral');
+      const stateCls =
+        st.state === 'accepted'   ? ' row-accepted'   :
+        st.state === 'rejected'   ? ' row-rejected'   :
+        st.state === 'overridden' ? ' row-overridden' : '';
+      const acceptSolid = (st.state === 'accepted') ? 'solid' : (st.state ? 'dim' : '');
+      const rejectSolid = (st.state === 'rejected') ? 'solid' : (st.state ? 'dim' : '');
+      const statusBadge =
+        st.state === 'accepted'   ? '<span class="dm-status b-accepted">Accepted</span>' :
+        st.state === 'rejected'   ? '<span class="dm-status b-rejected">Rejected</span>' :
+        st.state === 'overridden' ? '<span class="dm-status b-overridden">Overridden</span>' : '';
+      return (
+        '<div class="dm-row' + stateCls + '" data-key="' + leaf.stateKey + '">' +
+          '<div>' +
+            '<span class="dm-ticket">' + esc(t.label) + '</span>' +
+            '<div class="dm-prices">' +
+              '<span class="current">' + fmtEur(leaf.current) + '</span>' +
+              '<span class="arrow">→</span>' +
+              '<span class="rec">' + fmtEur(rec) + '</span>' +
+              '<span class="pct ' + pctClass + '">' + fmtPct(pctChange) + '</span>' +
             '</div>' +
-            '<div>' + statusBadge + '</div>' +
-            '<div class="dm-actions">' +
-              '<button class="action-btn act-accept ' + acceptSolid + '" type="button" data-action="accept" data-key="' + leaf.stateKey + '" aria-label="Accept">' + ACCEPT_SVG + '</button>' +
-              '<button class="action-btn act-reject ' + rejectSolid + '" type="button" data-action="reject" data-key="' + leaf.stateKey + '" aria-label="Reject">' + REJECT_SVG + '</button>' +
-            '</div>' +
-          '</div>'
-        );
-      }).join('');
-      return '<div class="dm-cat-head">' + esc(cat.label) + '</div>' + rows;
+          '</div>' +
+          '<div>' + statusBadge + '</div>' +
+          '<div class="dm-actions">' +
+            '<button class="action-btn act-accept ' + acceptSolid + '" type="button" data-action="accept" data-key="' + leaf.stateKey + '" aria-label="Accept">' + ACCEPT_SVG + '</button>' +
+            '<button class="action-btn act-reject ' + rejectSolid + '" type="button" data-action="reject" data-key="' + leaf.stateKey + '" aria-label="Reject">' + REJECT_SVG + '</button>' +
+          '</div>' +
+        '</div>'
+      );
     }).join('');
-    dmBody.innerHTML = sections;
+    dmBody.innerHTML = dailyRows;
   }
 
   // Cell click → detail modal.
@@ -4466,19 +4741,15 @@
     const cell = e.target.closest('td[data-row]');
     if (!cell) return;
     if (calMode === 'daily') {
-      const level = cell.dataset.level;
-      const parkId = cell.dataset.park;
+      const level   = cell.dataset.level;
+      const parkId  = cell.dataset.park;
       const dateIso = cell.dataset.period;
-      const catId   = cell.dataset.cat;
       const tickId  = cell.dataset.ticket;
-      if (level === 'row-leaf') {
+      if (level === 'leaf') {
         const park = PARKS.find(p => p.id === parkId);
-        const cat  = park && park.categories.find(c => c.id === catId);
-        const tk   = cat && cat.tickets.find(t => t.id === tickId);
+        const tk   = park && park.tickets.find(t => t.id === tickId);
         const date = DATES.find(d => d.iso === dateIso);
-        if (park && cat && tk && date) openModal({ level: 'leaf', key: stateKey(park, cat, tk, date) });
-      } else if (level === 'row-category') {
-        openModal({ level: 'category', parkId, catId, dateIso });
+        if (park && tk && date) openModal({ level: 'leaf', key: stateKey(park, tk, date) });
       } else {
         openModal({ level: 'park', parkId, dateIso });
       }
@@ -4929,14 +5200,13 @@
   //  applyFilters — single source of truth that re-renders both views
   // ─────────────────────────────────────────────────────────────
   function applyFilters() {
-    ['park', 'category', 'ticket', 'daytype', 'alert'].forEach(updateMsTrigger);
+    ['park', 'ticket', 'daytype', 'alert'].forEach(updateMsTrigger);
     updateDateTrigger();
     const anyActive =
-      filters.park.length     > 0 ||
-      filters.category.length > 0 ||
-      filters.ticket.length   > 0 ||
-      filters.daytype.length  > 0 ||
-      filters.alert.length    > 0 ||
+      filters.park.length    > 0 ||
+      filters.ticket.length  > 0 ||
+      filters.daytype.length > 0 ||
+      filters.alert.length   > 0 ||
       !!(filters.dateRange.start || filters.dateRange.end);
     document.getElementById('filterClear').hidden = !anyActive;
     render();
@@ -4954,7 +5224,6 @@
   // Clear button
   document.getElementById('filterClear').addEventListener('click', () => {
     filters.park = [];
-    filters.category = [];
     filters.ticket = [];
     filters.daytype = [];
     filters.alert = [];
@@ -4962,39 +5231,402 @@
     applyFilters();
   });
 
-  // ── Row hover dim (table + calendar) ──
-  function wireHoverDim(tbody) {
-    if (!tbody) return;
-    tbody.setAttribute('data-hover-active', 'false');
-    tbody.addEventListener('mouseover', e => {
-      const tr = e.target.closest('tr');
-      if (!tr || !tbody.contains(tr)) return;
-      if (tr.classList.contains('srt-empty')) return;
-      if (tr.classList.contains('is-hovered')) return;
-      tbody.querySelectorAll('tr.is-hovered').forEach(r => r.classList.remove('is-hovered'));
-      tr.classList.add('is-hovered');
-      tbody.setAttribute('data-hover-active', 'true');
-    });
-    tbody.addEventListener('mouseleave', () => {
-      tbody.setAttribute('data-hover-active', 'false');
-      tbody.querySelectorAll('tr.is-hovered').forEach(r => r.classList.remove('is-hovered'));
-    });
-  }
-  wireHoverDim(document.getElementById('srtBody'));
-  wireHoverDim(document.getElementById('calBody'));
-
-  // After every render, reset hover state so post-state-change re-renders
-  // don't leave stale dim on rows whose elements were replaced.
-  const _prevRender = render;
-  render = function () {
-    _prevRender();
-    ['srtBody', 'calBody'].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.setAttribute('data-hover-active', 'false');
-      el.querySelectorAll('tr.is-hovered').forEach(r => r.classList.remove('is-hovered'));
-    });
+  // ─────────────────────────────────────────────────────────────
+  //  RM Copilot — general + row copilots, keyword-routed answers
+  // ─────────────────────────────────────────────────────────────
+  const cp = {
+    general: { open: false, msgs: [], typing: false, welcomed: false },
+    row:     { open: false, msgs: [], typing: false, rowKey: null, ctx: null },
   };
+
+  // ── Suggestion pills ──
+  const PORTFOLIO_SUGGESTIONS = [
+    'Which parks are behind plan?',
+    'Where is pickup weakest this week?',
+    'Any capacity risk dates?',
+    'Best performing park today?',
+    'Which ticket types need pricing action?',
+  ];
+  function buildRowSuggestions(ctx) {
+    const out = [];
+    if (ctx.pickup < -10)       out.push('Why is pickup behind?');
+    if (ctx.demand > 80)        out.push('Why is demand so high?');
+    if (ctx.alerts.length > 0)  out.push("What's flagging on this row?");
+    if (ctx.rec !== ctx.perCap) out.push('Why this price recommendation?');
+    out.push('Show channel mix');
+    out.push('How does this compare to last year?');
+    return out.slice(0, 4);
+  }
+
+  // ── Build the row's data context once on open ──
+  function buildRowContext(rowKey) {
+    const leaf = ALL_LEAVES[rowKey];
+    if (!leaf) return null;
+    const m = leafModalData(leaf);
+    const st = rowStates[rowKey] || {};
+    const rec = typeof st.overrideValue === 'number' ? st.overrideValue : leaf.rec;
+    const pctChange = Math.round(((rec - leaf.current) / leaf.current) * 1000) / 10;
+    const perCapLY = Math.max(1, Math.round(leaf.current / (1 + (leaf.yoy / 100))));
+    return {
+      leaf,
+      park: leaf.park, ticket: leaf.ticket, date: leaf.date,
+      pickup: leaf.ros,
+      perCap: leaf.current,
+      perCapLY,
+      demand: leaf.demand,
+      forecastUnits: leaf.fcst,
+      pctOfFcst: leaf.pctOfFcst,
+      sold: leaf.sold,
+      revenue: leaf.revenue,
+      rec, pctChange,
+      yoy: leaf.yoy,
+      wx: leaf.wx,
+      cap: leaf.cap,
+      alerts: leaf.alerts || [],
+      alertLabels: (leaf.alerts || []).map(a => a.label),
+      cmp: m.cmp,
+    };
+  }
+
+  // ── The context summary the assistant pushes when a row opens ──
+  function buildContextMessage(ctx) {
+    const alertList = ctx.alertLabels.length ? ctx.alertLabels.join(', ') : 'none';
+    return "Here's the position for " + ctx.park.name + " — " + ctx.ticket.label +
+      " on " + ctx.date.label + " " + ctx.date.dowLabel + ":\n" +
+      "• Pickup vs Historic: " + (ctx.pickup > 0 ? '+' : '') + ctx.pickup + "%\n" +
+      "• Per Cap: €" + ctx.perCap + " (vs €" + ctx.perCapLY + " last year)\n" +
+      "• Demand score: " + ctx.demand + "\n" +
+      "• Forecast: " + ctx.forecastUnits.toLocaleString('en-GB') + " units (" + ctx.pctOfFcst + "% sold)\n" +
+      "• Alerts: " + alertList + "\n\n" +
+      "What would you like to explore?";
+  }
+
+  // ── Pure answer functions ──
+  function _portfolioAnswer(q) {
+    const lower = (q || '').toLowerCase();
+    const visibleDates = DATES.filter(dateInDateRange);
+
+    if (/behind|underperform/.test(lower)) {
+      const parkPickup = PARKS.map(p => {
+        let sum = 0, n = 0;
+        visibleDates.forEach(d => p.tickets.forEach(t => {
+          sum += ALL_LEAVES[stateKey(p, t, d)].ros; n++;
+        }));
+        return { p, avg: n ? Math.round(sum / n) : 0 };
+      });
+      const worst = parkPickup.slice().sort((a, b) => a.avg - b.avg).slice(0, 2);
+      return 'Two parks running behind plan:\n' +
+        worst.map(w => '• ' + w.p.name + ' — Pickup avg ' + (w.avg > 0 ? '+' : '') + w.avg + '%').join('\n');
+    }
+
+    if (/pickup|weakest|low pace/.test(lower)) {
+      const cells = [];
+      visibleDates.forEach(d => PARKS.forEach(p => {
+        const leaves = p.tickets.map(t => ALL_LEAVES[stateKey(p, t, d)]);
+        const agg = aggregate(leaves);
+        cells.push({ park: p, date: d, ros: agg.ros });
+      }));
+      cells.sort((a, b) => a.ros - b.ros);
+      const top = cells.slice(0, 3);
+      return 'Three weakest Park × Date cells by Pickup:\n' +
+        top.map(c => '• ' + c.park.name + ' ' + c.date.label + ' — ' +
+          (c.ros > 0 ? '+' : '') + c.ros + '%').join('\n');
+    }
+
+    if (/capacity|risk|sold out/.test(lower)) {
+      const hits = [];
+      visibleDates.forEach(d => PARKS.forEach(p => {
+        const totalFcst = p.tickets.reduce((s, t) => s + ALL_LEAVES[stateKey(p, t, d)].fcst, 0);
+        const pct = (totalFcst / p.capacity) * 100;
+        if (pct > 95) hits.push({ park: p, date: d, pct });
+      }));
+      if (!hits.length) {
+        return 'No capacity risks across the current range — forecast utilisation stays below 95%.';
+      }
+      hits.sort((a, b) => b.pct - a.pct);
+      return hits.length + ' park-date' + (hits.length === 1 ? '' : 's') + ' with capacity > 95%:\n' +
+        hits.slice(0, 6).map(h => '• ' + h.park.name + ' ' + h.date.label + ' — ' + h.pct.toFixed(0) + '% of capacity').join('\n');
+    }
+
+    if (/best|top|outperform/.test(lower)) {
+      const parkPickup = PARKS.map(p => {
+        let sum = 0, n = 0;
+        visibleDates.forEach(d => p.tickets.forEach(t => {
+          sum += ALL_LEAVES[stateKey(p, t, d)].ros; n++;
+        }));
+        return { p, avg: n ? Math.round(sum / n) : 0 };
+      });
+      const best = parkPickup.slice().sort((a, b) => b.avg - a.avg).slice(0, 2);
+      return 'Best-performing parks across the current range:\n' +
+        best.map(b => '• ' + b.p.name + ' — Pickup avg ' + (b.avg > 0 ? '+' : '') + b.avg + '%').join('\n');
+    }
+
+    if (/which.*(ticket|product|type)|pricing action/.test(lower)) {
+      const all = Object.values(ALL_LEAVES).map(l => {
+        const st = rowStates[l.stateKey] || {};
+        const rec = typeof st.overrideValue === 'number' ? st.overrideValue : l.rec;
+        const pct = (rec - l.current) / l.current * 100;
+        return { leaf: l, pct, absPct: Math.abs(pct) };
+      });
+      all.sort((a, b) => b.absPct - a.absPct);
+      const top = all.slice(0, 3);
+      return 'Three leaves with the biggest pricing actions:\n' +
+        top.map(t => '• ' + t.leaf.park.name + ' — ' + t.leaf.ticket.label + ' ' +
+          t.leaf.date.label + ' — ' + (t.pct > 0 ? '+' : '') + t.pct.toFixed(1) + '%').join('\n');
+    }
+
+    return 'I can help with pickup, capacity, alerts, and pricing recommendations. Try one of the suggestions above, or open a specific row for deeper context.';
+  }
+
+  function _rowAnswer(q, ctx) {
+    if (!ctx) return 'No row context loaded.';
+    const lower = (q || '').toLowerCase();
+
+    if (/why.*demand|high demand/.test(lower)) {
+      const wxFactor = ctx.wx.kind === 'sun'  ? 'clear weather forecast'
+                     : ctx.wx.kind === 'rain' && ctx.park.id === 'tropical' ? 'rain forecast (indoor venue benefits)'
+                     : '';
+      const dateFactor = ctx.date.isHoliday ? 'school-holiday week'
+                       : ctx.date.isWeekend ? 'weekend'
+                       : 'weekday baseline';
+      const capPct = (ctx.forecastUnits / ctx.park.capacity * 100).toFixed(0);
+      return 'Demand score ' + ctx.demand + ' is driven by:\n' +
+        '• ' + dateFactor + '\n' +
+        (wxFactor ? '• ' + wxFactor + '\n' : '') +
+        '• Forecast ' + ctx.forecastUnits.toLocaleString('en-GB') + ' units (' + capPct + '% of capacity)';
+    }
+
+    if (/alert|flag/.test(lower)) {
+      if (!ctx.alerts.length) return 'No alerts firing on this row.';
+      return 'Active alerts on this row:\n' +
+        ctx.alerts.map(a => {
+          const detail = a.tooltip.indexOf(': ') >= 0 ? a.tooltip.split(': ').slice(1).join(': ') : a.tooltip;
+          return '• ' + a.label + ' — ' + detail;
+        }).join('\n');
+    }
+
+    if (/recommendation|price|rec/.test(lower)) {
+      const direction = ctx.pickup < 0 ? 'soft pickup' : 'strong demand';
+      const capLabel = ctx.cap === 'open' ? 'open' : ctx.cap === 'limited' ? 'limited' : 'sold-out risk';
+      return 'Current €' + ctx.perCap + ', recommended €' + ctx.rec + ' (' +
+        (ctx.pctChange > 0 ? '+' : '') + ctx.pctChange + '%). ' +
+        'Driven by ' + direction + ' and ' + capLabel + ' capacity. ' +
+        'Accept to apply, or override in the price cell.';
+    }
+
+    if (/channel|source|market/.test(lower)) {
+      const modalKey = ctx.leaf.stateKey;
+      const channelPcts = computeMixPcts(CHANNEL_MIX, modalKey, 'chan', 5);
+      const channelLines = CHANNEL_MIX.map((c, i) => '• ' + c.label + ' ' + channelPcts[i].toFixed(1) + '%').join('\n');
+      const markets = SOURCE_MIX_BY_PARK[ctx.park.id] || SOURCE_MIX_BY_PARK.warner;
+      const srcPcts = computeMixPcts(markets, modalKey, 'src', 4);
+      const srcLines = markets.map((m, i) => '• ' + m.label + ' ' + srcPcts[i].toFixed(1) + '%').join('\n');
+      return 'Channel mix:\n' + channelLines + '\n\nSource market mix:\n' + srcLines;
+    }
+
+    if (/last year|vs ly|compare/.test(lower)) {
+      return 'Versus last year:\n' +
+        '• Pickup: ' + (ctx.pickup > 0 ? '+' : '') + ctx.pickup + '% (LY was the benchmark, 0%)\n' +
+        '• Per Cap: €' + ctx.perCap + ' vs €' + ctx.perCapLY + ' (' + (ctx.yoy > 0 ? '+' : '') + ctx.yoy + '% on revenue)\n' +
+        '• Units: ' + ctx.cmp.units.current.toLocaleString('en-GB') + ' vs ' + ctx.cmp.units.lastYear.toLocaleString('en-GB') + ' LY';
+    }
+
+    if (/why|behind|pickup/.test(lower)) {
+      const cause = ctx.wx.kind === 'rain' && ctx.park.id !== 'tropical' ? 'rain in the forecast'
+                  : ctx.wx.kind === 'sun' && ctx.park.id === 'tropical' ? 'sunny outdoor weather pulling visitors away from indoor venues'
+                  : ctx.demand < 35 ? 'soft weekday demand'
+                  : ctx.pickup > 0 ? 'no specific driver — pacing slightly above benchmark'
+                  : 'general benchmark drift on this weekday';
+      const suggestedDrop = Math.max(3, Math.min(10, Math.abs(Math.round(ctx.pickup / 2))));
+      return ctx.ticket.label + ' at ' + ctx.park.name + ' is pacing ' +
+        (ctx.pickup > 0 ? '+' : '') + ctx.pickup + '% vs benchmark. ' +
+        'Driver appears to be ' + cause + '. ' +
+        'Forecast still expects ' + ctx.forecastUnits.toLocaleString('en-GB') + ' units ' +
+        '(current sell-through ' + ctx.pctOfFcst + '%). ' +
+        (ctx.pickup < 0
+          ? 'Consider reducing price by ' + suggestedDrop + '% to stimulate pickup.'
+          : 'Hold pricing — pace is healthy.');
+    }
+
+    return 'I can dig into pickup, demand drivers, alerts, the recommendation, channel mix, or YoY comparison for this row.';
+  }
+
+  // ── Render helpers ──
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function renderChat(scope) {
+    const state = cp[scope];
+    const chat = document.getElementById(scope === 'general' ? 'cpGeneralChat' : 'cpRowChat');
+    if (!chat) return;
+    const msgs = state.msgs.map(m =>
+      '<div class="cp-msg ' + (m.role === 'asst' ? 'cp-asst' : 'cp-user') + '">' + escHtml(m.text) + '</div>'
+    ).join('');
+    const typing = state.typing
+      ? '<div class="cp-typing"><span></span><span></span><span></span></div>'
+      : '';
+    chat.innerHTML = msgs + typing;
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function renderGeneralSuggestions() {
+    document.getElementById('cpGeneralSuggestions').innerHTML =
+      PORTFOLIO_SUGGESTIONS.map(s =>
+        '<button class="cp-pill" type="button" data-q="' + escHtml(s) + '">' + escHtml(s) + '</button>'
+      ).join('');
+  }
+  function renderRowSuggestions() {
+    if (!cp.row.ctx) return;
+    const pills = buildRowSuggestions(cp.row.ctx);
+    document.getElementById('cpRowSuggestions').innerHTML = pills.map(s =>
+      '<button class="cp-pill" type="button" data-q="' + escHtml(s) + '">' + escHtml(s) + '</button>'
+    ).join('');
+  }
+  function renderRowHeader() {
+    const ctx = cp.row.ctx;
+    if (!ctx) return;
+    document.getElementById('cpRowHeader').innerHTML =
+      '<div style="min-width:0;flex:1">' +
+        '<div class="cp-title">' + escHtml(ctx.park.name) + '</div>' +
+        '<div class="cp-sub">' + escHtml(ctx.ticket.label) + ' · ' +
+          escHtml(ctx.date.label) + ' ' + escHtml(ctx.date.dowLabel) +
+          (ctx.date.isHoliday ? ' · Holiday' : '') +
+        '</div>' +
+        '<div class="cp-metrics">Pickup: ' + (ctx.pickup > 0 ? '+' : '') + ctx.pickup + '% · ' +
+          'Per Cap: €' + ctx.perCap + ' · Demand: ' + ctx.demand + '</div>' +
+        '<div class="cp-tag"><span style="font-size:11px">✦</span> RM Copilot</div>' +
+      '</div>' +
+      '<button class="cp-header-close" type="button" id="cpRowClose" aria-label="Close">' +
+        '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">' +
+          '<line x1="3.5" y1="3.5" x2="10.5" y2="10.5"/>' +
+          '<line x1="10.5" y1="3.5" x2="3.5" y2="10.5"/>' +
+        '</svg>' +
+      '</button>';
+    document.getElementById('cpRowClose').addEventListener('click', closeRowCopilot);
+  }
+
+  // ── State transitions ──
+  function openGeneralCopilot() {
+    cp.general.open = true;
+    if (!cp.general.welcomed) {
+      cp.general.msgs.push({
+        role: 'asst',
+        text: 'Hi — I can help you analyse pricing across all parks, spot underperforming dates, and surface opportunities. Ask me anything, or open a specific row to scope the conversation.',
+      });
+      cp.general.welcomed = true;
+    }
+    renderChat('general');
+    renderGeneralSuggestions();
+    document.getElementById('cpGeneralPanel').classList.add('is-open');
+    document.getElementById('cpGeneralPanel').classList.toggle('row-open', cp.row.open);
+    setTimeout(() => document.getElementById('cpGeneralInput').focus(), 220);
+  }
+  function closeGeneralCopilot() {
+    cp.general.open = false;
+    document.getElementById('cpGeneralPanel').classList.remove('is-open');
+  }
+  function toggleGeneralCopilot() {
+    if (cp.general.open) closeGeneralCopilot();
+    else openGeneralCopilot();
+  }
+
+  function openRowCopilot(rowKey) {
+    const ctx = buildRowContext(rowKey);
+    if (!ctx) return;
+    const wasOpen = cp.row.open;
+    cp.row.rowKey = rowKey;
+    cp.row.ctx = ctx;
+    cp.row.msgs = [];
+    cp.row.typing = true;
+    renderRowHeader();
+    renderChat('row');
+    renderRowSuggestions();
+    document.getElementById('cpRowPanel').classList.add('is-open');
+    cp.row.open = true;
+    // Push the context message after a short typing delay
+    setTimeout(() => {
+      if (cp.row.rowKey !== rowKey) return;  // user switched rows mid-wait
+      cp.row.typing = false;
+      cp.row.msgs.push({ role: 'asst', text: buildContextMessage(ctx) });
+      renderChat('row');
+    }, 400);
+    if (!wasOpen) {
+      document.getElementById('cpGeneralPanel').classList.toggle('row-open', true);
+      setTimeout(() => document.getElementById('cpRowInput').focus(), 280);
+    }
+  }
+  function closeRowCopilot() {
+    cp.row.open = false;
+    cp.row.rowKey = null;
+    document.getElementById('cpRowPanel').classList.remove('is-open');
+    document.getElementById('cpGeneralPanel').classList.remove('row-open');
+  }
+
+  // ── Send a message (user → typing → assistant) ──
+  function sendMessage(scope, text) {
+    text = String(text || '').trim();
+    if (!text) return;
+    const state = cp[scope];
+    state.msgs.push({ role: 'user', text });
+    state.typing = true;
+    renderChat(scope);
+    const ctx = scope === 'row' ? cp.row.ctx : null;
+    setTimeout(() => {
+      const answer = scope === 'general' ? _portfolioAnswer(text) : _rowAnswer(text, ctx);
+      state.typing = false;
+      state.msgs.push({ role: 'asst', text: answer });
+      renderChat(scope);
+    }, 400);
+  }
+
+  // ── Wire DOM ──
+  document.getElementById('cpFab').addEventListener('click', toggleGeneralCopilot);
+  document.getElementById('cpGeneralClose').addEventListener('click', closeGeneralCopilot);
+
+  document.getElementById('cpGeneralInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const v = e.target.value; e.target.value = '';
+      sendMessage('general', v);
+    }
+  });
+  document.getElementById('cpGeneralSend').addEventListener('click', () => {
+    const input = document.getElementById('cpGeneralInput');
+    const v = input.value; input.value = '';
+    sendMessage('general', v);
+  });
+  document.getElementById('cpGeneralSuggestions').addEventListener('click', e => {
+    const pill = e.target.closest('.cp-pill');
+    if (!pill) return;
+    sendMessage('general', pill.dataset.q);
+  });
+
+  document.getElementById('cpRowInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const v = e.target.value; e.target.value = '';
+      sendMessage('row', v);
+    }
+  });
+  document.getElementById('cpRowSend').addEventListener('click', () => {
+    const input = document.getElementById('cpRowInput');
+    const v = input.value; input.value = '';
+    sendMessage('row', v);
+  });
+  document.getElementById('cpRowSuggestions').addEventListener('click', e => {
+    const pill = e.target.closest('.cp-pill');
+    if (!pill) return;
+    sendMessage('row', pill.dataset.q);
+  });
+
+  // Esc: close row first, then general on second press
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (cp.row.open)     { closeRowCopilot(); return; }
+    if (cp.general.open) { closeGeneralCopilot(); }
+  });
+
+  // Expose for the modal Ask button
+  window.__sgOpenRowCopilot = openRowCopilot;
 
   render();
   applyFilters();   // populate trigger labels + initial filter-clear hidden state
