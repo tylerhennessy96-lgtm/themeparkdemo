@@ -3105,13 +3105,11 @@
 
   // ── State stores ──
   const rowStates = {};   // keyed by stateKey
+  // `${parkId}|${dateISO}` — expanded park rows show their channel children.
+  // Everything starts collapsed.
   const expanded = {
-    parks: new Set(),   // `${parkId}|${dateISO}` — expanded park rows show their ticket children
+    parks: new Set(),
   };
-  // Default expansion: Warner Madrid expanded across all dates.
-  DATES.forEach(d => {
-    expanded.parks.add('warner|' + d.iso);
-  });
 
   // ── Compute all rows once, keyed for state lookups ──
   const ALL_LEAVES = {};   // stateKey → leaf
