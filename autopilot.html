@@ -46,6 +46,19 @@
     .ap-master .state-label { min-width: 24px; }
     .ap-master .state-label.on { color: #047857; }
     .ap-spacer { flex: 1; }
+    .ap-reset-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--accent);
+      background: none;
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .ap-reset-btn:hover { background: rgba(232,0,125,0.08); }
     .ap-park-filter {
       font-family: 'Inter', sans-serif;
       font-size: 12.5px;
@@ -100,14 +113,9 @@
     .ap-kpi.k-auto   .value { color: #047857; }
     .ap-kpi.k-review .value { color: #b45309; }
 
-    /* Body: table + rules sidebar */
-    .ap-body {
-      flex: 1;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 320px;
-      overflow: hidden;
-    }
+    /* Table */
     .ap-table-wrap {
+      flex: 1;
       overflow: auto;
       background: var(--surface);
     }
@@ -115,7 +123,8 @@
       border-collapse: separate;
       border-spacing: 0;
       width: 100%;
-      min-width: 860px;
+      min-width: 720px;
+      max-width: 1080px;
       font-family: 'Inter', sans-serif;
       font-size: 11.5px;
       background: var(--surface);
@@ -124,7 +133,7 @@
       position: sticky;
       top: 0;
       z-index: 5;
-      padding: 8px 10px;
+      padding: 8px 14px;
       font-weight: 600;
       font-size: 11px;
       color: var(--text-secondary);
@@ -133,27 +142,26 @@
       text-align: left;
       white-space: nowrap;
     }
-    table.ap-table thead th.num { text-align: right; }
+    table.ap-table thead th .sub {
+      display: block;
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 10px;
+      margin-top: 2px;
+    }
     table.ap-table tbody td {
-      padding: 7px 10px;
+      padding: 8px 14px;
       border-bottom: 1px solid var(--border);
       color: var(--text-primary);
       vertical-align: middle;
       white-space: nowrap;
       background: var(--surface);
     }
-    table.ap-table tbody td.num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
     table.ap-table tbody tr:hover td { background-color: var(--row-hover); }
     table.ap-table tbody tr.row-park td { background: #f6f8fc; font-weight: 600; }
     table.ap-table tbody tr.row-park:hover td { background: #eef2f8; }
-    table.ap-table tbody tr.row-week td { background: #fbfcfe; }
-    table.ap-table tbody tr.row-week:hover td { background: #f3f5f9; }
     table.ap-table tbody tr.row-park td.col-name { padding-left: 12px; }
-    table.ap-table tbody tr.row-week td.col-name { padding-left: 30px; box-shadow: inset 2px 0 0 var(--border); }
-    table.ap-table tbody tr.row-day  td.col-name { padding-left: 52px; box-shadow: inset 2px 0 0 var(--border); }
+    table.ap-table tbody tr.row-week td.col-name { padding-left: 32px; box-shadow: inset 2px 0 0 var(--border); }
 
     .accordion-name {
       display: inline-flex;
@@ -187,107 +195,20 @@
       color: var(--text-muted);
       font-weight: 400;
       font-size: 10.5px;
-      margin-left: 6px;
     }
-    .leaf-bullet {
-      display: inline-block;
-      color: var(--text-muted);
-      margin-right: 8px;
-      font-size: 14px;
-      line-height: 1;
-      vertical-align: middle;
-      transform: translateY(-1px);
-    }
-    .day-dow { color: var(--text-muted); font-size: 10.5px; margin-left: 6px; }
-    .holiday-tag { color: var(--accent); font-weight: 500; margin-left: 6px; font-size: 10.5px; }
 
-    /* Demand Level chips (same scale as Pricing) */
-    .dl-chip {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      padding: 1px 6px;
-      border-radius: 999px;
-      font-variant-numeric: tabular-nums;
-    }
-    .dl-chip.dl-5 { background: #fee2e2; color: #991b1b; }
-    .dl-chip.dl-4 { background: #ffedd5; color: #9a3412; }
-    .dl-chip.dl-3 { background: #f1f5f9; color: #475569; }
-    .dl-chip.dl-2 { background: #e0f2fe; color: #075985; }
-    .dl-chip.dl-1 { background: #ede9fe; color: #5b21b6; }
-
-    /* Counts + status */
-    .ap-count-auto   { color: #047857; font-weight: 600; }
-    .ap-count-review { color: #b45309; font-weight: 600; }
-    .ap-count-zero   { color: var(--text-muted); font-weight: 400; }
-    .ap-status {
-      display: inline-block;
-      font-size: 9.5px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    .ap-status.s-auto   { background: #dcfce7; color: #166534; }
-    .ap-status.s-review { background: #fef3c7; color: #92400e; }
-    .ap-status.s-none   { background: #f1f5f9; color: #64748b; }
-    .ap-status.s-off    { background: #f1f5f9; color: #64748b; }
-    td.status-cell { white-space: nowrap; }
-    .ap-tune {
+    /* Per-row rule controls */
+    .ap-rule-cell {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      margin-left: 6px;
-      border: none;
-      background: transparent;
-      border-radius: 50%;
-      color: var(--text-muted);
-      cursor: pointer;
-      vertical-align: middle;
-      padding: 0;
-      transition: color .12s, background .12s;
-    }
-    .ap-tune:hover { color: var(--accent); background: rgba(232,0,125,0.08); }
-    .ap-ovr-chip {
-      display: inline-block;
-      font-size: 9.5px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: rgba(232,0,125,0.08);
-      color: var(--accent);
-      margin-left: 6px;
-      vertical-align: middle;
+      gap: 5px;
       font-variant-numeric: tabular-nums;
     }
-    .ap-ovr-popover {
-      position: fixed;
-      z-index: 300;
-      width: 290px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      padding: 14px 16px;
-      font-family: 'Inter', sans-serif;
+    .ap-rule-cell .pm, .ap-rule-cell .unit {
+      font-size: 11.5px;
+      color: var(--text-secondary);
     }
-    .ap-ovr-title { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
-    .ap-ovr-sub { font-size: 11px; color: var(--text-secondary); line-height: 1.45; margin: 4px 0 10px; }
-    .ap-ovr-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 0;
-    }
-    .ap-ovr-row label { flex: 1; font-size: 11.5px; font-weight: 500; color: var(--text-primary); }
-    .ap-ovr-row .pm, .ap-ovr-row .unit { font-size: 11.5px; color: var(--text-secondary); }
-    .ap-ovr-row input {
+    input.ap-thresh {
       width: 56px;
       height: 28px;
       padding: 0 8px;
@@ -296,136 +217,43 @@
       font-family: 'Inter', sans-serif;
       font-size: 12px;
       font-weight: 500;
+      color: var(--text-primary);
       text-align: right;
       font-variant-numeric: tabular-nums;
-    }
-    .ap-ovr-row input:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
-    .ap-ovr-actions {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .ap-ovr-clear {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      background: transparent;
-      border: 1px solid var(--border-mid);
-      border-radius: 999px;
-      padding: 5px 12px;
-      cursor: pointer;
-    }
-    .ap-ovr-clear:hover { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
-    .ap-ovr-apply {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      color: #fff;
-      background: var(--accent);
-      border: 1px solid var(--accent);
-      border-radius: 999px;
-      padding: 5px 16px;
-      cursor: pointer;
-    }
-    .ap-ovr-apply:hover { background: var(--accent-dim); }
-    .ap-rules-note-icon { color: var(--text-secondary); }
-
-    .ap-moves {
-      font-size: 10.5px;
-      color: var(--text-secondary);
-      font-variant-numeric: tabular-nums;
-    }
-    .ap-moves .up   { color: #166534; }
-    .ap-moves .down { color: #991b1b; }
-    .ap-empty {
-      text-align: center;
-      font-style: italic;
-      color: var(--text-muted);
-      padding: 32px 16px !important;
-    }
-
-    /* Rules sidebar */
-    .ap-rules {
-      border-left: 1px solid var(--border);
       background: var(--surface);
-      overflow-y: auto;
-      padding: 18px 20px 24px;
-      font-family: 'Inter', sans-serif;
+      transition: border-color .12s;
     }
-    .ap-rules-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 2px;
-    }
-    .ap-rules-sub {
-      font-size: 11.5px;
-      color: var(--text-secondary);
-      line-height: 1.45;
-      margin-bottom: 16px;
-    }
-    .ap-rule {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 0;
-      border-top: 1px solid var(--border);
-    }
-    .ap-rule-text { flex: 1; min-width: 0; }
-    .ap-rule-label { font-size: 12px; font-weight: 600; color: var(--text-primary); }
-    .ap-rule-desc {
-      font-size: 11px;
-      color: var(--text-secondary);
-      line-height: 1.45;
-      margin-top: 2px;
-    }
-    .ap-rule-input {
+    input.ap-thresh:hover { border-color: var(--accent); }
+    input.ap-thresh:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+    /* Inherited values read muted; explicit overrides read accented */
+    input.ap-thresh.inherited { color: var(--text-muted); }
+    input.ap-thresh.custom { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .ap-inherit-reset {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .ap-rule-input input[type="number"] {
-      width: 58px;
-      height: 28px;
-      padding: 0 8px;
-      border: 1px solid var(--border-mid);
-      border-radius: var(--radius);
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-primary);
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-    .ap-rule-input input[type="number"]:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
-    .ap-rule-input .suffix { font-size: 11.5px; color: var(--text-secondary); }
-    .ap-rules-reset {
-      margin-top: 16px;
-      font-family: 'Inter', sans-serif;
-      font-size: 11.5px;
-      font-weight: 500;
-      color: var(--accent);
-      background: none;
-      border: 1px solid var(--accent);
-      border-radius: 999px;
-      padding: 6px 14px;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: background .12s;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1;
+      transition: color .12s, background .12s;
     }
-    .ap-rules-reset:hover { background: rgba(232,0,125,0.08); }
-    .ap-rules-note {
-      margin-top: 14px;
-      font-size: 10.5px;
+    .ap-inherit-reset:hover { color: var(--accent); background: rgba(232,0,125,0.08); }
+    .ap-inherit-reset[hidden] { display: none; }
+
+    .ap-note {
+      padding: 14px 24px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
       color: var(--text-muted);
       line-height: 1.5;
-    }
-
-    @media (max-width: 1100px) {
-      .ap-body { grid-template-columns: 1fr; }
-      .ap-rules { border-left: none; border-top: 1px solid var(--border); }
+      max-width: 720px;
     }
   </style>
 </head>
@@ -462,6 +290,7 @@
         <span class="state-label on" id="apEnabledLabel">On</span>
       </div>
       <div class="ap-spacer"></div>
+      <button class="ap-reset-btn" type="button" id="apRulesReset">Reset all rules</button>
       <select class="ap-park-filter" id="apParkFilter" aria-label="Filter by park">
         <option value="">All parks</option>
       </select>
@@ -469,89 +298,25 @@
 
     <div class="ap-kpis" id="apKpis"></div>
 
-    <div class="ap-body">
-      <div class="ap-table-wrap">
-        <table class="ap-table">
-          <thead>
-            <tr>
-              <th>Park / Week / Day</th>
-              <th>Period</th>
-              <th>Demand</th>
-              <th class="num">Price changes</th>
-              <th class="num">Auto-accepted</th>
-              <th class="num">Needs review</th>
-              <th class="num">Avg Δ%</th>
-              <th>Moves</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="apBody"></tbody>
-        </table>
+    <div class="ap-table-wrap">
+      <table class="ap-table">
+        <thead>
+          <tr>
+            <th>Park / Week</th>
+            <th>Period</th>
+            <th>Auto-accept within<span class="sub">changes outside go to review</span></th>
+            <th>Review peak days<span class="sub">weekends &amp; holidays always manual</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="apBody"></tbody>
+      </table>
+      <div class="ap-note">
+        Recommended price changes within a row's band are accepted automatically; everything else is
+        queued for manual review on the Pricing page. Week rows inherit their park's rules —
+        edit a value to override it (shown in pink), and use ↺ to go back to inheriting.
+        Rules are saved in this browser.
       </div>
-
-      <aside class="ap-rules" aria-label="Autopilot rules">
-        <div class="ap-rules-title">Auto-accept rules</div>
-        <div class="ap-rules-sub">
-          Recommended price changes that pass every rule are accepted automatically.
-          Everything else is queued for manual review on the Pricing page.
-        </div>
-
-        <div class="ap-rule">
-          <div class="ap-rule-text">
-            <div class="ap-rule-label">Auto-accept small moves</div>
-            <div class="ap-rule-desc">Accept any change within this band, regardless of demand level.</div>
-          </div>
-          <div class="ap-rule-input">
-            <span class="suffix">±</span>
-            <input type="number" id="ruleMaxAuto" min="0" max="20" step="0.5" value="3" />
-            <span class="suffix">%</span>
-          </div>
-        </div>
-
-        <div class="ap-rule">
-          <div class="ap-rule-text">
-            <div class="ap-rule-label">Hard review cap</div>
-            <div class="ap-rule-desc">Never auto-accept a change outside this band — always send to review.</div>
-          </div>
-          <div class="ap-rule-input">
-            <span class="suffix">±</span>
-            <input type="number" id="ruleCap" min="1" max="50" step="0.5" value="10" />
-            <span class="suffix">%</span>
-          </div>
-        </div>
-
-        <div class="ap-rule">
-          <div class="ap-rule-text">
-            <div class="ap-rule-label">Demand-level consistency</div>
-            <div class="ap-rule-desc">Between the two bands, auto-accept only when the move matches the day's demand level: increases need DL4–DL5, decreases need DL1–DL2.</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="ruleDlConsistent" checked />
-            <span class="switch-track"><span class="switch-thumb"></span></span>
-          </label>
-        </div>
-
-        <div class="ap-rule">
-          <div class="ap-rule-text">
-            <div class="ap-rule-label">Manual review on peak days</div>
-            <div class="ap-rule-desc">Always send weekend and holiday changes to review, even small ones.</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="ruleWeekendManual" />
-            <span class="switch-track"><span class="switch-thumb"></span></span>
-          </label>
-        </div>
-
-        <button class="ap-rules-reset" type="button" id="apRulesReset">Reset to defaults</button>
-        <div class="ap-rules-note">
-          Rules are saved in this browser and applied instantly to the 8-week horizon shown here.
-          Demand levels (DL1–DL5) follow the same customisable rules as the Pricing page.
-          <br><br>
-          Need different thresholds for one park or week? Use the
-          <span class="ap-rules-note-icon" aria-hidden="true">⚙</span> button on that row to set a
-          per-row override — reset clears them all.
-        </div>
-      </aside>
     </div>
 
   </main>
@@ -654,7 +419,6 @@
   }
   function rngFor(key) { return mulberry32(hashStr(key)); }
   function pick(rng, lo, hi) { return lo + rng() * (hi - lo); }
-  function pickInt(rng, lo, hi) { return Math.round(pick(rng, lo, hi)); }
 
   // ── Domain (mirrors the Pricing page: booking channels at the Adult rate) ──
   const PARKS = [
@@ -663,35 +427,10 @@
     { id: 'mirabilandia', name: 'Mirabilandia',         country: 'IT' },
     { id: 'tropical',     name: 'Tropical Islands',     country: 'DE' },
   ];
-  const CHANNELS = [
-    { id: 'web',  label: 'Web' },
-    { id: 'app',  label: 'App' },
-    { id: 'ota',  label: 'OTA' },
-    { id: 'gate', label: 'Gate' },
-  ];
-
-  // ── Demand Levels (same customisable-rules table as Pricing) ──
-  const DL_META = {
-    5: { code: 'DL5', label: 'BOD / Very high' },
-    4: { code: 'DL4', label: 'High demand' },
-    3: { code: 'DL3', label: 'Standard demand' },
-    2: { code: 'DL2', label: 'Low demand' },
-    1: { code: 'DL1', label: 'Smart day / Very low' },
-  };
-  function demandLevelFor(ppt) {
-    if (ppt >= 20)  return 5;
-    if (ppt >= 10)  return 4;
-    if (ppt >= -5)  return 3;
-    if (ppt >= -10) return 2;
-    return 1;
-  }
-  function dlChip(dl) {
-    return '<span class="dl-chip dl-' + dl + '" title="' + DL_META[dl].code + ' — ' + DL_META[dl].label + '">' + DL_META[dl].code + '</span>';
-  }
+  const CHANNELS = ['web', 'app', 'ota', 'gate'];
 
   // ── 8-week horizon from Thu 2026-07-16 (tomorrow in the demo data model) ──
   const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const DOWS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   function buildWeeks() {
     const weeks = [];
     const start = new Date(Date.UTC(2026, 6, 16));   // Thu 2026-07-16
@@ -704,21 +443,18 @@
         const dow = d.getUTCDay();
         days.push({
           iso,
-          label: String(d.getUTCDate()).padStart(2, '0') + ' ' + MONTHS_SHORT[d.getUTCMonth()],
-          dowLabel: DOWS[dow],
           isWeekend: dow === 0 || dow === 6,
           // School-holiday week: Sat 2026-07-25 .. Fri 2026-07-31
           isHoliday: iso >= '2026-07-25' && iso <= '2026-07-31',
         });
       }
       const a = days[0], b = days[6];
+      const label = d => String(new Date(d.iso).getUTCDate()).padStart(2, '0') + ' ' + MONTHS_SHORT[new Date(d.iso).getUTCMonth()];
       const sameMonth = a.iso.slice(5, 7) === b.iso.slice(5, 7);
       weeks.push({
         key: 'w' + w,
         num: w + 1,
-        label: sameMonth
-          ? a.label.slice(0, 2) + '–' + b.label
-          : a.label + ' – ' + b.label,
+        label: sameMonth ? label(a).slice(0, 2) + '–' + label(b) : label(a) + ' – ' + label(b),
         days,
       });
     }
@@ -726,49 +462,45 @@
   }
   const WEEKS = buildWeeks();
 
-  // ── Per park × day: demand level + one recommended change per channel ──
-  // Same shape of logic as the Pricing page: weekend/holiday lift demand,
-  // demand level drives the direction/size of the price move, DL3 mostly
-  // holds, and ~4% of changes are wild outliers that trip the review cap.
-  function dayData(park, day) {
+  // ── Per park × day: one recommended change per channel ──
+  // Same shape of logic as the Pricing page: weekend/holiday lift demand and
+  // the demand level (internal here) drives the direction/size of the move;
+  // standard days mostly hold. ~4% of changes are wild outliers.
+  function dayChanges(park, day) {
     const r = rngFor('ap|' + park.id + '|' + day.iso);
     let ds = day.isWeekend ? 65 : 38;
     if (day.isHoliday) ds += 18;
     ds += pick(r, -14, 14);
     ds = Math.max(8, Math.min(99, Math.round(ds)));
-    // Same centring as the Pricing page: typical weekday → DL3.
     const ppt = Math.round((ds - 42) * 0.55);
-    const dl = demandLevelFor(ppt);
+    const dl = ppt >= 20 ? 5 : ppt >= 10 ? 4 : ppt >= -5 ? 3 : ppt >= -10 ? 2 : 1;
 
-    const changes = CHANNELS.map(ch => {
-      const cr = rngFor('apch|' + park.id + '|' + ch.id + '|' + day.iso);
+    return CHANNELS.map(ch => {
+      const cr = rngFor('apch|' + park.id + '|' + ch + '|' + day.iso);
       let pct = 0;
       if      (dl === 5) pct = pick(cr, 4, 9);
       else if (dl === 4) pct = pick(cr, 2, 5);
       else if (dl === 2) pct = pick(cr, -6, -3);
       else if (dl === 1) pct = pick(cr, -12, -7);
-      else if (cr() < 0.15) pct = pick(cr, -2, 2);   // DL3 mostly holds
-      // Wild-outlier seed (~4%) — lands outside the hard review cap.
-      if (cr() < 0.04) pct = (cr() > 0.5 ? 1 : -1) * pick(cr, 11, 16);
-      pct = Math.round(pct * 10) / 10;
-      return { channel: ch, pct };
+      else if (cr() < 0.15) pct = pick(cr, -2, 2);   // standard days mostly hold
+      if (cr() < 0.04) pct = (cr() > 0.5 ? 1 : -1) * pick(cr, 11, 16);   // wild outlier
+      return Math.round(pct * 10) / 10;
     });
-    return { dl, ppt, changes };
   }
 
   // ── Rules (persisted) ──
-  // `overrides` holds per-row custom thresholds, keyed by parkId (whole park)
-  // or `parkId|weekKey` (one week). Week overrides beat park overrides beat
-  // the global rules.
+  // Every row carries its own rules. Week rows inherit from their park, park
+  // rows inherit from the built-in defaults, unless explicitly overridden in
+  // `overrides` (keyed by parkId or `parkId|weekKey`).
   const RULES_KEY = 'dynamica.autopilot';
-  const RULE_DEFAULTS = { enabled: true, maxAuto: 3, cap: 10, dlConsistent: true, weekendManual: false };
+  const DEFAULTS = { maxAuto: 5, reviewPeak: false };
   function loadRules() {
-    const out = Object.assign({}, RULE_DEFAULTS, { overrides: {} });
+    const out = { enabled: true, overrides: {} };
     try {
       const raw = localStorage.getItem(RULES_KEY);
       if (!raw) return out;
       const parsed = JSON.parse(raw);
-      Object.keys(RULE_DEFAULTS).forEach(k => { if (k in parsed) out[k] = parsed[k]; });
+      if ('enabled' in parsed) out.enabled = !!parsed.enabled;
       if (parsed.overrides && typeof parsed.overrides === 'object') out.overrides = parsed.overrides;
       return out;
     } catch (e) { return out; }
@@ -776,102 +508,73 @@
   function saveRules() { localStorage.setItem(RULES_KEY, JSON.stringify(rules)); }
   let rules = loadRules();
 
-  // Effective thresholds for a park × week scope.
-  function effectiveThresholds(parkId, weekKey) {
-    const o = rules.overrides || {};
-    const w = o[parkId + '|' + weekKey] || {};
-    const p = o[parkId] || {};
+  function ovr(scope) { return rules.overrides[scope] || {}; }
+  // Effective rule values + where they come from ('own' | 'inherited').
+  function effectiveRules(parkId, weekKey) {
+    const p = ovr(parkId);
+    const w = weekKey != null ? ovr(parkId + '|' + weekKey) : {};
     return {
-      maxAuto: w.maxAuto != null ? w.maxAuto : (p.maxAuto != null ? p.maxAuto : rules.maxAuto),
-      cap:     w.cap     != null ? w.cap     : (p.cap     != null ? p.cap     : rules.cap),
+      maxAuto:        w.maxAuto    != null ? w.maxAuto    : (p.maxAuto    != null ? p.maxAuto    : DEFAULTS.maxAuto),
+      maxAutoOwn:     weekKey != null ? w.maxAuto    != null : p.maxAuto    != null,
+      reviewPeak:     w.reviewPeak != null ? w.reviewPeak : (p.reviewPeak != null ? p.reviewPeak : DEFAULTS.reviewPeak),
+      reviewPeakOwn:  weekKey != null ? w.reviewPeak != null : p.reviewPeak != null,
     };
   }
 
-  // ── Classify one change against the rules ──
-  // 'auto' = auto-accepted, 'review' = queued for manual review, 'none' = no change.
-  function classify(change, day, dl, th) {
-    if (change.pct === 0) return 'none';
-    if (!rules.enabled) return 'review';
-    const abs = Math.abs(change.pct);
-    if (abs > th.cap) return 'review';                                      // hard cap
-    if (rules.weekendManual && (day.isWeekend || day.isHoliday)) return 'review';
-    if (abs <= th.maxAuto) return 'auto';                                   // small move
-    if (rules.dlConsistent) {
-      if (change.pct > 0 && dl >= 4) return 'auto';
-      if (change.pct < 0 && dl <= 2) return 'auto';
-      return 'review';
-    }
-    return 'auto';
-  }
-
-  // ── Aggregate helpers ──
-  function classifyDay(park, day, weekKey) {
-    const d = dayData(park, day);
-    const th = effectiveThresholds(park.id, weekKey);
-    let auto = 0, review = 0, pctSum = 0, n = 0;
-    const moves = [];
-    d.changes.forEach(c => {
-      const cls = classify(c, day, d.dl, th);
-      if (cls === 'none') return;
-      n++;
-      pctSum += c.pct;
-      if (cls === 'auto') auto++; else review++;
-      moves.push({ label: c.channel.label, pct: c.pct, cls });
+  // ── Classification: within the row's band → auto, otherwise review ──
+  function weekStats(park, week) {
+    const eff = effectiveRules(park.id, week.key);
+    let changes = 0, auto = 0, review = 0, pctSum = 0;
+    week.days.forEach(day => {
+      dayChanges(park, day).forEach(pct => {
+        if (pct === 0) return;
+        changes++;
+        pctSum += pct;
+        if (!rules.enabled) { review++; return; }
+        if (eff.reviewPeak && (day.isWeekend || day.isHoliday)) { review++; return; }
+        if (Math.abs(pct) <= eff.maxAuto) auto++; else review++;
+      });
     });
-    return { dl: d.dl, changes: n, auto, review, avg: n ? pctSum / n : 0, moves };
+    return { changes, auto, review, avg: changes ? pctSum / changes : 0 };
   }
   function sumStats(list) {
     let changes = 0, auto = 0, review = 0, wSum = 0;
-    list.forEach(s => {
-      changes += s.changes; auto += s.auto; review += s.review;
-      wSum += s.avg * s.changes;
-    });
+    list.forEach(s => { changes += s.changes; auto += s.auto; review += s.review; wSum += s.avg * s.changes; });
     return { changes, auto, review, avg: changes ? wSum / changes : 0 };
   }
 
-  // ── Formatting ──
   function fmtPct(n) {
     const r = Math.round(n * 10) / 10;
     return (r > 0 ? '+' : '') + r.toFixed(1) + '%';
   }
-  function countCell(n, cls) {
-    return n > 0 ? '<span class="' + cls + '">' + n + '</span>' : '<span class="ap-count-zero">0</span>';
-  }
-  function statusChip(stats) {
-    if (!rules.enabled) return '<span class="ap-status s-off">Autopilot off</span>';
-    if (stats.changes === 0) return '<span class="ap-status s-none">No changes</span>';
-    if (stats.review === 0)  return '<span class="ap-status s-auto">All auto</span>';
-    return '<span class="ap-status s-review">' + stats.review + ' to review</span>';
-  }
-  // ── Per-row threshold overrides: tune button + indicator chip ──
-  const tuneSvg = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><line x1="2" y1="4" x2="12" y2="4"/><circle cx="5" cy="4" r="1.6" fill="var(--surface)"/><line x1="2" y1="10" x2="12" y2="10"/><circle cx="9" cy="10" r="1.6" fill="var(--surface)"/></svg>';
-  function tuneBtn(scope, label) {
-    return '<button class="ap-tune" type="button" data-scope="' + scope + '" data-label="' + label +
-      '" title="Custom thresholds — ' + label + '" aria-label="Custom thresholds for ' + label + '">' + tuneSvg + '</button>';
-  }
-  function ovrChip(scope) {
-    const o = (rules.overrides || {})[scope];
-    if (!o || (o.maxAuto == null && o.cap == null)) return '';
-    const parts = [];
-    if (o.maxAuto != null) parts.push('auto ±' + o.maxAuto + '%');
-    if (o.cap != null) parts.push('cap ±' + o.cap + '%');
-    return '<span class="ap-ovr-chip" title="Custom thresholds on this row override the global rules">' + parts.join(' · ') + '</span>';
-  }
 
-  function movesCell(moves) {
-    if (!moves || !moves.length) return '<span class="ap-count-zero">—</span>';
-    return '<span class="ap-moves">' + moves.map(m =>
-      '<span class="' + (m.pct > 0 ? 'up' : 'down') + '" title="' + m.label + ' ' + fmtPct(m.pct) +
-      (m.cls === 'review' ? ' — needs review' : ' — auto-accepted') + '">' +
-      m.label + ' ' + fmtPct(m.pct) + '</span>'
-    ).join('<span style="color:var(--text-muted)"> · </span>') + '</span>';
+  // ── Per-row rule controls ──
+  function threshCell(scope, value, own) {
+    return (
+      '<span class="ap-rule-cell">' +
+        '<span class="pm">±</span>' +
+        '<input type="number" class="ap-thresh ' + (own ? 'custom' : 'inherited') +
+          '" data-scope="' + scope + '" data-rule="maxAuto" min="0" max="20" step="0.5" value="' + value + '">' +
+        '<span class="unit">%</span>' +
+      '</span>'
+    );
+  }
+  function peakCell(scope, checked, own) {
+    return (
+      '<label class="switch" title="' + (own ? 'Set on this row' : 'Inherited') + '" style="' + (own ? '' : 'opacity:0.55;') + '">' +
+        '<input type="checkbox" class="ap-peak" data-scope="' + scope + '" data-rule="reviewPeak"' + (checked ? ' checked' : '') + '>' +
+        '<span class="switch-track"><span class="switch-thumb"></span></span>' +
+      '</label>'
+    );
+  }
+  function resetCell(scope) {
+    const hasOwn = Object.keys(ovr(scope)).length > 0;
+    return '<button class="ap-inherit-reset" data-scope="' + scope + '" title="Reset to inherited rules"' +
+      (hasOwn ? '' : ' hidden') + ' aria-label="Reset row rules">↺</button>';
   }
 
   // ── Accordion state ──
-  const expanded = {
-    parks: new Set(['warner']),
-    weeks: new Set(),          // `${parkId}|${weekKey}`
-  };
+  const expanded = { parks: new Set() };
   let parkFilter = '';
 
   const chevronSvg = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>';
@@ -881,16 +584,13 @@
     const body = document.getElementById('apBody');
     const out = [];
     const parks = PARKS.filter(p => !parkFilter || p.id === parkFilter);
-    const allParkStats = [];
+    const allStats = [];
 
     parks.forEach(park => {
-      const weekStats = WEEKS.map(week => {
-        const dayStats = week.days.map(day => classifyDay(park, day, week.key));
-        return { week, dayStats, stats: sumStats(dayStats) };
-      });
-      const parkStats = sumStats(weekStats.map(w => w.stats));
-      allParkStats.push(parkStats);
+      const perWeek = WEEKS.map(week => weekStats(park, week));
+      allStats.push(sumStats(perWeek));
       const parkOpen = expanded.parks.has(park.id);
+      const parkEff = effectiveRules(park.id, null);
 
       out.push(
         '<tr class="row-park" data-park="' + park.id + '">' +
@@ -901,76 +601,32 @@
               '<span class="park-country">' + park.country + '</span>' +
             '</span>' +
           '</td>' +
-          '<td><span class="row-meta">8 weeks</span></td>' +
-          '<td></td>' +
-          '<td class="num">' + parkStats.changes + '</td>' +
-          '<td class="num">' + countCell(parkStats.auto, 'ap-count-auto') + '</td>' +
-          '<td class="num">' + countCell(parkStats.review, 'ap-count-review') + '</td>' +
-          '<td class="num">' + fmtPct(parkStats.avg) + '</td>' +
-          '<td></td>' +
-          '<td class="status-cell">' + statusChip(parkStats) + ovrChip(park.id) + tuneBtn(park.id, park.name) + '</td>' +
+          '<td><span class="row-meta">8 weeks · ' + WEEKS[0].label.slice(0, 2) + ' Jul – ' + WEEKS[7].label.split('–').pop().trim() + '</span></td>' +
+          '<td>' + threshCell(park.id, parkEff.maxAuto, parkEff.maxAutoOwn) + '</td>' +
+          '<td>' + peakCell(park.id, parkEff.reviewPeak, parkEff.reviewPeakOwn) + '</td>' +
+          '<td>' + resetCell(park.id) + '</td>' +
         '</tr>'
       );
       if (!parkOpen) return;
 
-      weekStats.forEach(({ week, dayStats, stats }) => {
-        const wKey = park.id + '|' + week.key;
-        const weekOpen = expanded.weeks.has(wKey);
-        // Dominant demand level across the week (mode).
-        const dlCounts = {};
-        dayStats.forEach(s => { dlCounts[s.dl] = (dlCounts[s.dl] || 0) + 1; });
-        const domDl = Object.keys(dlCounts).sort((a, b) => dlCounts[b] - dlCounts[a])[0];
-
+      WEEKS.forEach(week => {
+        const scope = park.id + '|' + week.key;
+        const eff = effectiveRules(park.id, week.key);
         out.push(
           '<tr class="row-week" data-park="' + park.id + '" data-week="' + week.key + '">' +
-            '<td class="col-name">' +
-              '<span class="accordion-name ' + (weekOpen ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="week" aria-expanded="' + weekOpen + '">' +
-                '<span class="accordion-chev">' + chevronSvg + '</span>' +
-                '<span class="lvl-week-name">Week ' + week.num + '</span>' +
-              '</span>' +
-            '</td>' +
+            '<td class="col-name"><span class="lvl-week-name">Week ' + week.num + '</span></td>' +
             '<td><span class="row-meta">' + week.label + '</span></td>' +
-            '<td>' + dlChip(+domDl) + '</td>' +
-            '<td class="num">' + stats.changes + '</td>' +
-            '<td class="num">' + countCell(stats.auto, 'ap-count-auto') + '</td>' +
-            '<td class="num">' + countCell(stats.review, 'ap-count-review') + '</td>' +
-            '<td class="num">' + fmtPct(stats.avg) + '</td>' +
-            '<td></td>' +
-            '<td class="status-cell">' + statusChip(stats) + ovrChip(park.id + '|' + week.key) +
-              tuneBtn(park.id + '|' + week.key, park.name + ' — Week ' + week.num) + '</td>' +
+            '<td>' + threshCell(scope, eff.maxAuto, eff.maxAutoOwn) + '</td>' +
+            '<td>' + peakCell(scope, eff.reviewPeak, eff.reviewPeakOwn) + '</td>' +
+            '<td>' + resetCell(scope) + '</td>' +
           '</tr>'
         );
-        if (!weekOpen) return;
-
-        week.days.forEach((day, i) => {
-          const s = dayStats[i];
-          out.push(
-            '<tr class="row-day">' +
-              '<td class="col-name">' +
-                '<span class="leaf-bullet" aria-hidden="true">•</span>' +
-                day.label +
-                '<span class="day-dow">' + day.dowLabel + '</span>' +
-                (day.isHoliday ? '<span class="holiday-tag">Holiday</span>' : '') +
-              '</td>' +
-              '<td></td>' +
-              '<td>' + dlChip(s.dl) + '</td>' +
-              '<td class="num">' + s.changes + '</td>' +
-              '<td class="num">' + countCell(s.auto, 'ap-count-auto') + '</td>' +
-              '<td class="num">' + countCell(s.review, 'ap-count-review') + '</td>' +
-              '<td class="num">' + (s.changes ? fmtPct(s.avg) : '—') + '</td>' +
-              '<td>' + movesCell(s.moves) + '</td>' +
-              '<td>' + statusChip(s) + '</td>' +
-            '</tr>'
-          );
-        });
       });
     });
 
-    if (!out.length) {
-      out.push('<tr><td colspan="9" class="ap-empty">No matching parks.</td></tr>');
-    }
-    body.innerHTML = out.join('');
-    renderKpis(sumStats(allParkStats));
+    body.innerHTML = out.length ? out.join('')
+      : '<tr><td colspan="5" style="text-align:center;font-style:italic;color:var(--text-muted);padding:32px;">No matching parks.</td></tr>';
+    renderKpis(sumStats(allStats));
   }
 
   function renderKpis(total) {
@@ -983,31 +639,73 @@
       '<div class="ap-kpi"><div class="label">Avg change</div><div class="value">' + fmtPct(total.avg) + '</div></div>';
   }
 
-  // ── Accordion events ──
-  document.getElementById('apBody').addEventListener('click', e => {
-    const toggle = e.target.closest('[data-toggle]');
-    if (!toggle) return;
-    const tr = toggle.closest('tr');
-    if (toggle.dataset.toggle === 'park') {
-      const k = tr.dataset.park;
-      if (expanded.parks.has(k)) expanded.parks.delete(k);
-      else expanded.parks.add(k);
-    } else {
-      const k = tr.dataset.park + '|' + tr.dataset.week;
-      if (expanded.weeks.has(k)) expanded.weeks.delete(k);
-      else expanded.weeks.add(k);
+  // ── Events: accordion + per-row rule edits ──
+  const bodyEl = document.getElementById('apBody');
+
+  bodyEl.addEventListener('click', e => {
+    const reset = e.target.closest('.ap-inherit-reset');
+    if (reset) {
+      delete rules.overrides[reset.dataset.scope];
+      saveRules();
+      render();
+      return;
     }
+    const toggle = e.target.closest('[data-toggle="park"]');
+    if (!toggle) return;
+    const k = toggle.closest('tr').dataset.park;
+    if (expanded.parks.has(k)) expanded.parks.delete(k);
+    else expanded.parks.add(k);
     render();
   });
-  document.getElementById('apBody').addEventListener('keydown', e => {
+  bodyEl.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
     const toggle = e.target.closest('[data-toggle]');
     if (!toggle) return;
     e.preventDefault();
     toggle.click();
   });
+  bodyEl.addEventListener('change', e => {
+    const el = e.target;
+    const scope = el.dataset.scope;
+    if (!scope || !el.dataset.rule) return;
+    const o = rules.overrides[scope] || (rules.overrides[scope] = {});
+    if (el.dataset.rule === 'maxAuto') {
+      const n = parseFloat(el.value);
+      if (isNaN(n)) delete o.maxAuto;
+      else o.maxAuto = Math.max(0, Math.min(20, n));
+    } else if (el.dataset.rule === 'reviewPeak') {
+      o.reviewPeak = el.checked;
+    }
+    if (!Object.keys(o).length) delete rules.overrides[scope];
+    saveRules();
+    render();
+  });
+  // Commit threshold edits on Enter too
+  bodyEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.classList.contains('ap-thresh')) e.target.blur();
+  });
 
-  // ── Park filter ──
+  // ── Header controls ──
+  const elEnabled = document.getElementById('apEnabled');
+  const elEnabledLabel = document.getElementById('apEnabledLabel');
+  function syncMaster() {
+    elEnabled.checked = rules.enabled;
+    elEnabledLabel.textContent = rules.enabled ? 'On' : 'Off';
+    elEnabledLabel.classList.toggle('on', rules.enabled);
+  }
+  elEnabled.addEventListener('change', () => {
+    rules.enabled = elEnabled.checked;
+    saveRules();
+    syncMaster();
+    render();
+  });
+  document.getElementById('apRulesReset').addEventListener('click', () => {
+    rules = { enabled: true, overrides: {} };
+    saveRules();
+    syncMaster();
+    render();
+  });
+
   const parkSel = document.getElementById('apParkFilter');
   PARKS.forEach(p => {
     const opt = document.createElement('option');
@@ -1021,133 +719,7 @@
     render();
   });
 
-  // ── Per-row threshold override popover ──
-  let ovrPopover = null;
-  let ovrScope = null;
-  function buildOvrPopover() {
-    if (ovrPopover) return;
-    ovrPopover = document.createElement('div');
-    ovrPopover.className = 'ap-ovr-popover';
-    ovrPopover.hidden = true;
-    ovrPopover.innerHTML =
-      '<div class="ap-ovr-title" id="ovrTitle">Custom thresholds</div>' +
-      '<div class="ap-ovr-sub">Overrides the global rules for this row (and everything under it). Leave a field blank to inherit.</div>' +
-      '<div class="ap-ovr-row"><label for="ovrMaxAuto">Auto-accept within</label><span class="pm">±</span><input type="number" id="ovrMaxAuto" min="0" max="20" step="0.5"><span class="unit">%</span></div>' +
-      '<div class="ap-ovr-row"><label for="ovrCap">Hard review cap</label><span class="pm">±</span><input type="number" id="ovrCap" min="1" max="50" step="0.5"><span class="unit">%</span></div>' +
-      '<div class="ap-ovr-actions">' +
-        '<button class="ap-ovr-clear" type="button" id="ovrClear">Clear override</button>' +
-        '<button class="ap-ovr-apply" type="button" id="ovrApply">Apply</button>' +
-      '</div>';
-    document.body.appendChild(ovrPopover);
-    ovrPopover.querySelector('#ovrApply').addEventListener('click', applyOvr);
-    ovrPopover.querySelector('#ovrClear').addEventListener('click', () => {
-      if (ovrScope && rules.overrides) delete rules.overrides[ovrScope];
-      saveRules();
-      closeOvrPopover();
-      render();
-    });
-  }
-  function openOvrPopover(btn) {
-    buildOvrPopover();
-    ovrScope = btn.dataset.scope;
-    ovrPopover.querySelector('#ovrTitle').textContent = 'Custom thresholds — ' + btn.dataset.label;
-    const cur = (rules.overrides || {})[ovrScope] || {};
-    ovrPopover.querySelector('#ovrMaxAuto').value = cur.maxAuto != null ? cur.maxAuto : '';
-    ovrPopover.querySelector('#ovrCap').value     = cur.cap     != null ? cur.cap     : '';
-    ovrPopover.hidden = false;
-    const r = btn.getBoundingClientRect();
-    const pw = ovrPopover.offsetWidth;
-    let left = Math.min(r.left, window.innerWidth - pw - 8);
-    ovrPopover.style.top  = (r.bottom + 6) + 'px';
-    ovrPopover.style.left = Math.max(8, left) + 'px';
-    document.addEventListener('mousedown', onOvrOutside, true);
-    document.addEventListener('keydown', onOvrKey);
-    setTimeout(() => ovrPopover.querySelector('#ovrMaxAuto').focus(), 30);
-  }
-  function closeOvrPopover() {
-    if (!ovrPopover || ovrPopover.hidden) return;
-    ovrPopover.hidden = true;
-    ovrScope = null;
-    document.removeEventListener('mousedown', onOvrOutside, true);
-    document.removeEventListener('keydown', onOvrKey);
-  }
-  function onOvrOutside(e) {
-    if (ovrPopover.contains(e.target) || e.target.closest('.ap-tune')) return;
-    closeOvrPopover();
-  }
-  function onOvrKey(e) {
-    if (e.key === 'Escape') closeOvrPopover();
-    if (e.key === 'Enter') applyOvr();
-  }
-  function applyOvr() {
-    if (!ovrScope) return;
-    const ma = parseFloat(ovrPopover.querySelector('#ovrMaxAuto').value);
-    const cp = parseFloat(ovrPopover.querySelector('#ovrCap').value);
-    rules.overrides = rules.overrides || {};
-    const o = {};
-    if (!isNaN(ma)) o.maxAuto = Math.max(0, Math.min(20, ma));
-    if (!isNaN(cp)) o.cap = Math.max(1, Math.min(50, cp));
-    if (o.maxAuto != null && o.cap != null && o.cap < o.maxAuto) o.cap = o.maxAuto;
-    if (o.maxAuto == null && o.cap == null) delete rules.overrides[ovrScope];
-    else rules.overrides[ovrScope] = o;
-    saveRules();
-    closeOvrPopover();
-    render();
-  }
-  document.getElementById('apBody').addEventListener('click', e => {
-    const btn = e.target.closest('.ap-tune');
-    if (!btn) return;
-    e.stopPropagation();
-    if (!ovrPopover || ovrPopover.hidden || ovrScope !== btn.dataset.scope) openOvrPopover(btn);
-    else closeOvrPopover();
-  });
-
-  // ── Rules form wiring ──
-  const elEnabled       = document.getElementById('apEnabled');
-  const elEnabledLabel  = document.getElementById('apEnabledLabel');
-  const elMaxAuto       = document.getElementById('ruleMaxAuto');
-  const elCap           = document.getElementById('ruleCap');
-  const elDlConsistent  = document.getElementById('ruleDlConsistent');
-  const elWeekendManual = document.getElementById('ruleWeekendManual');
-
-  function syncForm() {
-    elEnabled.checked       = rules.enabled;
-    elEnabledLabel.textContent = rules.enabled ? 'On' : 'Off';
-    elEnabledLabel.classList.toggle('on', rules.enabled);
-    elMaxAuto.value         = rules.maxAuto;
-    elCap.value             = rules.cap;
-    elDlConsistent.checked  = rules.dlConsistent;
-    elWeekendManual.checked = rules.weekendManual;
-  }
-  function clampNum(v, lo, hi, fallback) {
-    const n = parseFloat(v);
-    if (isNaN(n)) return fallback;
-    return Math.max(lo, Math.min(hi, n));
-  }
-  function onRulesChanged() {
-    rules.enabled       = elEnabled.checked;
-    rules.maxAuto       = clampNum(elMaxAuto.value, 0, 20, RULE_DEFAULTS.maxAuto);
-    rules.cap           = clampNum(elCap.value, 1, 50, RULE_DEFAULTS.cap);
-    if (rules.cap < rules.maxAuto) rules.cap = rules.maxAuto;   // cap can't sit inside the auto band
-    rules.dlConsistent  = elDlConsistent.checked;
-    rules.weekendManual = elWeekendManual.checked;
-    saveRules();
-    syncForm();
-    render();
-  }
-  [elEnabled, elDlConsistent, elWeekendManual].forEach(el => el.addEventListener('change', onRulesChanged));
-  [elMaxAuto, elCap].forEach(el => {
-    el.addEventListener('change', onRulesChanged);
-    el.addEventListener('keydown', e => { if (e.key === 'Enter') onRulesChanged(); });
-  });
-  document.getElementById('apRulesReset').addEventListener('click', () => {
-    rules = Object.assign({}, RULE_DEFAULTS, { overrides: {} });   // also clears per-row overrides
-    saveRules();
-    syncForm();
-    render();
-  });
-
-  syncForm();
+  syncMaster();
   render();
 })();
 </script>

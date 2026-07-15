@@ -21,9 +21,9 @@ with a seeded RNG — deterministic across reloads, no backend.
   demand levels (DL1–DL5), rules-driven price recommendations,
   accept/reject/override + reason codes + commit flow, row-select checkboxes
   with a bulk price-update modal (% or €), detail modals, notes, RM Copilot mock.
-- `autopilot.html` — **Autopilot**: Park → Week → Day accordion over 8 weeks;
-  configurable auto-accept rules (thresholds, DL-consistency, peak-day review)
-  plus per-park/per-week threshold overrides (⚙ on each row), all persisted in
+- `autopilot.html` — **Autopilot**: Park → Week accordion over 8 weeks; every
+  row carries its own rules inline (auto-accept band ±%, peak-day review
+  switch) with week→park→default inheritance and per-row reset, persisted in
   `localStorage` (`dynamica.autopilot`).
 - `settings.html` — account + alert thresholds (`localStorage` `dynamica.alerts`,
   read by index.html).

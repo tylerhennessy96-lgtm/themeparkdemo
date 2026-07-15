@@ -25,6 +25,24 @@ why, and any decisions/assumptions worth remembering). Newest entries at the top
 - **Workflow:** work locally; push to GitHub only when Tyler says it's ready.
   Claude never runs git operations unless explicitly asked.
 
+## 2026-07-15 (later still) — Autopilot stripped back to per-row rules
+
+- Autopilot rewritten per Tyler's feedback: no Demand column, no Moves column,
+  no status chips, no day-level rows, and the right-hand master-rules panel is
+  gone. The table is now just **Park → Week | Period | rules on each row**:
+  an "Auto-accept within ±X%" input and a "Review peak days" switch per row.
+- Week rows inherit their park's rules (muted); editing a value creates a
+  pink "custom" override with an ↺ reset back to inherited. Park rows inherit
+  built-in defaults (±5%, peak-day review off). "Reset all rules" in the header
+  clears every override. Same localStorage key (`dynamica.autopilot`), now just
+  `{enabled, overrides}`.
+- Dropping the demand-consistency rule made the old ±3% default look weak
+  (only ~27% auto-accepted), so the default band is ±5% (~77% auto).
+- The hard review cap was removed too: with a single band, anything outside it
+  goes to review, so a second cap threshold was redundant.
+- Kept: master on/off toggle (header), KPI strip, park filter.
+- Pricing table now loads fully collapsed (no default Warner expansion).
+
 ## 2026-07-15 (later) — Bulk update, reason codes, per-row Autopilot rules, fixes
 
 Second batch from Tyler's review of the first round:
