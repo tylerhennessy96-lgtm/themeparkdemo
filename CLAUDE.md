@@ -1,70 +1,66 @@
-# Dynamica — Marketing/Demo Website
+# Dynamica SmartGate — Theme-park Revenue Management demo
 
-Marketing/demo website for **Dynamica**, a B2B revenue management platform.
-Repurposed from a prior internal data-app demo; the design system was preserved
-verbatim during the strip-back so we can build out new content on top of it.
+Clickable UI demo of **Dynamica SmartGate**, a revenue-management / dynamic-pricing
+platform for theme parks. Everything runs on **mock data generated client-side**
+with a seeded RNG — deterministic across reloads, no backend.
+
+> **Keep `JOURNAL.md` up to date.** It is the ongoing record of changes,
+> decisions, and assumptions. Append a dated entry every working session.
 
 ## Stack
-- Pure HTML + CSS, no framework, no build step, no JS dependencies.
-- All shared styles in `styles.css`.
-- Fonts: Inter + JetBrains Mono via Google Fonts (imported at the top of `styles.css`).
+- Pure HTML + CSS + vanilla JS, no framework, no build step, no dependencies.
+- Shared design system in `styles.css` (tokens, top nav, drawer, settings, switch).
+  Page-specific CSS lives in an inline `<style>` block per page.
+- Fonts: Inter + JetBrains Mono via Google Fonts (imported in `styles.css`).
 - Accent color: `#e8007d` (Dynamica pink/magenta).
 
-## Local path
-`/Users/tylerhennessy/logdemo/`
+## Pages (plain static files)
+- `index.html` — **Pricing** (the main page, ~6k lines, all logic inline):
+  Park → Booking Channel accordion table, calendar heatmap view (with an
+  "All parks" total row + per-cell metric hover text), filters, sorting, alerts,
+  demand levels (DL1–DL5), rules-driven price recommendations,
+  accept/reject/override + reason codes + commit flow, row-select checkboxes
+  with a bulk price-update modal (% or €), detail modals, notes, RM Copilot mock.
+- `autopilot.html` — **Autopilot**: Park → Week → Day accordion over 8 weeks;
+  configurable auto-accept rules (thresholds, DL-consistency, peak-day review)
+  plus per-park/per-week threshold overrides (⚙ on each row), all persisted in
+  `localStorage` (`dynamica.autopilot`).
+- `settings.html` — account + alert thresholds (`localStorage` `dynamica.alerts`,
+  read by index.html).
+- `sso.html` — fake login page (logout redirects here).
+- `app.js` — shared burger-drawer/logout wiring only.
 
-## Routing
-Plain static files. `index.html` IS the Pricing page (no redirect). When more
-pages are added later, each becomes its own `.html` file.
+## Domain model (mock data)
+- 4 parks (Warner Madrid, Movie Park, Mirabilandia, Tropical Islands).
+- Second accordion level = **booking channels** (Website / Mobile App / OTA / Gate).
+  ⚠️ Internally still named `tickets`/`ticket` — only data + labels were changed.
+- All prices are the **Adult rate**; other ticket types are derived via the Rate
+  selector multipliers (`RATE_TYPES` in index.html).
+- Demo "today" = **2026-07-15**; 30-day pricing horizon from 07-16; holiday week
+  2026-07-25 → 07-31. Tropical Islands is indoor (weather effects inverted).
+- **Demand Levels** per `rules.png`: forecast-vs-expected ppt → DL1..DL5;
+  DL drives the price recommendation (DL3 = no change, most common).
+- Data is seeded per key (`rngFor('...' + id + iso)`) — change a seed string and
+  every number downstream changes; keep seeds stable unless intentional.
 
-## Pages
-- `index.html` — Pricing (placeholder; just `<h1>Pricing</h1>` for now).
-
-## Persistent header
-A dark header bar appears on every page, defined inline per-page (no shared
-templating since there is no build step). Markup pattern lives in `index.html`:
-- `<nav class="topnav">` styled by `.topnav` in `styles.css` (`--nav-bg`, 48px, 1px bottom border).
-- Logo block on the left, made up of:
-  - The pink/magenta diamond image: `engine_logo (2).png` (28px tall).
-  - "DYNAMICA" wordmark: Inter 11px / 600 / uppercase / 0.18em letter-spacing / white.
-  - "SmartRents" sub-label underneath: Inter 12px / 400 / 0.02em / `rgba(255,255,255,0.55)`.
-- **Currently nothing else** — no nav tabs, no divider, no hamburger menu. These
-  may return when the IA is decided.
-
-The logo block uses inline styles (matches the original demo) so the rendering
-is locked in regardless of any CSS changes.
-
-## Design system (`styles.css`)
-**Do not edit lightly.** This file holds all design tokens, fonts, the header
-styling, and a large amount of component CSS from the previous demo. The dead
-component CSS (filter bars, data tables, modals, etc.) is intentionally retained
-so we can reuse pieces as we build new pages. Key tokens in `:root`:
-- `--nav-bg: #1a1a2e`
-- `--nav-border: #2d2d44`
-- `--accent: #e8007d`
-- `--accent-dim: #c2185b`
-- `--body-bg: #f5f6f8`
-- `--surface: #ffffff`
-- `--border: #e4e6eb`
-- `--text-primary / --text-secondary / --text-muted`
-- `--radius: 6px`, `--radius-lg: 10px`
-- `--shadow-sm / --shadow-md / --shadow-lg`
-
-## Known quirks to revisit later
-- `html, body { height: 100%; overflow: hidden }` and `.app { height: 100vh; overflow: hidden }`
-  are tuned for fixed-viewport data apps. For a scrolling marketing site we will
-  likely want to relax these. The current `index.html` works around it locally
-  by giving `<main>` `flex:1; overflow:auto`.
-- Body font-size defaults to 13px (data-app density). Marketing copy may want
-  larger sizing per page or via a future override.
+## Key quirks
+- `html, body { height:100%; overflow:hidden }` — each page's `<main>` manages
+  its own scroll containers (fixed-viewport data-app layout).
+- Body font-size defaults to 13px (data-app density); tables use 11.5px.
+- The shell (top nav + drawer) is duplicated per page — adding a menu item means
+  editing every page's drawer.
+- `styles.css` retains dead component CSS from an earlier demo for reuse —
+  don't prune it casually.
 
 ## Local dev
-No build step. From the project directory:
+No build step:
 ```
 python3 -m http.server 8000
 ```
-Then open http://localhost:8000/
+Then open http://localhost:8000/ (or use the `.claude/launch.json` preview).
 
 ## Workflow notes
+- Work locally; push to GitHub only when Tyler explicitly says it's ready.
 - Claude does not run git operations unless explicitly asked.
-- Do not add new dependencies without discussion.
+- Do not add dependencies without discussion.
+- Reference for pricing rules: `rules.png` (demand-level bands + price ladder).

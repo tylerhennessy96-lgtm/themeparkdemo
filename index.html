@@ -115,7 +115,7 @@
       top: 0;
       z-index: 12;
       height: 28px;
-      padding: 0 14px;
+      padding: 0 10px;
       font-family: 'Inter', sans-serif;
       font-weight: 700;
       font-size: 10.5px;
@@ -135,7 +135,7 @@
       position: sticky;
       top: 28px;
       z-index: 11;
-      padding: 8px 14px;
+      padding: 6px 10px;
       font-family: 'Inter', sans-serif;
       font-weight: 600;
       font-size: 11px;
@@ -159,7 +159,7 @@
 
     /* ── Body cells ── */
     table.srt tbody td {
-      padding: 7px 14px;
+      padding: 7px 10px;
       border-bottom: 1px solid var(--border);
       color: var(--text-primary);
       vertical-align: middle;
@@ -181,7 +181,7 @@
     table.srt tbody td.col-date {
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
-      width: 110px;
+      width: 98px;
     }
     table.srt tbody td.col-date .date-num { color: var(--text-primary); font-weight: 500; }
     table.srt tbody td.col-date .date-dow { color: var(--text-muted); margin-left: 6px; font-size: 10.5px; }
@@ -203,9 +203,9 @@
        rule, so padding-left actually applies. Two earlier passes lost this
        silently because `.indent-1/2/3 { padding-left }` was outranked by the
        generic shorthand `padding`. */
-    table.srt tbody tr.row-park     td.col-name { padding-left: 14px; }
-    table.srt tbody tr.row-category td.col-name { padding-left: 36px; }
-    table.srt tbody tr.row-leaf     td.col-name { padding-left: 60px; }
+    table.srt tbody tr.row-park     td.col-name { padding-left: 12px; }
+    table.srt tbody tr.row-category td.col-name { padding-left: 30px; }
+    table.srt tbody tr.row-leaf     td.col-name { padding-left: 44px; }
 
     /* Vertical guide-line on the left edge of nested rows (inset shadow
        composes with row background and survives table-cell rendering). */
@@ -303,10 +303,10 @@
 
     /* ── Alerts cell + chips ── */
     table.srt tbody td.alerts-cell {
-      padding: 4px 12px;
+      padding: 4px 8px;
       vertical-align: middle;
       white-space: nowrap;
-      min-width: 90px;
+      min-width: 72px;
     }
     .alert-chips {
       display: inline-flex;
@@ -356,25 +356,95 @@
       z-index: 1;
     }
 
-    /* Demand score */
+    /* Demand Level (DL1–DL5 from the customisable-rules table) */
     .demand-cell {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       justify-content: flex-end;
+      cursor: default;
     }
-    .demand-bar {
-      width: 42px;
-      height: 5px;
+    .dl-chip {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 1px 6px;
       border-radius: 999px;
-      background: #eef0f5;
-      overflow: hidden;
+      font-variant-numeric: tabular-nums;
     }
-    .demand-bar-fill {
-      display: block;
-      height: 100%;
-      background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 60%, #dc2626 100%);
+    .dl-chip.dl-5 { background: #fee2e2; color: #991b1b; }
+    .dl-chip.dl-4 { background: #ffedd5; color: #9a3412; }
+    .dl-chip.dl-3 { background: #f1f5f9; color: #475569; }
+    .dl-chip.dl-2 { background: #e0f2fe; color: #075985; }
+    .dl-chip.dl-1 { background: #ede9fe; color: #5b21b6; }
+    .dl-label {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
     }
+
+    /* Recommendation column (Increase / Decrease / No change) */
+    .rec-action-cell { white-space: nowrap; }
+    .rec-action-chip {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .rec-action-chip.ra-up   { background: #dcfce7; color: #166534; }
+    .rec-action-chip.ra-down { background: #fee2e2; color: #991b1b; }
+    .rec-action-chip.ra-flat { background: #f1f5f9; color: #64748b; }
+    .rec-action-summary {
+      display: inline-flex;
+      gap: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .rec-action-summary .ras-up   { color: #166534; }
+    .rec-action-summary .ras-down { color: #991b1b; }
+    .rec-action-summary.ras-flat  { color: var(--text-muted); font-weight: 400; }
+
+    /* Rate selector (ticket type derived from the Adult rate) */
+    .rate-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-left: 12px;
+      flex-shrink: 0;
+    }
+    .rate-select-wrap label {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .rate-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 20px;
+      height: 30px;
+      padding: 0 28px 0 12px;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .rate-select:hover { border-color: var(--accent); }
+    .rate-select:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; }
 
     /* ── Rec. price editing ── */
     table.srt tbody td.rec-cell {
@@ -418,7 +488,7 @@
 
     /* ── Action cell + buttons ── */
     table.srt tbody td.action-cell {
-      padding: 4px 12px;
+      padding: 4px 8px;
       position: relative;
       vertical-align: middle;
       white-space: nowrap;
@@ -429,21 +499,6 @@
       align-items: center;
       gap: 6px;
     }
-    .action-corner {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      box-shadow: 0 0 0 1.5px var(--surface);
-      display: none;
-      pointer-events: none;
-    }
-    .action-cell.state-accepted   .action-corner { display: block; background: #16a34a; }
-    .action-cell.state-rejected   .action-corner { display: block; background: #dc2626; }
-    .action-cell.state-overridden .action-corner { display: block; background: #6366f1; }
-
     .action-btn {
       width: 26px;
       height: 26px;
@@ -543,6 +598,179 @@
       font-size: 10.5px;
       font-style: italic;
     }
+
+    /* ── Row-select checkboxes (bulk update) ── */
+    table.srt th.col-select,
+    table.srt tbody td.col-select {
+      width: 34px;
+      min-width: 34px;
+      padding: 4px 8px 4px 12px;
+      text-align: center;
+    }
+    input.row-select {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      vertical-align: middle;
+    }
+
+    /* ── Reason code dropdown (Action cell) ── */
+    select.reason-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 999px;
+      height: 22px;
+      padding: 0 18px 0 8px;
+      margin-left: 4px;
+      max-width: 108px;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      flex-shrink: 0;
+    }
+    select.reason-select:hover { border-color: var(--accent); }
+    select.reason-select.has-reason { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+    /* ── Bulk price update modal ── */
+    .bulk-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,0.55);
+      z-index: 1200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .bulk-backdrop.is-open { display: flex; }
+    .bulk-modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 460px;
+      max-width: calc(100vw - 48px);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    .bulk-modal-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bulk-modal-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .bulk-modal-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .bulk-modal-close {
+      margin-left: auto;
+      width: 28px; height: 28px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bulk-modal-close:hover { background: #f3f4f8; color: var(--text-primary); }
+    .bulk-modal-body { padding: 16px 22px; display: flex; flex-direction: column; gap: 14px; }
+    .bulk-type-row { display: flex; gap: 10px; }
+    .bulk-type-opt {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: border-color .12s, background .12s;
+    }
+    .bulk-type-opt:hover { border-color: var(--accent); }
+    .bulk-type-opt:has(input:checked) {
+      border-color: var(--accent);
+      background: rgba(232,0,125,0.05);
+    }
+    .bulk-type-opt input { accent-color: var(--accent); }
+    .bulk-value-row { display: flex; align-items: center; gap: 10px; }
+    .bulk-value-row label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .bulk-value-row input {
+      flex: 1;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .bulk-value-row input:focus { outline: 1.5px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+    .bulk-unit { font-size: 13px; font-weight: 600; color: var(--text-secondary); width: 16px; }
+    .bulk-hint { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+    .bulk-hint b { color: var(--text-secondary); }
+    .bulk-preview { display: flex; flex-direction: column; gap: 4px; }
+    .bulk-preview-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .bulk-preview-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+    .bulk-preview-row b { color: var(--text-primary); }
+    .bulk-preview-more { font-size: 11px; color: var(--text-muted); font-style: italic; }
+    .bulk-modal-footer {
+      padding: 14px 22px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .bulk-btn-ghost, .bulk-btn-primary {
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background .12s, border-color .12s, opacity .12s;
+    }
+    .bulk-btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-mid);
+    }
+    .bulk-btn-ghost:hover { background: #f3f4f8; color: var(--text-primary); }
+    .bulk-btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+    }
+    .bulk-btn-primary:hover:not(:disabled) { background: var(--accent-dim); border-color: var(--accent-dim); }
+    .bulk-btn-primary:disabled { opacity: 0.45; cursor: default; }
 
     /* ── Notes modal ── */
     .note-backdrop {
@@ -1147,8 +1375,8 @@
       padding: 0 14px;
       border-right: 1px solid var(--border);
       background: #fafbfc;
-      min-width: 270px;
-      width: 270px;
+      min-width: 240px;
+      width: 240px;
     }
     table.cal-table thead th.cal-corner.sortable {
       cursor: pointer;
@@ -1228,8 +1456,8 @@
       font-weight: 500;
       color: var(--text-primary);
       text-align: left;
-      min-width: 270px;
-      width: 270px;
+      min-width: 240px;
+      width: 240px;
       white-space: normal;
       line-height: 1.35;
     }
@@ -1311,8 +1539,8 @@
        Higher specificity than `table.cal-table tbody th.cal-route { padding: 10px 14px }`
        so the shorthand doesn't outrank padding-left. */
     table.cal-table tbody tr.row-park     th.cal-route { padding-left: 14px; }
-    table.cal-table tbody tr.row-category th.cal-route { padding-left: 36px; }
-    table.cal-table tbody tr.row-leaf     th.cal-route { padding-left: 60px; }
+    table.cal-table tbody tr.row-category th.cal-route { padding-left: 32px; }
+    table.cal-table tbody tr.row-leaf     th.cal-route { padding-left: 44px; }
 
     /* Per-level backgrounds.
        Sticky left column always tinted regardless of tier.
@@ -1325,24 +1553,69 @@
     table.cal-table tbody tr.row-category td:not(.tier-pos2):not(.tier-pos1):not(.tier-zero):not(.tier-neg1):not(.tier-neg2) { background: #fbfcfe; }
     table.cal-table tbody tr.row-leaf     td:not(.tier-pos2):not(.tier-pos1):not(.tier-zero):not(.tier-neg1):not(.tier-neg2) { background: var(--surface); }
 
-    /* Click affordance + decision markers */
+    /* Click affordance */
     table.cal-table tbody td[data-row] { cursor: pointer; }
-    table.cal-table tbody td.decided-accept,
-    table.cal-table tbody td.decided-reject { position: relative; }
-    table.cal-table tbody td.decided-accept::after,
-    table.cal-table tbody td.decided-reject::after {
-      content: '';
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      z-index: 1;
-      box-shadow: 0 0 0 1.5px var(--surface);
+
+    /* ── Total row (all parks aggregate) — pinned under the sticky header ── */
+    table.cal-table tbody tr.row-total th.cal-route,
+    table.cal-table tbody tr.row-total td {
+      position: sticky;
+      top: 40px;             /* header row height */
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-mid, #d7dae1);
     }
-    table.cal-table tbody td.decided-accept::after { background: #16a34a; }
-    table.cal-table tbody td.decided-reject::after { background: #dc2626; }
+    table.cal-table tbody tr.row-total td { z-index: 2; cursor: default; }
+    table.cal-table tbody tr.row-total th.cal-route {
+      left: 0;
+      z-index: 3;
+      background: #eef2f8;
+    }
+    table.cal-table tbody tr.row-total td:not(.tier-pos2):not(.tier-pos1):not(.tier-neg1):not(.tier-neg2) {
+      background: #eef2f8;
+    }
+    table.cal-table tbody tr.row-total td:hover { outline: none; }
+    table.cal-table tbody tr.row-total:hover th.cal-route { background-color: #eef2f8; }
+    .cal-total-name { font-weight: 700; }
+
+    /* Info icon + hover tooltip explaining the cell metrics */
+    .cal-info {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      margin-left: 6px;
+      border-radius: 50%;
+      color: var(--text-muted);
+      cursor: help;
+      position: relative;
+      vertical-align: middle;
+    }
+    .cal-info:hover, .cal-info:focus { color: var(--accent); outline: none; }
+    .cal-info-tip {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 6px);
+      z-index: 60;
+      width: 280px;
+      background: var(--nav-bg);
+      color: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      padding: 12px 14px;
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.45;
+      white-space: normal;
+      flex-direction: column;
+      gap: 7px;
+      cursor: default;
+    }
+    .cal-info:hover .cal-info-tip,
+    .cal-info:focus .cal-info-tip { display: flex; }
+    .cal-info-tip strong { color: #fff; font-size: 11.5px; letter-spacing: 0.02em; }
+    .cal-info-tip b { color: #fff; font-weight: 600; }
 
     /* Empty-state row */
     .cal-empty-th {
@@ -1356,8 +1629,8 @@
       font-weight: 500;
       color: var(--text-muted);
       text-align: left;
-      min-width: 270px;
-      width: 270px;
+      min-width: 240px;
+      width: 240px;
       font-style: italic;
     }
 
@@ -2106,7 +2379,7 @@
           <span class="ms-trigger-count" hidden></span>
         </button>
         <button class="filter-pill ms-pill" data-filter="ticket" type="button" aria-haspopup="listbox" aria-expanded="false">
-          <span class="ms-trigger-text">All Ticket Types</span>
+          <span class="ms-trigger-text">All Booking Channels</span>
           <span class="ms-trigger-count" hidden></span>
         </button>
         <button class="filter-pill ms-pill" data-filter="daytype" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -2115,6 +2388,14 @@
         </button>
         <button class="filter-pill ms-pill" data-filter="alert" type="button" aria-haspopup="listbox" aria-expanded="false">
           <span class="ms-trigger-text">All Alerts</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="rec" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ms-trigger-text">All Recommendations</span>
+          <span class="ms-trigger-count" hidden></span>
+        </button>
+        <button class="filter-pill ms-pill" data-filter="action" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ms-trigger-text">All Actions</span>
           <span class="ms-trigger-count" hidden></span>
         </button>
         <button class="filter-pill date-pill" id="dateRangeTrigger" type="button" aria-haspopup="dialog" aria-expanded="false">
@@ -2133,8 +2414,24 @@
         <button class="view-toggle-btn is-active" type="button" data-view="table" role="tab" aria-selected="true">Table</button>
         <button class="view-toggle-btn" type="button" data-view="calendar" role="tab" aria-selected="false">Calendar</button>
       </div>
+      <div class="rate-select-wrap" title="The engine prices the Adult ticket; other ticket types are derived from the Adult rate.">
+        <label for="rateSelect">Rate</label>
+        <select id="rateSelect" class="rate-select">
+          <option value="adult" selected>Adult</option>
+          <option value="junior">Junior</option>
+          <option value="senior">Senior</option>
+          <option value="evening">Evening</option>
+        </select>
+      </div>
       <div class="pricing-spacer"></div>
       <div class="commit-cluster">
+        <button class="accept-all-btn" id="bulkBtn" type="button" disabled>
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 4.5h10M2 7h10M2 9.5h6"/>
+            <path d="M10.2 8.6l1.1 1.1 2-2.2"/>
+          </svg>
+          <span class="bulk-btn-label">Bulk update (0)</span>
+        </button>
         <button class="accept-all-btn" id="acceptAllBtn" type="button" disabled>
           <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="3,7 6,10 11,4"/>
@@ -2152,31 +2449,33 @@
       <table class="srt">
         <thead>
           <tr class="bands">
-            <th class="band-product" colspan="5">Ticket details</th>
+            <th class="band-product" colspan="6">Channel details</th>
             <th class="band-sales"   colspan="5">Sales to date</th>
             <th class="band-demand"  colspan="3">Demand forecast</th>
-            <th class="band-price"   colspan="4">Price recommendation</th>
+            <th class="band-price"   colspan="5">Price recommendation</th>
           </tr>
           <tr class="cols">
-            <th class="sortable" data-sort-key="name" data-sort-type="text"><span class="th-inner"><span class="th-text">Park / Category / Ticket</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="col-select"><input type="checkbox" class="row-select" id="selectAllRows" aria-label="Select all visible rows" title="Select all visible channel rows"></th>
+            <th class="sortable" data-sort-key="name" data-sort-type="text"><span class="th-inner"><span class="th-text">Park /<span class="sub">Booking Channel</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="date" data-sort-type="text"><span class="th-inner"><span class="th-text">Date</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th>Forecast weather</th>
+            <th><span class="th-inner"><span class="th-text">Forecast<span class="sub">weather</span></span></span></th>
             <th class="sortable" data-sort-key="cap" data-sort-type="text"><span class="th-inner"><span class="th-text">Capacity</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="sortable" data-sort-key="alertCount" data-sort-type="num"><span class="th-inner"><span class="th-text">Alerts</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num sortable" data-sort-key="sold" data-sort-type="num"><span class="th-inner"><span class="th-text">Units sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="sold" data-sort-type="num"><span class="th-inner"><span class="th-text">Units<span class="sub">sold</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="perCap" data-sort-type="num"><span class="th-inner"><span class="th-text">Per Cap</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="num sortable" data-sort-key="ros" data-sort-type="num"><span class="th-inner"><span class="th-text">Pickup vs Historic</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="num sortable" data-sort-key="salesRate" data-sort-type="num"><span class="th-inner"><span class="th-text">24h sales rate<span class="sub">units/hr</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="num sortable" data-sort-key="pctOfFcst" data-sort-type="num"><span class="th-inner"><span class="th-text">% of forecast sold</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="ros" data-sort-type="num"><span class="th-inner"><span class="th-text">Pickup<span class="sub">vs historic</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="salesRate" data-sort-type="num"><span class="th-inner"><span class="th-text">24h rate<span class="sub">units/hr</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="pctOfFcst" data-sort-type="num"><span class="th-inner"><span class="th-text">% forecast<span class="sub">sold</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num sortable" data-sort-key="fcst" data-sort-type="num"><span class="th-inner"><span class="th-text">Forecast units</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="num sortable" data-sort-key="demand" data-sort-type="num"><span class="th-inner"><span class="th-text">Demand score</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="num sortable" data-sort-key="yoy" data-sort-type="num"><span class="th-inner"><span class="th-text">YoY revenue</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="fcst" data-sort-type="num"><span class="th-inner"><span class="th-text">Forecast<span class="sub">sold</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="demand" data-sort-type="num"><span class="th-inner"><span class="th-text">Demand<span class="sub">level</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="yoy" data-sort-type="num"><span class="th-inner"><span class="th-text">YoY<span class="sub">revenue</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
 
-            <th class="num sortable" data-sort-key="current" data-sort-type="num"><span class="th-inner"><span class="th-text">Current price</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
-            <th class="num sortable" data-sort-key="rec" data-sort-type="num"><span class="th-inner"><span class="th-text">Rec. price</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="current" data-sort-type="num"><span class="th-inner"><span class="th-text">Current<span class="sub">price</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="num sortable" data-sort-key="rec" data-sort-type="num"><span class="th-inner"><span class="th-text">Rec.<span class="sub">price</span></span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th class="num sortable" data-sort-key="pctChange" data-sort-type="num"><span class="th-inner"><span class="th-text">% change</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
+            <th class="sortable" data-sort-key="recAction" data-sort-type="num"><span class="th-inner"><span class="th-text">Recommendation</span><span class="sort-ind" aria-hidden="true"><span class="sa-up">▲</span><span class="sa-down">▼</span></span></span></th>
             <th>Action</th>
           </tr>
         </thead>
@@ -2305,6 +2604,16 @@
         </a>
       </li>
       <li>
+        <a href="autopilot.html" class="drawer-item">
+          <span class="drawer-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 1.8 L10.6 6.2 L15.4 6.2 L11.5 9.1 L13 13.8 L9 11 L5 13.8 L6.5 9.1 L2.6 6.2 L7.4 6.2 Z"/>
+            </svg>
+          </span>
+          Autopilot
+        </a>
+      </li>
+      <li>
         <a href="settings.html" class="drawer-item">
           <span class="drawer-icon">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2360,6 +2669,50 @@
   </div>
 </div>
 
+<!-- ── Bulk price update modal ── -->
+<div class="bulk-backdrop" id="bulkBackdrop" aria-hidden="true">
+  <div class="bulk-modal" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+    <div class="bulk-modal-header">
+      <div>
+        <div class="bulk-modal-title" id="bulkTitle">Bulk price update</div>
+        <div class="bulk-modal-sub" id="bulkSub">0 rows selected</div>
+      </div>
+      <button class="bulk-modal-close" type="button" id="bulkCloseBtn" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <line x1="3" y1="3" x2="11" y2="11"/>
+          <line x1="11" y1="3" x2="3" y2="11"/>
+        </svg>
+      </button>
+    </div>
+    <div class="bulk-modal-body">
+      <div class="bulk-type-row" role="radiogroup" aria-label="Adjustment type">
+        <label class="bulk-type-opt">
+          <input type="radio" name="bulkType" value="pct" checked>
+          <span>Percentage (%)</span>
+        </label>
+        <label class="bulk-type-opt">
+          <input type="radio" name="bulkType" value="amt">
+          <span>Amount (€)</span>
+        </label>
+      </div>
+      <div class="bulk-value-row">
+        <label for="bulkValue">Adjustment</label>
+        <input type="number" id="bulkValue" step="0.5" placeholder="e.g. 5 or -3">
+        <span class="bulk-unit" id="bulkUnit">%</span>
+      </div>
+      <div class="bulk-hint">
+        Applied to each row's <b>current price</b>. Positive raises, negative lowers.
+        Updated rows are marked <b>Overridden</b> and queued for Commit.
+      </div>
+      <div class="bulk-preview" id="bulkPreview"></div>
+    </div>
+    <div class="bulk-modal-footer">
+      <button class="bulk-btn-ghost" type="button" id="bulkCancelBtn">Cancel</button>
+      <button class="bulk-btn-primary" type="button" id="bulkApplyBtn" disabled>Apply to 0 rows</button>
+    </div>
+  </div>
+</div>
+
 <div class="app-toast" id="appToast" role="status" aria-live="polite"></div>
 
 <script src="app.js"></script>
@@ -2390,6 +2743,12 @@
   function pickInt(rng, lo, hi) { return Math.round(pick(rng, lo, hi)); }
 
   // ── Domain model ──
+  // Second accordion level = Booking Channel. All prices shown are the ADULT
+  // rate for that channel; other ticket types are derived from it via the
+  // Rate selector multipliers (RATE_TYPES below). Direct Website is the
+  // reference price: OTA and Gate sit structurally above it.
+  // NOTE: internal property/key names still say `tickets`/`ticket` (pre-rename);
+  // only the data + user-facing labels changed. See JOURNAL.md.
   const PARKS = [
     {
       id: 'warner',
@@ -2397,10 +2756,10 @@
       country: 'ES',
       capacity: 22000,
       tickets: [
-        { id: 'adult',   label: 'Adult',   basePrice: 34 },
-        { id: 'junior',  label: 'Junior',  basePrice: 27 },
-        { id: 'evening', label: 'Evening', basePrice: 22 },
-        { id: 'reduced', label: 'Reduced', basePrice: 30 },
+        { id: 'web',  label: 'Website',    basePrice: 34 },
+        { id: 'app',  label: 'Mobile App', basePrice: 33 },
+        { id: 'ota',  label: 'OTA',        basePrice: 37 },
+        { id: 'gate', label: 'Gate',       basePrice: 39 },
       ],
     },
     {
@@ -2409,10 +2768,10 @@
       country: 'DE',
       capacity: 18000,
       tickets: [
-        { id: 'adult',   label: 'Adult',   basePrice: 33 },
-        { id: 'junior',  label: 'Junior',  basePrice: 28 },
-        { id: 'evening', label: 'Evening', basePrice: 22 },
-        { id: 'senior',  label: 'Senior',  basePrice: 28 },
+        { id: 'web',  label: 'Website',    basePrice: 33 },
+        { id: 'app',  label: 'Mobile App', basePrice: 32 },
+        { id: 'ota',  label: 'OTA',        basePrice: 36 },
+        { id: 'gate', label: 'Gate',       basePrice: 38 },
       ],
     },
     {
@@ -2421,10 +2780,10 @@
       country: 'IT',
       capacity: 20000,
       tickets: [
-        { id: 'adult',   label: 'Adult',   basePrice: 33 },
-        { id: 'junior',  label: 'Junior',  basePrice: 27 },
-        { id: 'evening', label: 'Evening', basePrice: 22 },
-        { id: 'reduced', label: 'Reduced', basePrice: 27 },
+        { id: 'web',  label: 'Website',    basePrice: 33 },
+        { id: 'app',  label: 'Mobile App', basePrice: 32 },
+        { id: 'ota',  label: 'OTA',        basePrice: 36 },
+        { id: 'gate', label: 'Gate',       basePrice: 38 },
       ],
     },
     {
@@ -2433,18 +2792,52 @@
       country: 'DE',
       capacity: 6000,
       tickets: [
-        { id: 'adult',   label: 'Adult',   basePrice: 45 },
-        { id: 'junior',  label: 'Junior',  basePrice: 36 },
-        { id: 'evening', label: 'Evening', basePrice: 30 },
-        { id: 'senior',  label: 'Senior',  basePrice: 40 },
+        { id: 'web',  label: 'Website',    basePrice: 45 },
+        { id: 'app',  label: 'Mobile App', basePrice: 44 },
+        { id: 'ota',  label: 'OTA',        basePrice: 48 },
+        { id: 'gate', label: 'Gate',       basePrice: 50 },
       ],
     },
   ];
 
-  // ── 30-day horizon from tomorrow (today = 2026-05-18) ──
+  // ── Ticket-type rate ladder (derived from the Adult rate) ──
+  // The engine prices the Adult ticket; other types are derived multipliers.
+  const RATE_TYPES = {
+    adult:   { label: 'Adult',   mult: 1.00 },
+    junior:  { label: 'Junior',  mult: 0.78 },
+    senior:  { label: 'Senior',  mult: 0.85 },
+    evening: { label: 'Evening', mult: 0.62 },
+  };
+  let rateView = 'adult';
+  function rateMult() { return RATE_TYPES[rateView].mult; }
+
+  // ── Demand Levels (from the customisable-rules table) ──
+  // Forecast vs baseline/expected demand (in ppt) maps to DL1..DL5.
+  const DEMAND_LEVELS = {
+    5: { level: 5, code: 'DL5', label: 'BOD / Very high',      interp: 'Strong outperformance vs. expected demand' },
+    4: { level: 4, code: 'DL4', label: 'High demand',          interp: 'Demand clearly above expectation' },
+    3: { level: 3, code: 'DL3', label: 'Standard demand',      interp: 'In line with expectation' },
+    2: { level: 2, code: 'DL2', label: 'Low demand',           interp: 'Demand below expectation' },
+    1: { level: 1, code: 'DL1', label: 'Smart day / Very low', interp: 'Significant underperformance' },
+  };
+  // Demand score (0-100) → forecast-vs-expected delta in ppt. Centred so a
+  // typical weekday (~38-45) lands in DL3, weekends in DL4, holiday peaks DL5.
+  function demandPpt(score) { return Math.round((score - 42) * 0.55); }
+  function signedPpt(ppt) { return (ppt > 0 ? '+' : '') + ppt + 'ppt'; }
+  function demandLevelFor(ppt) {
+    if (ppt >= 20)  return DEMAND_LEVELS[5];
+    if (ppt >= 10)  return DEMAND_LEVELS[4];
+    if (ppt >= 5)   return Object.assign({}, DEMAND_LEVELS[3], { interp: 'Slightly above expectation' });
+    if (ppt >= -5)  return DEMAND_LEVELS[3];
+    if (ppt >= -10) return DEMAND_LEVELS[2];
+    return DEMAND_LEVELS[1];
+  }
+  function demandLevelForScore(score) { return demandLevelFor(demandPpt(score)); }
+
+  // ── 30-day horizon from tomorrow (today = 2026-07-15) ──
   function buildDates() {
     const out = [];
-    const start = new Date(Date.UTC(2026, 4, 19));   // 2026-05-19
+    const start = new Date(Date.UTC(2026, 6, 16));   // 2026-07-16
     for (let i = 0; i < 30; i++) {
       const d = new Date(start);
       d.setUTCDate(start.getUTCDate() + i);
@@ -2454,8 +2847,8 @@
       const iso = y + '-' + m + '-' + dd;
       const dow = d.getUTCDay();              // 0..6 (Sun..Sat)
       const isWeekend = dow === 0 || dow === 6;
-      // School-holiday week: Sat 2026-05-30 .. Fri 2026-06-05
-      const isHoliday = iso >= '2026-05-30' && iso <= '2026-06-05';
+      // School-holiday week: Sat 2026-07-25 .. Fri 2026-07-31
+      const isHoliday = iso >= '2026-07-25' && iso <= '2026-07-31';
       const label = String(d.getUTCDate()).padStart(2, '0') + ' ' +
                     ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
       const dowLabel = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow];
@@ -2493,10 +2886,9 @@
     if (wx.kind === 'cloud') wxMult = inverted ? 1.10 : 0.94;
     if (wx.kind === 'rain')  wxMult = inverted ? 1.35 : 0.65;
 
-    // Per-ticket share of park capacity. Boosted vs the pre-collapse values to
-    // backfill the removed Group category — totals ~0.69 so a busy day can still
-    // cross the capacity-risk threshold.
-    const baseShare = { adult: 0.32, junior: 0.18, evening: 0.09, reduced: 0.10, senior: 0.10 }[ticket.id] || 0.12;
+    // Per-channel share of park capacity — totals ~0.69 so a busy day can
+    // still cross the capacity-risk threshold.
+    const baseShare = { web: 0.28, app: 0.12, ota: 0.17, gate: 0.12 }[ticket.id] || 0.12;
 
     const baseFcst = park.capacity * baseShare;
     const fcst = Math.max(20, Math.round(baseFcst * dayMult * wxMult * pick(r, 0.78, 1.15)));
@@ -2532,17 +2924,24 @@
       pickInt(r, -2, 2)
     );
 
-    // Price-inversion seed: ~7% of (sibling, park × date) combos get an out-of-band
-    // promo-error boost, making the sibling sometimes more expensive than Adult.
-    // The Adult never gets this boost — keeps inversions firing on the right leaf.
-    if (ticket.id !== 'adult') {
+    // Price-inversion seed: ~7% of OTA/Gate leaves get an out-of-band
+    // promo-error discount, undercutting the direct Website price. Website
+    // never gets it — keeps inversions firing on the right leaf.
+    if (ticket.id === 'ota' || ticket.id === 'gate') {
       const invRng = rngFor('priceInv|' + park.id + '|' + ticket.id + '|' + date.iso);
-      if (invRng() < 0.07) current += pickInt(invRng, 8, 16);
+      if (invRng() < 0.07) current = Math.max(8, current - pickInt(invRng, 8, 16));
     }
 
-    let recLean = ((demand - 60) / 30) + (ros / 60) + pick(r, -0.25, 0.25);
-    let rec = current + Math.round(recLean * 4);
-    if (rec === current && r() > 0.4) rec = current + (r() > 0.5 ? 1 : -1);
+    // ── Recommendation engine (rules-driven) ──
+    // The Demand Level drives the price move: DL5 pushes up hard, DL4 up,
+    // DL3 holds (No change), DL2 trims, DL1 discounts to stimulate. Most days
+    // land in DL3, so most rows carry no price change — as intended.
+    const dl = demandLevelFor(demandPpt(demand)).level;
+    let rec = current;
+    if      (dl === 5) rec = Math.round(current * pick(r, 1.04, 1.09));
+    else if (dl === 4) rec = Math.round(current * pick(r, 1.02, 1.05));
+    else if (dl === 2) rec = Math.round(current * pick(r, 0.94, 0.97));
+    else if (dl === 1) rec = Math.round(current * pick(r, 0.88, 0.93));
 
     // Out-of-line move seed: ~4% of leaves get a wild rec swing, putting their
     // % change far above sibling median so the alert can fire on a real outlier.
@@ -2612,19 +3011,21 @@
         'Low pace: Pickup ' + (agg.ros > 0 ? '+' : '') + agg.ros + '% vs historic (threshold ' + cfg.lowPace.threshold + '%)'));
     }
     if (cfg.highDemand.enabled && agg.demand > cfg.highDemand.threshold) {
+      const dl = demandLevelForScore(agg.demand);
       out.push(makeAlert('highDemand',
-        'High demand: score ' + agg.demand + ' (threshold ' + cfg.highDemand.threshold + ')'));
+        'High demand: ' + dl.code + ' — ' + dl.label + ' (forecast ' + signedPpt(demandPpt(agg.demand)) + ' vs expected)'));
     }
     if (cfg.lowDemand.enabled && agg.demand < cfg.lowDemand.threshold) {
+      const dl = demandLevelForScore(agg.demand);
       out.push(makeAlert('lowDemand',
-        'Low demand: score ' + agg.demand + ' (threshold ' + cfg.lowDemand.threshold + ')'));
+        'Low demand: ' + dl.code + ' — ' + dl.label + ' (forecast ' + signedPpt(demandPpt(agg.demand)) + ' vs expected)'));
     }
     if (cfg.weather.enabled && agg.demand >= cfg.weather.threshold) {
       const inverted = parkId === 'tropical';
       if ((!inverted && wxKind === 'rain') || (inverted && wxKind === 'sun')) {
         out.push(makeAlert('weather',
           'Weather warning: ' + (inverted ? 'sunny day' : 'rain forecast') +
-          ', demand ' + agg.demand + ' (threshold ' + cfg.weather.threshold + ')'));
+          ', demand ' + demandLevelForScore(agg.demand).code));
       }
     }
     if (cfg.capacity.enabled) {
@@ -2796,19 +3197,21 @@
         'Low pace: Pickup ' + fmtSigned(leaf.ros) + ' vs historic (threshold ' + cfg.lowPace.threshold + '%)'));
     }
     if (cfg.highDemand.enabled && leaf.demand > cfg.highDemand.threshold) {
+      const dl = demandLevelForScore(leaf.demand);
       out.push(makeAlert('highDemand',
-        'High demand: score ' + leaf.demand + ' (threshold ' + cfg.highDemand.threshold + ')'));
+        'High demand: ' + dl.code + ' — ' + dl.label + ' (forecast ' + signedPpt(demandPpt(leaf.demand)) + ' vs expected)'));
     }
     if (cfg.lowDemand.enabled && leaf.demand < cfg.lowDemand.threshold) {
+      const dl = demandLevelForScore(leaf.demand);
       out.push(makeAlert('lowDemand',
-        'Low demand: score ' + leaf.demand + ' (threshold ' + cfg.lowDemand.threshold + ')'));
+        'Low demand: ' + dl.code + ' — ' + dl.label + ' (forecast ' + signedPpt(demandPpt(leaf.demand)) + ' vs expected)'));
     }
     if (cfg.weather.enabled && leaf.demand >= cfg.weather.threshold) {
       const inverted = leaf.park.id === 'tropical';
       if ((!inverted && leaf.wx.kind === 'rain') || (inverted && leaf.wx.kind === 'sun')) {
         out.push(makeAlert('weather',
           'Weather warning: ' + (inverted ? 'sunny day' : 'rain forecast') +
-          ', demand ' + leaf.demand + ' (threshold ' + cfg.weather.threshold + ')'));
+          ', demand ' + demandLevelForScore(leaf.demand).code));
       }
     }
     if (cfg.capacity.enabled) {
@@ -2825,20 +3228,19 @@
     if (!alertCfg.priceInv.enabled && !alertCfg.outOfLine.enabled) return;
     PARKS.forEach(park => {
       DATES.forEach(date => {
-        // Price inversion: Adult cheaper than any sibling ticket type within the park.
+        // Price inversion: OTA/Gate undercutting the direct Website price.
         if (alertCfg.priceInv.enabled) {
-          const adultTicket = park.tickets.find(t => t.id === 'adult');
-          if (adultTicket) {
-            const adult = ALL_LEAVES[stateKey(park, adultTicket, date)];
-            const higher = park.tickets
-              .filter(t => t.id !== 'adult')
+          const webChannel = park.tickets.find(t => t.id === 'web');
+          if (webChannel) {
+            const web = ALL_LEAVES[stateKey(park, webChannel, date)];
+            park.tickets
+              .filter(t => t.id === 'ota' || t.id === 'gate')
               .map(t => ALL_LEAVES[stateKey(park, t, date)])
-              .filter(s => s.current > adult.current);
-            if (higher.length) {
-              const worst = higher.reduce((m, s) => s.current > m.current ? s : m, higher[0]);
-              adult.alerts.push(makeAlert('priceInv',
-                'Price inversion: Adult €' + adult.current + ' < ' + worst.ticket.label + ' €' + worst.current));
-            }
+              .filter(s => s.current < web.current)
+              .forEach(s => {
+                s.alerts.push(makeAlert('priceInv',
+                  'Price inversion: ' + s.ticket.label + ' €' + s.current + ' < Website €' + web.current));
+              });
           }
         }
         // Out-of-line move: leaf's |% change| > 3× sibling median (siblings = same park × date).
@@ -2847,9 +3249,10 @@
           const pcts = leaves.map(l => Math.abs((l.rec - l.current) / l.current * 100));
           const sorted = pcts.slice().sort((a, b) => a - b);
           const median = sorted[Math.floor(sorted.length / 2)];
-          if (median < 1) return; // skip when siblings are flat
+          // Flat siblings (median ~0) still expose a wild outlier — floor the baseline.
+          const baseline = Math.max(median, 1.5);
           leaves.forEach((l, i) => {
-            if (pcts[i] > median * 3) {
+            if (pcts[i] > baseline * 3) {
               l.alerts.push(makeAlert('outOfLine',
                 'Out-of-line move: ' + pcts[i].toFixed(1) + '% vs sibling median ' + median.toFixed(1) + '%'));
             }
@@ -2901,12 +3304,37 @@
     return '<span class="weather-cell"><span class="weather-icon">' + wx.icon + '</span><span>' + wx.temp + '°</span></span>';
   }
   function demandCell(score) {
+    const ppt = demandPpt(score);
+    const dl = demandLevelFor(ppt);
+    const tooltip = dl.code + ' — ' + dl.label + ' · ' + dl.interp +
+      ' (forecast ' + signedPpt(ppt) + ' vs expected)';
     return (
-      '<span class="demand-cell">' +
-        '<span>' + score + '</span>' +
-        '<span class="demand-bar"><span class="demand-bar-fill" style="width:' + Math.min(100, score) + '%"></span></span>' +
+      '<span class="demand-cell" title="' + esc(tooltip) + '">' +
+        '<span class="dl-chip dl-' + dl.level + '">' + dl.code + '</span>' +
+        '<span class="dl-label">' + esc(dl.label) + '</span>' +
       '</span>'
     );
+  }
+
+  // ── Recommendation action (Increase / Decrease / No change) ──
+  function recActionFor(leaf) {
+    const shown = recDisplayed(leaf);
+    if (shown > leaf.current) return 'Increase';
+    if (shown < leaf.current) return 'Decrease';
+    return 'No change';
+  }
+  function recActionChip(action) {
+    const cls  = action === 'Increase' ? 'ra-up' : action === 'Decrease' ? 'ra-down' : 'ra-flat';
+    const icon = action === 'Increase' ? '↑' : action === 'Decrease' ? '↓' : '—';
+    return '<span class="rec-action-chip ' + cls + '">' + icon + '&nbsp;' + action + '</span>';
+  }
+  // Current action state of a leaf row (drives the Action filter).
+  function leafActionState(leaf) {
+    const st = rowStates[leaf.stateKey];
+    if (st && st.state === 'accepted')   return 'Accepted';
+    if (st && st.state === 'rejected')   return 'Rejected';
+    if (st && st.state === 'overridden') return 'Overridden';
+    return 'Pending';
   }
 
   // ── SVG snippets ──
@@ -2933,7 +3361,7 @@
 
   function noteIsExpired(st) {
     if (!st || !st.noteExpiry) return false;
-    const today = '2026-05-18';
+    const today = '2026-07-15';
     return st.noteExpiry < today;
   }
 
@@ -2990,6 +3418,7 @@
       case 'current':   return leaf.current;
       case 'rec':       return rec;
       case 'pctChange':  return (rec - leaf.current) / leaf.current * 100;
+      case 'recAction':  return rec > leaf.current ? 1 : (rec < leaf.current ? -1 : 0);
       case 'alertCount': return (leaf.alerts && leaf.alerts.length) ? leaf.alerts.length : null;
     }
     return null;
@@ -3007,6 +3436,15 @@
       if (key === 'current')   return price.avgCurrent;
       if (key === 'rec')       return price.avgRec;
       if (key === 'pctChange') return price.pctChange;
+    }
+    if (key === 'recAction') {
+      let net = 0;
+      leaves.forEach(l => {
+        const a = recActionFor(l);
+        if (a === 'Increase') net++;
+        else if (a === 'Decrease') net--;
+      });
+      return net;
     }
     if (key === 'alertCount') {
       const wx = weatherFor(park.id, date.iso);
@@ -3097,7 +3535,7 @@
     });
 
     if (!out.length) {
-      out.push('<tr class="srt-empty"><td colspan="17">No matching rows for the current filters.</td></tr>');
+      out.push('<tr class="srt-empty"><td colspan="19">No matching rows for the current filters.</td></tr>');
     }
 
     body.innerHTML = out.join('');
@@ -3111,8 +3549,25 @@
     const recTint = tintFor(Math.round(price.pctChange));
     const direct = aggregateGroupAAlerts(agg, park.capacity, wx.kind, park.id);
     const alerts = unionAlertsWithRollup(direct, leafRows);
+    const rm = rateMult();
+    let recUp = 0, recDown = 0;
+    leafRows.forEach(l => {
+      const a = recActionFor(l);
+      if (a === 'Increase') recUp++;
+      else if (a === 'Decrease') recDown++;
+    });
+    const recSummary = (recUp || recDown)
+      ? '<span class="rec-action-summary">' +
+          (recUp   ? '<span class="ras-up">'   + recUp   + '↑</span>' : '') +
+          (recDown ? '<span class="ras-down">' + recDown + '↓</span>' : '') +
+        '</span>'
+      : '<span class="rec-action-summary ras-flat">—</span>';
+    const passingKeys = leafRows.filter(leafPasses).map(l => l.stateKey);
+    const allSelected = passingKeys.length > 0 && passingKeys.every(k => selectedKeys.has(k));
     return (
       '<tr class="row-park" data-park="' + park.id + '" data-date="' + date.iso + '">' +
+        '<td class="col-select"><input type="checkbox" class="row-select park-select" data-park="' + park.id + '" data-date="' + date.iso + '"' +
+          (allSelected ? ' checked' : '') + ' aria-label="Select all channels for ' + esc(park.name) + ' ' + date.label + '"></td>' +
         '<td class="col-name">' +
           '<span class="accordion-name ' + (isExpanded ? 'expanded' : '') + '" role="button" tabindex="0" data-toggle="park" aria-expanded="' + isExpanded + '">' +
             '<span class="accordion-chev">' +
@@ -3120,7 +3575,7 @@
             '</span>' +
             '<span class="lvl-park-name">' + park.name + '</span>' +
             '<span class="park-country">' + park.country + '</span>' +
-            '<span class="row-meta">' + totalLeaves + ' tickets</span>' +
+            '<span class="row-meta">' + totalLeaves + ' channels</span>' +
           '</span>' +
         '</td>' +
         '<td class="col-date">' +
@@ -3133,7 +3588,7 @@
         alertsCellHtml(alerts) +
 
         '<td class="num">' + fmtInt(agg.sold) + '</td>' +
-        '<td class="num">' + fmtEur(agg.sold > 0 ? agg.revenue / agg.sold : 0) + '</td>' +
+        '<td class="num">' + fmtEur((agg.sold > 0 ? agg.revenue / agg.sold : 0) * rm) + '</td>' +
         '<td class="num ' + tintFor(agg.ros) + '">' + signed(agg.ros, '%') + '</td>' +
         '<td class="num">' + fmtInt(agg.salesRate) + '</td>' +
         '<td class="num">' + agg.pctOfFcst + '%</td>' +
@@ -3143,9 +3598,10 @@
         '<td class="num ' + tintFor(agg.yoy) + '">' + signed(agg.yoy, '%') + '</td>' +
 
         // Price band on parent: revenue-weighted avg current/rec, computed pctChange
-        '<td class="num">' + fmtEur(price.avgCurrent) + '</td>' +
-        '<td class="num ' + recTint + '">' + fmtEur(price.avgRec) + '</td>' +
+        '<td class="num">' + fmtEur(price.avgCurrent * rm) + '</td>' +
+        '<td class="num ' + recTint + '">' + fmtEur(price.avgRec * rm) + '</td>' +
         '<td class="num ' + recTint + '">' + signed(Math.round(price.pctChange * 10) / 10, '%') + '</td>' +
+        '<td class="rec-action-cell">' + recSummary + '</td>' +
         '<td class="action-cell"><span class="row-action-meta">' + totalLeaves + ' rows</span></td>' +
       '</tr>'
     );
@@ -3162,30 +3618,40 @@
     const yoyTint = tintFor(leaf.yoy);
     const recShown = recDisplayed(leaf);
     const recChangePct = Math.round(((recShown - leaf.current) / leaf.current) * 1000) / 10;
-    const actionCorner =
-      st.state === 'accepted'   ? ' state-accepted' :
-      st.state === 'rejected'   ? ' state-rejected' :
-      st.state === 'overridden' ? ' state-overridden' : '';
     const acceptClass = (st.state === 'accepted')   ? 'solid' : (st.state ? 'dim' : '');
     const rejectClass = (st.state === 'rejected')   ? 'solid' : (st.state ? 'dim' : '');
     const hasNote = !!(st.note && String(st.note).trim());
     const expired = noteIsExpired(st);
 
+    const reasonSelect = reasonSelectHtml(leaf.stateKey, st.reason);
     let actionInner;
     if (st.state === 'accepted') {
-      actionInner = '<span class="action-badge b-accepted">Accepted</span>' + actionButtons(acceptClass, rejectClass, hasNote);
+      actionInner = '<span class="action-badge b-accepted">Accepted</span>' + actionButtons(acceptClass, rejectClass, hasNote) + reasonSelect;
     } else if (st.state === 'rejected') {
-      actionInner = '<span class="action-badge b-rejected">Rejected</span>' + actionButtons(acceptClass, rejectClass, hasNote);
+      actionInner = '<span class="action-badge b-rejected">Rejected</span>' + actionButtons(acceptClass, rejectClass, hasNote) + reasonSelect;
     } else if (st.state === 'overridden') {
-      actionInner = '<span class="action-badge b-overridden">Overridden</span>' + actionButtons(acceptClass, rejectClass, hasNote);
+      actionInner = '<span class="action-badge b-overridden">Overridden</span>' + actionButtons(acceptClass, rejectClass, hasNote) + reasonSelect;
     } else if (expired) {
-      actionInner = '<span class="action-badge b-expired">Expired note</span>' + actionButtons('', '', hasNote);
+      actionInner = '<span class="action-badge b-expired">Expired note</span>' + actionButtons('', '', hasNote) + reasonSelect;
     } else {
-      actionInner = '<span class="pending-chip">Pending</span>' + actionButtons('', '', hasNote);
+      actionInner = '<span class="pending-chip">Pending</span>' + actionButtons('', '', hasNote) + reasonSelect;
     }
+
+    // Rec. price is editable only in Adult view — derived rates are read-only.
+    const rm = rateMult();
+    const recPriceCell = rateView === 'adult'
+      ? '<td class="num rec-cell ' + recTint + '" data-key="' + leaf.stateKey + '">' +
+          PENCIL_SVG +
+          '<span class="rec-value">' + fmtEur(recShown) + '</span>' +
+        '</td>'
+      : '<td class="num ' + recTint + '" title="Derived from the Adult rate — edit in Adult view">' +
+          fmtEur(recShown * rm) +
+        '</td>';
 
     return (
       '<tr class="row-leaf' + stateCls + '" data-key="' + leaf.stateKey + '" data-park="' + leaf.park.id + '" data-date="' + leaf.date.iso + '">' +
+        '<td class="col-select"><input type="checkbox" class="row-select leaf-select" data-key="' + leaf.stateKey + '"' +
+          (selectedKeys.has(leaf.stateKey) ? ' checked' : '') + ' aria-label="Select row"></td>' +
         '<td class="col-name">' +
           '<span class="leaf-bullet" aria-hidden="true">•</span>' +
           '<span class="lvl-ticket-name">' + leaf.ticket.label + '</span>' +
@@ -3199,7 +3665,7 @@
         alertsCellHtml(leaf.alerts) +
 
         '<td class="num">' + fmtInt(leaf.sold) + '</td>' +
-        '<td class="num">' + fmtEur(leaf.current) + '</td>' +
+        '<td class="num">' + fmtEur(leaf.current * rm) + '</td>' +
         '<td class="num ' + rosTint + '">' + signed(leaf.ros, '%') + '</td>' +
         '<td class="num">' + fmtInt(leaf.salesRate) + '</td>' +
         '<td class="num">' + leaf.pctOfFcst + '%</td>' +
@@ -3208,18 +3674,26 @@
         '<td class="num">' + demandCell(leaf.demand) + '</td>' +
         '<td class="num ' + yoyTint + '">' + signed(leaf.yoy, '%') + '</td>' +
 
-        '<td class="num">' + fmtEur(leaf.current) + '</td>' +
-        '<td class="num rec-cell ' + recTint + '" data-key="' + leaf.stateKey + '">' +
-          PENCIL_SVG +
-          '<span class="rec-value">' + fmtEur(recShown) + '</span>' +
-        '</td>' +
+        '<td class="num">' + fmtEur(leaf.current * rm) + '</td>' +
+        recPriceCell +
         '<td class="num ' + recTint + '">' + signed(recChangePct, '%') + '</td>' +
-        '<td class="action-cell' + actionCorner + '">' +
-          '<span class="action-corner"></span>' +
+        '<td class="rec-action-cell">' + recActionChip(recActionFor(leaf)) + '</td>' +
+        '<td class="action-cell">' +
           '<span class="action-cell-inner">' + actionInner + '</span>' +
         '</td>' +
       '</tr>'
     );
+  }
+
+  // ── Reason code dropdown (sits next to the accept/reject buttons) ──
+  const REASON_CODES = ['Autopilot', 'DL Increase', 'DL Decrease', 'Holiday'];
+  function reasonSelectHtml(key, current) {
+    const opts = ['<option value="">Reason…</option>'].concat(
+      REASON_CODES.map(rc =>
+        '<option value="' + rc + '"' + (current === rc ? ' selected' : '') + '>' + rc + '</option>')
+    ).join('');
+    return '<select class="reason-select' + (current ? ' has-reason' : '') + '" data-key="' + key +
+      '" aria-label="Reason code">' + opts + '</select>';
   }
 
   function actionButtons(acceptClass, rejectClass, hasNote) {
@@ -3271,8 +3745,72 @@
     showToast._t = setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
+  // ── Row selection (bulk price update) ──
+  const selectedKeys = new Set();
+  function updateBulkBtn() {
+    const btn = document.getElementById('bulkBtn');
+    btn.querySelector('.bulk-btn-label').textContent = 'Bulk update (' + selectedKeys.size + ')';
+    btn.disabled = selectedKeys.size === 0;
+  }
+
   // ── Event delegation: accordion toggles + action buttons + rec edit ──
   const bodyEl = document.getElementById('srtBody');
+
+  // Selection checkboxes + reason dropdowns (change events)
+  bodyEl.addEventListener('change', e => {
+    const leafSel = e.target.closest('input.leaf-select');
+    if (leafSel) {
+      if (leafSel.checked) selectedKeys.add(leafSel.dataset.key);
+      else selectedKeys.delete(leafSel.dataset.key);
+      render();
+      updateBulkBtn();
+      return;
+    }
+    const parkSel = e.target.closest('input.park-select');
+    if (parkSel) {
+      const park = PARKS.find(p => p.id === parkSel.dataset.park);
+      const date = DATES.find(d => d.iso === parkSel.dataset.date);
+      if (park && date) {
+        park.tickets
+          .map(t => ALL_LEAVES[stateKey(park, t, date)])
+          .filter(leafPasses)
+          .forEach(l => {
+            if (parkSel.checked) selectedKeys.add(l.stateKey);
+            else selectedKeys.delete(l.stateKey);
+          });
+      }
+      render();
+      updateBulkBtn();
+      return;
+    }
+    const reasonSel = e.target.closest('select.reason-select');
+    if (reasonSel) {
+      const key = reasonSel.dataset.key;
+      const st = rowStates[key] || (rowStates[key] = {});
+      if (reasonSel.value) st.reason = reasonSel.value;
+      else delete st.reason;
+      if (!st.state && typeof st.overrideValue !== 'number' && !st.note && !st.reason) delete rowStates[key];
+      render();
+    }
+  });
+
+  // Select-all header checkbox — every leaf passing the current filters on visible dates
+  document.getElementById('selectAllRows').addEventListener('change', e => {
+    const check = e.target.checked;
+    DATES.filter(dateInDateRange).forEach(date => {
+      PARKS.filter(parkMatchesFilter).forEach(park => {
+        park.tickets
+          .map(t => ALL_LEAVES[stateKey(park, t, date)])
+          .filter(leafPasses)
+          .forEach(l => {
+            if (check) selectedKeys.add(l.stateKey);
+            else selectedKeys.delete(l.stateKey);
+          });
+      });
+    });
+    render();
+    updateBulkBtn();
+  });
 
   bodyEl.addEventListener('click', e => {
     // Accordion toggle (park only — 2-level accordion)
@@ -3319,18 +3857,19 @@
     const st = rowStates[key] || (rowStates[key] = {});
     if (st.state === 'accepted') { delete st.state; }
     else { st.state = 'accepted'; delete st.overrideValue; }
-    if (!st.state && typeof st.overrideValue !== 'number' && !st.note) delete rowStates[key];
+    if (!st.state && typeof st.overrideValue !== 'number' && !st.note && !st.reason) delete rowStates[key];
     render();
   }
   function toggleReject(key) {
     const st = rowStates[key] || (rowStates[key] = {});
     if (st.state === 'rejected') { delete st.state; }
     else { st.state = 'rejected'; delete st.overrideValue; }
-    if (!st.state && typeof st.overrideValue !== 'number' && !st.note) delete rowStates[key];
+    if (!st.state && typeof st.overrideValue !== 'number' && !st.note && !st.reason) delete rowStates[key];
     render();
   }
 
   function enterRecEdit(cell) {
+    if (rateView !== 'adult') return;   // derived rates are read-only
     const key = cell.dataset.key;
     const leaf = ALL_LEAVES[key];
     if (!leaf) return;
@@ -3348,16 +3887,17 @@
       const raw = input.value.trim();
       const sanitized = raw.replace(/[^0-9.,]/g, '').replace(',', '.');
       const n = parseFloat(sanitized);
-      if (!isNaN(n) && n > 0 && Math.round(n) !== Math.round(leaf.current === n ? leaf.current : n)) {
+      if (!isNaN(n) && n > 0) {
         const rounded = Math.round(n);
         const st = rowStates[key] || (rowStates[key] = {});
         if (rounded === leaf.current) {
           // Reverting to current — treat as cancel
           delete st.overrideValue;
-          if (st.state !== 'accepted' && st.state !== 'rejected' && !st.note) delete rowStates[key];
-        } else {
+          if (st.state !== 'accepted' && st.state !== 'rejected' && !st.note && !st.reason) delete rowStates[key];
+        } else if (rounded !== recDisplayed(leaf)) {
           st.overrideValue = rounded;
           st.state = 'overridden';
+          showToast('Price saved: ' + fmtEur(rounded));
         }
       }
       render();
@@ -3407,7 +3947,7 @@
     const exp  = noteExpiry.value || '';
     if (text) st.note = text; else delete st.note;
     if (exp)  st.noteExpiry = exp; else delete st.noteExpiry;
-    if (!st.state && typeof st.overrideValue !== 'number' && !st.note) delete rowStates[activeNoteKey];
+    if (!st.state && typeof st.overrideValue !== 'number' && !st.note && !st.reason) delete rowStates[activeNoteKey];
     render();
   }
   noteTextarea.addEventListener('blur', saveActiveNote);
@@ -3800,7 +4340,7 @@
       const totalLeaves = park.tickets.length;
       subtitle = esc(date.label) + ' ' + esc(date.dowLabel) +
         (date.isHoliday ? ' · Holiday' : '') +
-        ' · ' + totalLeaves + ' ticket types · aggregate';
+        ' · ' + totalLeaves + ' channels · aggregate';
     }
 
     const wxDesc = {
@@ -3845,9 +4385,9 @@
         '<div class="lm-panel">' +
           '<div class="lm-panel-title">Recommendation</div>' +
           '<div style="color:var(--text-secondary);font-size:13px;line-height:1.5;padding:6px 0;">' +
-            'Multiple ticket types — review individually.' +
+            'Multiple booking channels — review individually.' +
             '<br><span style="color:var(--text-muted);font-size:12px;">' +
-              'Expand the row to act on each ticket type\'s recommendation.' +
+              'Expand the row to act on each channel\'s recommendation.' +
             '</span>' +
           '</div>' +
         '</div>';
@@ -3927,16 +4467,19 @@
 
             recPanelHtml +
 
-            // Channel mix + Source market mix — seeded from the modal's active key.
+            // Channel mix (park level only — a leaf IS a channel now) + Source market mix.
             (function () {
               const modalKey = level === 'leaf' ? leaf.stateKey : (park.id + '|' + date.iso);
-              const channelPcts = computeMixPcts(CHANNEL_MIX, modalKey, 'chan', 5);
-              const channelHtml = mixPanelHtml(
-                'Channel mix',
-                CHANNEL_MIX,
-                channelPcts,
-                (it) => it.color
-              );
+              let channelHtml = '';
+              if (level !== 'leaf') {
+                const channelPcts = computeMixPcts(CHANNEL_MIX, modalKey, 'chan', 5);
+                channelHtml = mixPanelHtml(
+                  'Channel mix',
+                  CHANNEL_MIX,
+                  channelPcts,
+                  (it) => it.color
+                );
+              }
               const markets = SOURCE_MIX_BY_PARK[park.id] || SOURCE_MIX_BY_PARK.warner;
               const srcPcts = computeMixPcts(markets, modalKey, 'src', 4);
               const srcHtml = mixPanelHtml(
@@ -4204,7 +4747,7 @@
 
   // ── Filter state ──
   const filters = {
-    park: [], ticket: [], daytype: [], alert: [],
+    park: [], ticket: [], daytype: [], alert: [], rec: [], action: [],
     dateRange: { start: null, end: null },
   };
 
@@ -4220,10 +4763,13 @@
     ticket:   ALL_TICKET_LABELS,
     daytype:  ['Weekday', 'Weekend', 'Holiday'],
     alert:    ['Any alert', 'No alert', 'Low pace', 'High demand', 'Low demand', 'Weather warning', 'Capacity risk', 'Price inversion', 'Out-of-line move'],
+    rec:      ['Increase', 'Decrease', 'No change'],
+    action:   ['Pending', 'Accepted', 'Rejected', 'Overridden'],
   };
   const FILTER_LABELS = {
-    park: 'Parks', ticket: 'Ticket Types',
+    park: 'Parks', ticket: 'Booking Channels',
     daytype: 'Day Types', alert: 'Alerts',
+    rec: 'Recommendations', action: 'Actions',
   };
 
   // Date helpers
@@ -4284,6 +4830,8 @@
     if (filters.park.length   && !filters.park.includes(leaf.park.name)) return false;
     if (filters.ticket.length && !filters.ticket.includes(leaf.ticket.label)) return false;
     if (filters.daytype.length  && !filters.daytype.includes(dateDayType(leaf.date))) return false;
+    if (filters.rec.length    && !filters.rec.includes(recActionFor(leaf))) return false;
+    if (filters.action.length && !filters.action.includes(leafActionState(leaf))) return false;
     if (!dateInDateRange(leaf.date)) return false;
     if (!leafMatchesAlertFilter(leaf)) return false;
     return true;
@@ -4496,22 +5044,22 @@
       const unitsRound = Math.round(agg.units * 10) / 10;
       const priceRound = Math.round(agg.price * 10) / 10;
       const cls = tier(rosRound);
-      const decisionCls = agg.anyAccepted ? ' decided-accept'
-                        : agg.anyRejected ? ' decided-reject' : '';
       // Alert indicator: top-left dot if any leaf in scope has any alert.
       let alertCount = 0;
       leaves.forEach(l => { if (l.alerts) alertCount += l.alerts.length; });
       const alertCls = alertCount > 0 ? ' has-alert' : '';
-      const titleAttr = alertCount > 0
-        ? ' title="' + alertCount + ' alert' + (alertCount === 1 ? '' : 's') + ' across descendant rows"'
-        : '';
+      // Hover text spells out every metric in the cell.
+      const titleAttr = ' title="Pickup vs historic ' + fmtPct(rosRound) +
+        ' · Units sold YoY ' + fmtPct(unitsRound) +
+        ' · Avg price change ' + fmtPct(priceRound) +
+        (alertCount > 0 ? ' · ' + alertCount + ' alert' + (alertCount === 1 ? '' : 's') + ' on descendant rows' : '') + '"';
       const dataAttrs = ' data-park="' + park.id + '"' +
         ' data-period="' + period.key + '"' +
         ' data-level="' + levelClass.replace('row-', '') + '"' +
         (ticket ? ' data-ticket="' + ticket.id + '"' : '') +
         ' data-row="' + park.id + '"';
       return (
-        '<td class="' + cls + decisionCls + alertCls + '"' + dataAttrs + titleAttr + '>' +
+        '<td class="' + cls + alertCls + '"' + dataAttrs + titleAttr + '>' +
           '<div class="cell-rev">' + fmtPct(rosRound) + '</div>' +
           '<div class="cell-meta">' +
             '<span>U ' + fmtPct(unitsRound) + '</span>' +
@@ -4523,6 +5071,48 @@
     }).join('');
 
     const chevronSvg = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><polygon points="3,2 7,5 3,8"/></svg>';
+
+    // ── Total row: aggregate across all visible parks, pinned under the header ──
+    const totalCells = periods.map(period => {
+      const leaves = [];
+      visibleParks.forEach(p => leaves.push(...leavesForScope(p, null, period)));
+      const agg = aggregateLeafList(leaves);
+      const rosRound   = Math.round(agg.ros   * 10) / 10;
+      const unitsRound = Math.round(agg.units * 10) / 10;
+      const priceRound = Math.round(agg.price * 10) / 10;
+      const titleAttr = ' title="Pickup vs historic ' + fmtPct(rosRound) +
+        ' · Units sold YoY ' + fmtPct(unitsRound) +
+        ' · Avg price change ' + fmtPct(priceRound) + '"';
+      return (
+        '<td class="' + tier(rosRound) + '"' + titleAttr + '>' +
+          '<div class="cell-rev">' + fmtPct(rosRound) + '</div>' +
+          '<div class="cell-meta">' +
+            '<span>U ' + fmtPct(unitsRound) + '</span>' +
+            '<span class="pipe" aria-hidden="true">|</span>' +
+            '<span>P ' + fmtPct(priceRound) + '</span>' +
+          '</div>' +
+        '</td>'
+      );
+    }).join('');
+    const infoIconSvg = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5.6"/><line x1="7" y1="6.4" x2="7" y2="9.8"/><circle cx="7" cy="4.3" r="0.4" fill="currentColor" stroke="none"/></svg>';
+    const totalRowHtml =
+      '<tr class="row-total">' +
+        '<th class="cal-route">' +
+          '<span class="cal-total-name">All parks</span>' +
+          '<span class="cal-info" tabindex="0" aria-label="What the cell metrics mean">' + infoIconSvg +
+            '<span class="cal-info-tip" role="tooltip">' +
+              '<strong>How to read these cells</strong>' +
+              '<span><b>Big number</b> — Pickup vs historic: sales pace vs the same period last year. The cell colour follows it (green ahead, red behind).</span>' +
+              '<span><b>U</b> — Units sold, year on year.</span>' +
+              '<span><b>P</b> — Average recommended price change vs current.</span>' +
+              '<span><b>Pink dot</b> (top-left) — alerts firing on descendant rows.</span>' +
+              '<span>Hover any cell for its exact values.</span>' +
+            '</span>' +
+          '</span>' +
+          '<span class="cal-park-meta">' + visibleParks.length + ' park' + (visibleParks.length === 1 ? '' : 's') + ' · aggregate</span>' +
+        '</th>' +
+        totalCells +
+      '</tr>';
 
     const rowsHtml = visibleParks.map(park => {
       const totalLeaves = park.tickets.length;
@@ -4537,7 +5127,7 @@
               '<span class="cal-park-name lvl-park-name">' + esc(park.name) + '</span>' +
               '<span class="cal-park-country">' + esc(park.country) + '</span>' +
             '</span>' +
-            '<span class="cal-park-meta">' + totalLeaves + ' tickets · capacity ' +
+            '<span class="cal-park-meta">' + totalLeaves + ' channels · capacity ' +
               park.capacity.toLocaleString('en-GB') + '/day</span>' +
           '</th>' +
           buildCells(park, null, 'row-park') +
@@ -4559,7 +5149,7 @@
       return html;
     }).join('');
 
-    body.innerHTML = rowsHtml;
+    body.innerHTML = totalRowHtml + rowsHtml;
   }
 
   // ── Corner-cell sort cycle ──
@@ -4800,6 +5390,7 @@
         const st = rowStates[k];
         delete st.state;
         delete st.overrideValue;
+        delete st.reason;
         if (!st.note && !st.noteExpiry) delete rowStates[k];
       });
       btn.classList.remove('is-loading');
@@ -5200,13 +5791,15 @@
   //  applyFilters — single source of truth that re-renders both views
   // ─────────────────────────────────────────────────────────────
   function applyFilters() {
-    ['park', 'ticket', 'daytype', 'alert'].forEach(updateMsTrigger);
+    ['park', 'ticket', 'daytype', 'alert', 'rec', 'action'].forEach(updateMsTrigger);
     updateDateTrigger();
     const anyActive =
       filters.park.length    > 0 ||
       filters.ticket.length  > 0 ||
       filters.daytype.length > 0 ||
       filters.alert.length   > 0 ||
+      filters.rec.length     > 0 ||
+      filters.action.length  > 0 ||
       !!(filters.dateRange.start || filters.dateRange.end);
     document.getElementById('filterClear').hidden = !anyActive;
     render();
@@ -5227,8 +5820,99 @@
     filters.ticket = [];
     filters.daytype = [];
     filters.alert = [];
+    filters.rec = [];
+    filters.action = [];
     filters.dateRange = { start: null, end: null };
     applyFilters();
+  });
+
+  // ── Rate selector (ticket type derived from the Adult rate) ──
+  document.getElementById('rateSelect').addEventListener('change', e => {
+    rateView = e.target.value;
+    render();
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  //  Bulk price update — apply a % or € adjustment to selected rows
+  // ─────────────────────────────────────────────────────────────
+  const bulkBackdrop = document.getElementById('bulkBackdrop');
+  const bulkValueEl  = document.getElementById('bulkValue');
+
+  function bulkType() {
+    return document.querySelector('input[name="bulkType"]:checked').value;
+  }
+  function bulkNewPrice(leaf, type, v) {
+    const raw = type === 'pct' ? leaf.current * (1 + v / 100) : leaf.current + v;
+    return Math.max(1, Math.round(raw));
+  }
+  function refreshBulkPreview() {
+    const v = parseFloat(bulkValueEl.value);
+    const applyBtn = document.getElementById('bulkApplyBtn');
+    const preview  = document.getElementById('bulkPreview');
+    applyBtn.textContent = 'Apply to ' + selectedKeys.size + ' row' + (selectedKeys.size === 1 ? '' : 's');
+    if (isNaN(v) || v === 0 || selectedKeys.size === 0) {
+      applyBtn.disabled = true;
+      preview.innerHTML = '';
+      return;
+    }
+    applyBtn.disabled = false;
+    const type = bulkType();
+    const sample = [...selectedKeys].slice(0, 3).map(k => {
+      const leaf = ALL_LEAVES[k];
+      return '<div class="bulk-preview-row"><span>' + esc(leaf.park.name) + ' · ' + esc(leaf.ticket.label) +
+        ' · ' + esc(leaf.date.label) + '</span><span>' + fmtEur(leaf.current) + ' → <b>' +
+        fmtEur(bulkNewPrice(leaf, type, v)) + '</b></span></div>';
+    }).join('');
+    const more = selectedKeys.size > 3
+      ? '<div class="bulk-preview-more">… and ' + (selectedKeys.size - 3) + ' more</div>' : '';
+    preview.innerHTML = '<div class="bulk-preview-title">Preview</div>' + sample + more;
+  }
+  function openBulkModal() {
+    if (!selectedKeys.size) return;
+    document.getElementById('bulkSub').textContent =
+      selectedKeys.size + ' row' + (selectedKeys.size === 1 ? '' : 's') + ' selected';
+    bulkValueEl.value = '';
+    refreshBulkPreview();
+    bulkBackdrop.classList.add('is-open');
+    bulkBackdrop.setAttribute('aria-hidden', 'false');
+    setTimeout(() => bulkValueEl.focus(), 30);
+  }
+  function closeBulkModal() {
+    bulkBackdrop.classList.remove('is-open');
+    bulkBackdrop.setAttribute('aria-hidden', 'true');
+  }
+  document.getElementById('bulkBtn').addEventListener('click', openBulkModal);
+  document.getElementById('bulkCloseBtn').addEventListener('click', closeBulkModal);
+  document.getElementById('bulkCancelBtn').addEventListener('click', closeBulkModal);
+  bulkBackdrop.addEventListener('click', e => { if (e.target === bulkBackdrop) closeBulkModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && bulkBackdrop.classList.contains('is-open')) closeBulkModal();
+  });
+  bulkValueEl.addEventListener('input', refreshBulkPreview);
+  document.querySelectorAll('input[name="bulkType"]').forEach(r => r.addEventListener('change', () => {
+    document.getElementById('bulkUnit').textContent = bulkType() === 'pct' ? '%' : '€';
+    refreshBulkPreview();
+  }));
+  document.getElementById('bulkApplyBtn').addEventListener('click', () => {
+    const v = parseFloat(bulkValueEl.value);
+    if (isNaN(v) || v === 0 || !selectedKeys.size) return;
+    const type = bulkType();
+    let n = 0;
+    selectedKeys.forEach(k => {
+      const leaf = ALL_LEAVES[k];
+      if (!leaf) return;
+      const st = rowStates[k] || (rowStates[k] = {});
+      st.overrideValue = bulkNewPrice(leaf, type, v);
+      st.state = 'overridden';
+      n++;
+    });
+    selectedKeys.clear();
+    closeBulkModal();
+    render();
+    updateBulkBtn();
+    document.getElementById('selectAllRows').checked = false;
+    showToast(n + ' price' + (n === 1 ? '' : 's') + ' updated (' +
+      (type === 'pct' ? (v > 0 ? '+' : '') + v + '%' : (v > 0 ? '+' : '') + '€' + v) + ')');
   });
 
   // ─────────────────────────────────────────────────────────────
@@ -5245,7 +5929,7 @@
     'Where is pickup weakest this week?',
     'Any capacity risk dates?',
     'Best performing park today?',
-    'Which ticket types need pricing action?',
+    'Which channels need pricing action?',
   ];
   function buildRowSuggestions(ctx) {
     const out = [];
@@ -5295,7 +5979,7 @@
       " on " + ctx.date.label + " " + ctx.date.dowLabel + ":\n" +
       "• Pickup vs Historic: " + (ctx.pickup > 0 ? '+' : '') + ctx.pickup + "%\n" +
       "• Per Cap: €" + ctx.perCap + " (vs €" + ctx.perCapLY + " last year)\n" +
-      "• Demand score: " + ctx.demand + "\n" +
+      "• Demand level: " + demandLevelForScore(ctx.demand).code + " (" + demandLevelForScore(ctx.demand).label + ")\n" +
       "• Forecast: " + ctx.forecastUnits.toLocaleString('en-GB') + " units (" + ctx.pctOfFcst + "% sold)\n" +
       "• Alerts: " + alertList + "\n\n" +
       "What would you like to explore?";
@@ -5361,7 +6045,7 @@
         best.map(b => '• ' + b.p.name + ' — Pickup avg ' + (b.avg > 0 ? '+' : '') + b.avg + '%').join('\n');
     }
 
-    if (/which.*(ticket|product|type)|pricing action/.test(lower)) {
+    if (/which.*(ticket|channel|product|type)|pricing action/.test(lower)) {
       const all = Object.values(ALL_LEAVES).map(l => {
         const st = rowStates[l.stateKey] || {};
         const rec = typeof st.overrideValue === 'number' ? st.overrideValue : l.rec;
@@ -5390,7 +6074,8 @@
                        : ctx.date.isWeekend ? 'weekend'
                        : 'weekday baseline';
       const capPct = (ctx.forecastUnits / ctx.park.capacity * 100).toFixed(0);
-      return 'Demand score ' + ctx.demand + ' is driven by:\n' +
+      const dlCtx = demandLevelForScore(ctx.demand);
+      return 'Demand level ' + dlCtx.code + ' (' + dlCtx.label + ') is driven by:\n' +
         '• ' + dateFactor + '\n' +
         (wxFactor ? '• ' + wxFactor + '\n' : '') +
         '• Forecast ' + ctx.forecastUnits.toLocaleString('en-GB') + ' units (' + capPct + '% of capacity)';
@@ -5492,7 +6177,7 @@
           (ctx.date.isHoliday ? ' · Holiday' : '') +
         '</div>' +
         '<div class="cp-metrics">Pickup: ' + (ctx.pickup > 0 ? '+' : '') + ctx.pickup + '% · ' +
-          'Per Cap: €' + ctx.perCap + ' · Demand: ' + ctx.demand + '</div>' +
+          'Per Cap: €' + ctx.perCap + ' · Demand: ' + demandLevelForScore(ctx.demand).code + '</div>' +
         '<div class="cp-tag"><span style="font-size:11px">✦</span> RM Copilot</div>' +
       '</div>' +
       '<button class="cp-header-close" type="button" id="cpRowClose" aria-label="Close">' +

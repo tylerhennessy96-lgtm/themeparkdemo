@@ -106,6 +106,16 @@
         </a>
       </li>
       <li>
+        <a href="autopilot.html" class="drawer-item">
+          <span class="drawer-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 1.8 L10.6 6.2 L15.4 6.2 L11.5 9.1 L13 13.8 L9 11 L5 13.8 L6.5 9.1 L2.6 6.2 L7.4 6.2 Z"/>
+            </svg>
+          </span>
+          Autopilot
+        </a>
+      </li>
+      <li>
         <a href="settings.html" class="drawer-item active">
           <span class="drawer-icon">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -159,7 +169,7 @@
       { id: 'lowDemand',  label: 'Low demand',       desc: 'Demand score falls below threshold',               color: '#94a3b8', defaultThreshold:  25, thresholdMin:   0, thresholdMax: 100, hasThreshold: true, unit: '' },
       { id: 'weather',    label: 'Weather warning',  desc: 'Adverse weather on a day with demand at or above', color: '#dc2626', defaultThreshold:  70, thresholdMin:   0, thresholdMax: 100, hasThreshold: true, unit: '' },
       { id: 'capacity',   label: 'Capacity risk',    desc: 'Forecast units exceed % of park capacity',         color: '#16a34a', defaultThreshold:  95, thresholdMin:  50, thresholdMax: 100, hasThreshold: true, unit: '%' },
-      { id: 'priceInv',   label: 'Price inversion',  desc: 'Adult cheaper than another ticket in the park',   color: '#a855f7', hasThreshold: false },
+      { id: 'priceInv',   label: 'Price inversion',  desc: 'OTA or Gate undercutting the direct Website price', color: '#a855f7', hasThreshold: false },
       { id: 'outOfLine',  label: 'Out-of-line move', desc: 'Leaf price change exceeds 3× sibling median',      color: '#f59e0b', hasThreshold: false },
     ];
     function alertsDefault() {
